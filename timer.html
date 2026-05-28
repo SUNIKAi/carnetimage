@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;800&display=swap" rel="stylesheet">
+<title>Chrono Repos</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#F5F5F5;display:flex;justify-content:center;align-items:center;
+     min-height:100vh;font-family:'Kanit',Arial,sans-serif;padding:16px;}
+.card{background:#1A1A1A;border-radius:10px;padding:20px 28px;text-align:center;
+      width:100%;max-width:320px;border-top:4px solid #CC2200;
+      box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.lbl{font-size:11px;font-weight:700;color:#666;letter-spacing:4px;
+     text-transform:uppercase;margin-bottom:6px;}
+.disp{font-size:64px;font-weight:800;color:#FFFFFF;line-height:1;
+      letter-spacing:-2px;transition:color .3s;}
+.disp.done{color:#CC2200;animation:pulse 0.5s infinite alternate;}
+@keyframes pulse{to{opacity:0.5;}}
+.btns{display:flex;gap:10px;margin-top:16px;}
+button{font-family:'Kanit',sans-serif;font-size:13px;font-weight:700;
+       letter-spacing:2px;border:none;border-radius:6px;padding:10px 0;
+       cursor:pointer;text-transform:uppercase;flex:1;transition:opacity .2s;}
+button:active{opacity:0.7;}
+#btn-main{background:#CC2200;color:#fff;}
+#btn-reset{background:#2A2A2A;color:#777;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="lbl">&#9201; Repos</div>
+  <div class="disp" id="disp">0:00</div>
+  <div class="btns">
+    <button id="btn-main" onclick="toggle()">START</button>
+    <button id="btn-reset" onclick="resetTimer()">RESET</button>
+  </div>
+</div>
+<script>
+var params=new URLSearchParams(location.search);
+var total=parseInt(params.get('t')||'120',10);
+var rem=total,iv=null,running=false;
+var disp=document.getElementById('disp');
+var btnM=document.getElementById('btn-main');
+function fmt(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
+function draw(){disp.textContent=fmt(rem);disp.classList.toggle('done',rem===0);}
+function toggle(){
+  if(rem===0){resetTimer();return;}
+  if(running){clearInterval(iv);running=false;btnM.textContent='RESUME';btnM.style.background='#884400';}
+  else{running=true;btnM.textContent='PAUSE';btnM.style.background='#CC2200';
+    iv=setInterval(function(){
+      if(rem>0){rem--;draw();}
+      else{clearInterval(iv);running=false;btnM.textContent='RESET';beep();}
+    },1000);}
+}
+function resetTimer(){clearInterval(iv);running=false;rem=total;draw();btnM.textContent='START';btnM.style.background='#CC2200';}
+function beep(){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [0,0.4,0.8].forEach(function(t){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);o.frequency.value=880;
+      g.gain.setValueAtTime(0.5,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.3);
+      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.35);
+    });}catch(e){}
+}
+draw();
+</script>
+</body>
+</html>

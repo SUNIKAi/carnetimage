@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carnet de séance</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#121110">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Séance">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap">
+<style>
+/* Carnet de seance : une colonne, saisie au pouce, minuteur plein ecran.
+   Identite du carnet Notion : noir chaud, rouge CC2200, Kanit. */
+:root{
+  --noir:#121110; --surface:#1B1917; --surface-haut:#252120; --ligne:#332E2B;
+  --rouge:#CC2200; --rouge-vif:#FF4A1F; --texte:#F4F0EC; --faible:#8B827B;
+  --tres-faible:#5E5751; --vert:#4A9B68; --ambre:#C8820A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--noir);color:var(--texte);
+  font-family:'Kanit',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-weight:400;font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:env(safe-area-inset-top,0px);
+  -webkit-tap-highlight-color:transparent;
+  -webkit-text-size-adjust:100%;
+}
+.page{max-width:460px;margin:0 auto;padding-bottom:124px;}
+
+/* ---------- entete ---------- */
+.entete{
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--noir);
+  padding-block:14px 0;border-bottom:1px solid var(--ligne);margin-bottom:16px;
+}
+.fil{display:flex;align-items:center;gap:7px;margin-bottom:4px;flex-wrap:wrap;}
+.pastille{width:6px;height:6px;border-radius:50%;background:var(--rouge);flex:none;}
+.semaine{font-size:10px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--faible);}
+.jour{font-size:24px;font-weight:800;letter-spacing:-.3px;margin:0;line-height:1.15;}
+.sous-jour{font-size:12px;color:var(--faible);margin-top:2px;}
+.onglets{display:flex;gap:6px;margin-top:11px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;}
+.onglets::-webkit-scrollbar{display:none;}
+.onglet{
+  flex:none;min-height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--ligne);
+  background:var(--surface);color:var(--faible);font-family:inherit;font-size:12px;
+  font-weight:600;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+}
+.onglet[aria-selected="true"]{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+.onglet .pt{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--vert);margin-left:6px;vertical-align:middle;}
+.barre{height:3px;background:var(--ligne);border-radius:2px;overflow:hidden;margin-bottom:-1px;}
+.barre span{display:block;height:100%;background:var(--rouge);width:0;transition:width .35s ease;}
+
+/* ---------- exercice ---------- */
+.exo{background:var(--surface);border:1px solid var(--ligne);border-radius:13px;margin-bottom:13px;overflow:hidden;transition:border-color .25s;}
+.exo.fait{border-color:rgba(74,155,104,.45);}
+.exo-tete{display:flex;gap:11px;padding:14px 14px 11px;align-items:flex-start;}
+.num{width:26px;height:26px;border-radius:7px;background:var(--surface-haut);color:var(--faible);
+  font-size:12px;font-weight:800;flex:none;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;}
+.exo.fait .num{background:rgba(74,155,104,.18);color:var(--vert);}
+.exo-titres{flex:1;min-width:0;}
+.exo-nom{font-size:17px;font-weight:600;line-height:1.2;margin:0;}
+.meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.tag{font-size:9.5px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;padding:3px 7px;border-radius:5px;background:var(--surface-haut);color:var(--faible);}
+.tag.tech{color:var(--ambre);background:rgba(200,130,10,.12);}
+.consigne{margin:0 14px 12px;padding:10px 12px;border-radius:9px;background:var(--surface-haut);border-left:2px solid var(--rouge);}
+.consigne dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;}
+.consigne dt{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--tres-faible);align-self:center;}
+.consigne dd{margin:0;font-size:13.5px;font-variant-numeric:tabular-nums;}
+.consigne dd.objectif{color:var(--rouge-vif);font-weight:600;}
+.series{padding:0 14px 4px;display:flex;flex-direction:column;gap:6px;}
+.serie{display:flex;align-items:center;gap:7px;}
+.serie-num{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--tres-faible);width:22px;flex:none;text-transform:uppercase;}
+.champ{position:relative;flex:1;min-width:0;}
+.champ input{width:100%;min-height:46px;background:var(--noir);color:var(--texte);border:1px solid var(--ligne);
+  border-radius:9px;padding:0 32px 0 11px;font-family:inherit;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;}
+.champ input:focus{outline:none;border-color:var(--rouge);}
+.champ .unite{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:var(--tres-faible);text-transform:uppercase;pointer-events:none;}
+.valider{width:46px;height:46px;flex:none;border-radius:9px;border:1px solid var(--ligne);background:var(--surface-haut);
+  color:var(--faible);cursor:pointer;font-size:17px;line-height:1;transition:transform .12s;}
+.valider:active{transform:scale(.94);}
+.serie.ok .valider{background:var(--vert);border-color:var(--vert);color:#fff;}
+.serie.ok .champ input{color:var(--faible);border-color:transparent;background:transparent;}
+.rpe{padding:11px 14px 14px;}
+.rpe-label{font-size:10px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--tres-faible);margin-bottom:7px;}
+.rpe-choix{display:flex;gap:6px;}
+.rpe-choix button{flex:1;min-height:42px;border-radius:8px;border:1px solid var(--ligne);background:var(--noir);
+  color:var(--faible);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums;}
+.rpe-choix button[aria-pressed="true"]{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+
+/* ---------- pied ---------- */
+.pied{position:fixed;left:0;right:0;bottom:0;z-index:11;
+  background:linear-gradient(to top,var(--noir) 72%,rgba(18,17,16,0));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:22px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));}
+.pied-inner{max-width:460px;margin:0 auto;}
+.terminer{width:100%;min-height:54px;border:none;border-radius:11px;background:var(--rouge);color:#fff;
+  font-family:inherit;font-size:15px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.terminer[disabled]{background:var(--surface-haut);color:var(--tres-faible);cursor:default;}
+
+/* ---------- minuteur ---------- */
+.minuteur{position:fixed;inset:0;z-index:20;background:rgba(10,9,8,.97);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:22px;padding:24px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));padding-top:calc(24px + env(safe-area-inset-top,0px));}
+.minuteur[hidden]{display:none!important;}
+.m-label{font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--faible);text-align:center;}
+.anneau{position:relative;width:min(60vw,230px);aspect-ratio:1;max-width:100%;}
+.anneau svg{width:100%;height:100%;transform:rotate(-90deg);display:block;}
+.piste{fill:none;stroke:var(--ligne);stroke-width:8;}
+.jauge{fill:none;stroke:var(--rouge);stroke-width:8;stroke-linecap:round;}
+.anneau.fini .jauge{stroke:var(--rouge-vif);}
+.m-temps{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(40px,12vw,56px);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-1px;}
+.anneau.fini .m-temps{color:var(--rouge-vif);animation:battement .5s infinite alternate;}
+@keyframes battement{to{opacity:.35;}}
+.m-btns{display:flex;gap:8px;width:100%;max-width:330px;}
+.m-btns button{flex:1;min-height:50px;border-radius:10px;font-family:inherit;font-size:13px;font-weight:800;
+  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid var(--ligne);background:var(--surface);color:var(--faible);}
+.m-btns button.primaire{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+.m-etat{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--tres-faible);min-height:14px;}
+
+/* ---------- bilan / etats ---------- */
+.bilan{position:fixed;inset:0;z-index:21;background:var(--noir);overflow-y:auto;
+  padding:0 max(16px,env(safe-area-inset-left,0px));}
+.bilan[hidden]{display:none!important;}
+.bilan-inner{max-width:460px;margin:0 auto;padding-block:40px;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));}
+.bilan h2{font-size:27px;font-weight:800;margin:0 0 4px;}
+.bilan .date{font-size:12px;color:var(--faible);margin-bottom:22px;}
+.recap{background:var(--surface);border:1px solid var(--ligne);border-radius:12px;padding:14px;margin-bottom:11px;}
+.recap h3{font-size:15px;font-weight:600;margin:0 0 8px;}
+.recap ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;}
+.recap li{display:flex;justify-content:space-between;font-size:13.5px;font-variant-numeric:tabular-nums;color:var(--faible);}
+.recap li b{color:var(--texte);font-weight:600;}
+.chiffres{display:flex;gap:9px;margin-bottom:20px;}
+.chiffre{flex:1;min-width:0;background:var(--surface);border:1px solid var(--ligne);border-radius:11px;padding:13px 9px;text-align:center;}
+.chiffre b{display:block;font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;}
+.chiffre span{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--tres-faible);}
+.note{font-size:12.5px;color:var(--faible);line-height:1.55;margin-top:18px;padding-top:16px;border-top:1px solid var(--ligne);}
+.bilan .fermer{width:100%;min-height:50px;margin-top:18px;border-radius:10px;border:1px solid var(--ligne);
+  background:var(--surface);color:var(--faible);font-family:inherit;font-size:13px;font-weight:800;
+  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;}
+.msg{padding:60px 0;text-align:center;color:var(--faible);}
+.msg h2{font-size:19px;font-weight:600;color:var(--texte);margin:0 0 8px;}
+.msg p{margin:0 auto;max-width:300px;font-size:13.5px;line-height:1.6;}
+.hors-ligne{display:none;align-items:center;justify-content:center;gap:6px;font-size:10px;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--ambre);padding:6px 0 0;}
+body.offline .hors-ligne{display:flex;}
+button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="entete" id="entete" hidden>
+    <div class="fil"><span class="pastille"></span><span class="semaine" id="hSemaine"></span></div>
+    <h1 class="jour" id="hJour"></h1>
+    <div class="sous-jour" id="hSous"></div>
+    <div class="hors-ligne">● Hors ligne — données en cache</div>
+    <div class="onglets" id="onglets" role="tablist"></div>
+    <div class="barre"><span id="hBarre"></span></div>
+  </header>
+
+  <main id="liste">
+    <div class="msg"><h2>Chargement…</h2><p>Récupération de ta séance.</p></div>
+  </main>
+</div>
+
+<div class="pied" id="pied" hidden>
+  <div class="pied-inner">
+    <button class="terminer" id="btnTerminer" disabled>Terminer la séance</button>
+  </div>
+</div>
+
+<div class="minuteur" id="minuteur" hidden>
+  <div class="m-label" id="mLabel">Repos</div>
+  <div class="anneau" id="mAnneau">
+    <svg viewBox="0 0 280 280" aria-hidden="true">
+      <circle class="piste" cx="140" cy="140" r="124"></circle>
+      <circle class="jauge" id="mJauge" cx="140" cy="140" r="124" stroke-dasharray="779.1" stroke-dashoffset="0"></circle>
+    </svg>
+    <div class="m-temps" id="mTemps">0:00</div>
+  </div>
+  <div class="m-etat" id="mEtat"></div>
+  <div class="m-btns">
+    <button id="mPlus" type="button">+15 s</button>
+    <button id="mSkip" type="button" class="primaire">Passer</button>
+  </div>
+</div>
+
+<div class="bilan" id="bilan" hidden>
+  <div class="bilan-inner">
+    <h2>Séance terminée</h2>
+    <div class="date" id="bDate"></div>
+    <div class="chiffres">
+      <div class="chiffre"><b id="bSeries">0</b><span>Séries</span></div>
+      <div class="chiffre"><b id="bVolume">0</b><span>Tonnage kg</span></div>
+      <div class="chiffre"><b id="bDuree">0</b><span>Minutes</span></div>
+    </div>
+    <div id="bRecap"></div>
+    <p class="note" id="bNote"></p>
+    <button class="fermer" id="bFermer" type="button">Revenir à la séance</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var CIRC = 2*Math.PI*124;
+  // Le jeton vient du lien (#xxxx). Une fois ouvert, on le retient : lance depuis
+  // l'ecran d'accueil, l'application demarre sur start_url et n'a plus le #.
+  var jeton = (location.hash||'').replace(/[^A-Za-z0-9_-]/g,'');
+  try{
+    if(jeton) localStorage.setItem('seance-jeton',jeton);
+    else jeton = localStorage.getItem('seance-jeton') || '';
+  }catch(e){}
+  var DATA = null, jourActif = 0, etat = {sets:{},rpe:{},debut:Date.now()};
+  var CLE_DATA = 'seance-data-'+jeton, CLE_ETAT = 'seance-etat-'+jeton;
+
+  var $ = function(id){ return document.getElementById(id); };
+  function lire(c){ try{ var v=localStorage.getItem(c); return v?JSON.parse(v):null; }catch(e){ return null; } }
+  function ecrire(c,v){ try{ localStorage.setItem(c,JSON.stringify(v)); }catch(e){} }
+  function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+  function cle(j,i,s){ return j+'-'+i+'-'+s; }
+  function nb(x){ return (+x).toString(); }   // 40.00 -> "40"
+
+  // Une perf sans série enregistrée ne compte pas comme un historique.
+  function derniereDe(exo){
+    var d = exo.derniere;
+    return (d && d.series && d.series.length) ? d : null;
+  }
+  function uniteDe(exo){
+    var d = derniereDe(exo);
+    return (d && d.unite ? d.unite : 'KG').toLowerCase();
+  }
+  function chargeSuggeree(exo){
+    var d = derniereDe(exo);
+    if(!d) return '';
+    return nb(Math.max.apply(null, d.series.map(function(z){ return +z.charge; })));
+  }
+  function texteDerniere(exo){
+    var d = derniereDe(exo);
+    if(!d) return 'Première fois';
+    var u = uniteDe(exo);
+    var parCharge = {};
+    d.series.forEach(function(z){
+      var c = nb(z.charge);
+      (parCharge[c] = parCharge[c] || []).push(z.reps);
+    });
+    return Object.keys(parCharge).map(function(c){
+      return c + ' ' + u + ' × ' + parCharge[c].join(' · ');
+    }).join('   ');
+  }
+
+  // ---------- chargement ----------
+  if(!jeton){
+    $('liste').innerHTML='<div class="msg"><h2>Lien incomplet</h2>'+
+      '<p>Ouvre le lien personnel que ton coach t\'a envoyé : il se termine par un code après le #.</p></div>';
+    return;
+  }
+
+  // ---------- base de données ----------
+  var API = 'https://aghftupaybcffvtzibds.supabase.co/rest/v1/rpc/';
+  var CLE_API = 'sb_publishable_vqFJ7bgqNbAtXfFFkAeSTg_diGfjPjz';
+
+  function appeler(fonction, args){
+    return fetch(API + fonction, {
+      method: 'POST',
+      headers: {'apikey': CLE_API, 'Authorization': 'Bearer ' + CLE_API,
+                'Content-Type': 'application/json'},
+      body: JSON.stringify(args)
+    }).then(function(r){
+      if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ' ' + t); });
+      return r.json();
+    });
+  }
+
+  var cache = lire(CLE_DATA);
+  if(cache){ DATA=cache; demarrer(); }
+
+  appeler('seance_eleve', {p_jeton: jeton})
+    .then(function(d){
+      var neuf = !DATA || DATA.semaine !== d.semaine;
+      DATA=d; ecrire(CLE_DATA,d);
+      document.body.classList.remove('offline');
+      demarrer();
+      viderFile();
+    })
+    .catch(function(e){
+      if(DATA){ document.body.classList.add('offline'); return; }
+      $('liste').innerHTML='<div class="msg"><h2>Séance introuvable</h2>'+
+        '<p>Impossible de charger les données. Vérifie ta connexion, ou demande un nouveau lien à ton coach.</p></div>';
+    });
+
+  // ---------- remontée des perfs (file d'attente si hors ligne) ----------
+  function envoyer(exoIdx){
+    var exo = DATA.jours[jourActif].exos[exoIdx];
+    var faites = [];
+    for(var s=0; s<exo.series; s++){
+      var v = etat.sets[cle(jourActif, exoIdx, s)];
+      if(v) faites.push({charge: v.kg, reps: v.reps});
+    }
+    var envoi = {
+      p_jeton:       jeton,
+      p_exercice_id: exo.exercice_id,
+      p_series:      faites,
+      p_unite:       uniteDe(exo).toUpperCase(),
+      p_rpe:         etat.rpe[jourActif + '-' + exoIdx] || null
+    };
+    if(!faites.length) return;
+    appeler('enregistrer_perf', envoi).catch(function(){
+      var f = lire('seance-file-' + jeton) || [];
+      f = f.filter(function(x){ return x.p_exercice_id !== envoi.p_exercice_id; });
+      f.push(envoi); ecrire('seance-file-' + jeton, f);
+      document.body.classList.add('offline');
+    });
+  }
+
+  function viderFile(){
+    var f = lire('seance-file-' + jeton) || [];
+    if(!f.length) return;
+    Promise.all(f.map(function(x){ return appeler('enregistrer_perf', x).catch(function(){}); }))
+      .then(function(){ ecrire('seance-file-' + jeton, []); });
+  }
+
+  function demarrer(){
+    var e = lire(CLE_ETAT);
+    if(e && e.semaine===DATA.semaine) etat=e; else etat={sets:{},rpe:{},debut:Date.now(),semaine:DATA.semaine};
+    etat.semaine=DATA.semaine;
+    $('entete').hidden=false; $('pied').hidden=false;
+    $('hSemaine').textContent='Semaine '+DATA.semaine+(DATA.intensity?' · '+DATA.intensity:'');
+    construireOnglets();
+    afficherJour(jourActif);
+  }
+  function sauver(){ ecrire(CLE_ETAT,etat); }
+
+  function construireOnglets(){
+    var o=$('onglets'); o.innerHTML='';
+    DATA.jours.forEach(function(j,idx){
+      var b=document.createElement('button');
+      b.className='onglet'; b.type='button'; b.setAttribute('role','tab');
+      b.setAttribute('aria-selected',String(idx===jourActif));
+      b.innerHTML='Day '+j.num+'<span class="pt" style="display:'+(jourComplet(idx)?'inline-block':'none')+'"></span>';
+      b.addEventListener('click',function(){ jourActif=idx; construireOnglets(); afficherJour(idx); window.scrollTo(0,0); });
+      o.appendChild(b);
+    });
+  }
+  function jourComplet(idx){
+    var j=DATA.jours[idx];
+    return j.exos.every(function(ex,i){
+      for(var s=0;s<ex.series;s++){ if(!etat.sets[cle(idx,i,s)]) return false; }
+      return true;
+    });
+  }
+
+  // ---------- rendu d'un jour ----------
+  function afficherJour(idx){
+    var j=DATA.jours[idx];
+    var nbSeries=j.exos.reduce(function(a,e){return a+e.series;},0);
+    $('hJour').textContent='Day '+j.num+' — '+j.titre;
+    $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' exercices · '+nbSeries+' séries';
+
+    var html='';
+    j.exos.forEach(function(exo,i){
+      var series='', un=uniteDe(exo), sug=chargeSuggeree(exo);
+      for(var s=0;s<exo.series;s++){
+        var v=etat.sets[cle(idx,i,s)];
+        series+='<div class="serie'+(v?' ok':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
+          '<span class="serie-num">S'+(s+1)+'</span>'+
+          '<label class="champ"><input id="kg-'+i+'-'+s+'" inputmode="decimal" aria-label="Charge série '+(s+1)+'" value="'+(v?v.kg:sug)+'"><span class="unite">'+un+'</span></label>'+
+          '<label class="champ"><input id="rp-'+i+'-'+s+'" inputmode="numeric" aria-label="Répétitions série '+(s+1)+'" value="'+(v?v.reps:'')+'"><span class="unite">reps</span></label>'+
+          '<button class="valider" type="button" data-valide aria-label="Valider la série '+(s+1)+'">✓</button>'+
+        '</div>';
+      }
+      var rpe='<div class="rpe"><div class="rpe-label">RPE de l\'exercice</div><div class="rpe-choix">';
+      [10,9,8,7,5].forEach(function(v){
+        rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+i+'" aria-pressed="'+(etat.rpe[idx+'-'+i]===v)+'">'+v+'</button>';
+      });
+      rpe+='</div></div>';
+
+      html+='<article class="exo" id="exo-'+i+'">'+
+        '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
+          '<h2 class="exo-nom">'+exo.nom+'</h2><div class="meta">'+
+            '<span class="tag">'+exo.series+' × '+exo.reps+'</span>'+
+            '<span class="tag">Repos '+fmt(exo.repos)+'</span>'+
+            (exo.technique?'<span class="tag tech">'+exo.technique+'</span>':'')+
+        '</div></div></div>'+
+        '<div class="consigne"><dl>'+
+          '<dt>Dernière</dt><dd>'+texteDerniere(exo)+'</dd>'+
+          '<dt>Objectif</dt><dd class="objectif">'+(derniereDe(exo)&&exo.objectif?exo.objectif.replace(/(\d)\.00\b/g,'$1'):'Trouve ta charge')+'</dd>'+
+        '</dl></div>'+
+        '<div class="series">'+series+'</div>'+rpe+'</article>';
+    });
+    $('liste').innerHTML=html;
+    majProgression();
+  }
+
+  // ---------- interactions ----------
+  $('liste').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-valide]');
+    if(b){ validerSerie(b.closest('.serie')); return; }
+    var r=ev.target.closest('[data-rpe]');
+    if(r){
+      var k=jourActif+'-'+r.dataset.exo, v=+r.dataset.rpe;
+      etat.rpe[k]=(etat.rpe[k]===v?null:v); sauver();
+      [].forEach.call(r.parentNode.children,function(x){
+        x.setAttribute('aria-pressed',String(+x.dataset.rpe===etat.rpe[k]));
+      });
+      envoyer(+r.dataset.exo);
+    }
+  });
+
+  function validerSerie(ligne){
+    var i=+ligne.dataset.exo, s=+ligne.dataset.serie, k=cle(jourActif,i,s);
+    var exo=DATA.jours[jourActif].exos[i];
+    reveiller();
+    if(etat.sets[k]){
+      delete etat.sets[k]; ligne.classList.remove('ok');
+    }else{
+      var kg=parseFloat($('kg-'+i+'-'+s).value)||0;
+      var reps=parseInt($('rp-'+i+'-'+s).value,10)||0;
+      if(!reps){ $('rp-'+i+'-'+s).focus(); return; }
+      etat.sets[k]={kg:kg,reps:reps};
+      ligne.classList.add('ok');
+      try{ if(navigator.vibrate) navigator.vibrate(35); }catch(e){}
+      var dernier=(s===exo.series-1);
+      lancerRepos(exo.repos, exo.nom, dernier?'Exercice suivant':'Série '+(s+2));
+    }
+    sauver(); majProgression(); construireOnglets(); envoyer(i);
+  }
+
+  function majProgression(){
+    var j=DATA.jours[jourActif];
+    var total=j.exos.reduce(function(a,e){return a+e.series;},0), faits=0;
+    j.exos.forEach(function(exo,i){
+      var n=0;
+      for(var s=0;s<exo.series;s++){ if(etat.sets[cle(jourActif,i,s)]){n++;faits++;} }
+      var el=$('exo-'+i); if(el) el.classList.toggle('fait',n===exo.series);
+    });
+    $('hBarre').style.width=(total?faits/total*100:0)+'%';
+    $('btnTerminer').disabled=(faits===0);
+  }
+
+  // ---------- minuteur ----------
+  var total=0, finAt=0, raf=null, fini=false, audio=null, verrou=null;
+  function lancerRepos(sec,nom,suite){
+    if(!sec){ return; }
+    total=sec; finAt=Date.now()+sec*1000; fini=false;
+    $('mLabel').textContent=nom+' · '+suite;
+    $('minuteur').hidden=false; garderEcran(); boucle();
+  }
+  function restant(){ return Math.max(0,finAt-Date.now()); }
+  function dessiner(){
+    var ms=restant();
+    $('mTemps').textContent=fmt(Math.ceil(ms/1000));
+    $('mJauge').setAttribute('stroke-dashoffset',String(CIRC*(1-(total>0?ms/(total*1000):0))));
+    $('mAnneau').classList.toggle('fini',fini);
+  }
+  function boucle(){
+    dessiner();
+    if(restant()<=0){ if(!fini) finirRepos(); return; }
+    raf=requestAnimationFrame(boucle);
+  }
+  function finirRepos(){
+    fini=true; dessiner(); sonner();
+    try{ if(navigator.vibrate) navigator.vibrate([220,110,220,110,400]); }catch(e){}
+  }
+  function fermerRepos(){
+    $('minuteur').hidden=true; if(raf) cancelAnimationFrame(raf);
+    relacherEcran(); $('mEtat').textContent='';
+  }
+  $('mSkip').addEventListener('click',fermerRepos);
+  $('mPlus').addEventListener('click',function(){
+    reveiller(); finAt+=15000; total=Math.max(total,Math.ceil(restant()/1000));
+    if(fini){ fini=false; boucle(); } else dessiner();
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible' && !$('minuteur').hidden){
+      if(restant()<=0){ if(!fini) finirRepos(); } else { garderEcran(); boucle(); }
+    }
+  });
+
+  function reveiller(){
+    try{
+      if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)();
+      if(audio.state==='suspended') audio.resume();
+    }catch(e){}
+  }
+  function sonner(){
+    try{
+      if(!audio) return;
+      [0,0.42,0.84].forEach(function(t){
+        var o=audio.createOscillator(), g=audio.createGain();
+        o.connect(g); g.connect(audio.destination);
+        o.frequency.value=880; o.type='sine';
+        g.gain.setValueAtTime(0.0001,audio.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(0.32,audio.currentTime+t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001,audio.currentTime+t+0.32);
+        o.start(audio.currentTime+t); o.stop(audio.currentTime+t+0.36);
+      });
+    }catch(e){}
+  }
+  function garderEcran(){
+    if(!('wakeLock' in navigator)) return;
+    navigator.wakeLock.request('screen').then(function(v){
+      verrou=v; $('mEtat').textContent='Écran maintenu allumé';
+      v.addEventListener('release',function(){ $('mEtat').textContent=''; });
+    }).catch(function(){});
+  }
+  function relacherEcran(){ if(verrou){ try{ verrou.release(); }catch(e){} verrou=null; } }
+
+  // ---------- bilan ----------
+  $('btnTerminer').addEventListener('click',function(){
+    var j=DATA.jours[jourActif], series=0, volume=0, recap='';
+    j.exos.forEach(function(exo,i){
+      var li='', n=0;
+      for(var s=0;s<exo.series;s++){
+        var v=etat.sets[cle(jourActif,i,s)];
+        if(!v) continue;
+        n++; series++; volume+=v.kg*v.reps;
+        li+='<li><span>Série '+(s+1)+'</span><b>'+v.kg+' '+uniteDe(exo)+' × '+v.reps+'</b></li>';
+      }
+      if(!n) return;
+      var r=etat.rpe[jourActif+'-'+i];
+      recap+='<div class="recap"><h3>'+exo.nom+(r?' · RPE '+r:'')+'</h3><ul>'+li+'</ul></div>';
+    });
+    $('bSeries').textContent=series;
+    $('bVolume').textContent=Math.round(volume).toLocaleString('fr-FR');
+    $('bDuree').textContent=Math.max(1,Math.round((Date.now()-(etat.debut||Date.now()))/60000));
+    $('bRecap').innerHTML=recap;
+    $('bDate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    $('bNote').textContent='Tes séries sont déjà enregistrées : ton coach les voit de son côté. '
+      + 'Si tu étais hors ligne, elles partiront dès que tu retrouveras du réseau.';
+    fermerRepos();
+    $('bilan').hidden=false; window.scrollTo(0,0);
+  });
+  $('bFermer').addEventListener('click',function(){ $('bilan').hidden=true; });
+
+  window.addEventListener('online',function(){ document.body.classList.remove('offline'); });
+  window.addEventListener('offline',function(){ document.body.classList.add('offline'); });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){});
+    });
+  }
+})();
+</script>
+</body>
+</html>

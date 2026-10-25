@@ -300,8 +300,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       (parCharge[c] = parCharge[c] || []).push(z.reps);
     });
     return Object.keys(parCharge).map(function(c){
-      return c + ' ' + u + ' × ' + parCharge[c].join(' · ');
-    }).join('   ');
+      return c + ' ' + u + ' × ' + parCharge[c].join('·');
+    }).join('&nbsp; | &nbsp;');
   }
 
   // ---------- chargement ----------

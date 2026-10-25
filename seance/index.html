@@ -428,12 +428,17 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(p.objectif){
       // "37.5kg (83lbs) 8+ reps" -> valeur principale / équivalence / reps
       var m = p.objectif.match(/^\s*([\d.,]+\s*(?:kg|lbs))\s*(\([^)]*\))?\s*(.*)$/i);
-      h += '<div class="charge"><span class="lab">Charge de travail</span>'+
-           (m ? '<span class="val">'+esc(m[1].toUpperCase())+'</span>'+
-                (m[2]?'<span class="alt">'+esc(m[2])+'</span>':'')+
-                (m[3]?'<span class="alt">'+esc(m[3])+'</span>':'')
-              : '<span class="val">'+esc(p.objectif)+'</span>')+
-           '</div>';
+      if(m){
+        h += '<div class="charge"><span class="lab">Charge de travail</span>'+
+             '<span class="val">'+esc(m[1].toUpperCase())+'</span>'+
+             (m[2]?'<span class="alt">'+esc(m[2])+'</span>':'')+
+             (m[3]?'<span class="alt">'+esc(m[3])+'</span>':'')+
+             '</div>';
+      }else{
+        // poids de corps ou première fois : pas de charge à annoncer
+        h += '<div class="charge"><span class="lab">Objectif</span>'+
+             '<span class="val" style="font-size:15px">'+esc(p.objectif)+'</span></div>';
+      }
     }
 
     var c = CAS[p.cas];

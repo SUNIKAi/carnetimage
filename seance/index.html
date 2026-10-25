@@ -345,11 +345,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var d = exo.derniere;
     return (d && d.series && d.series.length) ? d : null;
   }
+  // La prescription du moteur fait foi : c'est elle qui est affichée sur la
+  // carte, donc c'est elle qui doit pré-remplir les champs. Sans elle on
+  // retombe sur la dernière perf.
+  function prescrit(exo){
+    var p = exo.prescription;
+    if(!p || !p.objectif) return null;
+    var m = p.objectif.match(/([\d.,]+)\s*(kg|lbs)/i);
+    if(!m) return null;
+    var reps = p.objectif.match(/(\d+)\s*\+?\s*reps/i);
+    return {charge: nb(m[1].replace(',', '.')),
+            unite:  m[2].toLowerCase(),
+            reps:   reps ? reps[1] : ''};
+  }
   function uniteDe(exo){
+    var pr = prescrit(exo);
+    if(pr) return pr.unite;
     var d = derniereDe(exo);
     return (d && d.unite ? d.unite : 'KG').toLowerCase();
   }
   function chargeSuggeree(exo){
+    var pr = prescrit(exo);
+    if(pr) return pr.charge;
     var d = derniereDe(exo);
     if(!d) return '';
     return nb(Math.max.apply(null, d.series.map(function(z){ return +z.charge; })));
@@ -553,12 +570,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var html='';
     j.exos.forEach(function(exo,i){
       var series='', un=uniteDe(exo), sug=chargeSuggeree(exo);
+      var repsCible=(prescrit(exo)||{}).reps||'';
       for(var s=0;s<exo.series;s++){
         var v=etat.sets[cle(idx,i,s)];
         series+='<div class="serie'+(v?' ok':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
           '<span class="serie-num">S'+(s+1)+'</span>'+
           '<label class="champ"><input id="kg-'+i+'-'+s+'" inputmode="decimal" aria-label="Charge série '+(s+1)+'" value="'+(v?v.kg:sug)+'"><span class="unite">'+un+'</span></label>'+
-          '<label class="champ"><input id="rp-'+i+'-'+s+'" inputmode="numeric" aria-label="Répétitions série '+(s+1)+'" value="'+(v?v.reps:'')+'"><span class="unite">reps</span></label>'+
+          '<label class="champ"><input id="rp-'+i+'-'+s+'" inputmode="numeric" aria-label="Répétitions série '+(s+1)+'" value="'+(v?v.reps:repsCible)+'"><span class="unite">reps</span></label>'+
           '<button class="valider" type="button" data-valide aria-label="Valider la série '+(s+1)+'">✓</button>'+
         '</div>';
       }

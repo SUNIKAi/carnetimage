@@ -136,10 +136,21 @@ body{
 .subs.ouvert{display:flex;}
 .sub{
   display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;
-  background:var(--noir);border:1px solid var(--ligne);
+  background:var(--noir);border:1px solid var(--ligne);width:100%;
+  font-family:inherit;color:var(--texte);cursor:pointer;text-align:left;
 }
+.sub:active{background:var(--surface-haut);}
+.sub.actif{border-color:var(--rouge);box-shadow:inset 0 0 0 1px var(--rouge);}
 .sub img{width:42px;height:42px;border-radius:6px;object-fit:cover;background:#fff;flex:none;}
 .sub .nom{font-size:13px;flex:1;min-width:0;}
+.sub .go{font-size:9.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tres-faible);flex:none;}
+.sub.actif .go{color:var(--rouge-vif);}
+.outil.retour{border-color:var(--rouge);color:var(--rouge-vif);}
+.bandeau-sub{
+  margin:0 14px 10px;padding:7px 10px;border-radius:7px;
+  background:rgba(200,130,10,.12);border-left:2px solid var(--ambre);
+  font-size:11.5px;color:var(--ambre);
+}
 .hist{position:fixed;inset:0;z-index:22;background:var(--noir);overflow-y:auto;
   padding:0 max(16px,env(safe-area-inset-left,0px));}
 .hist[hidden]{display:none!important;}
@@ -337,6 +348,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
   function cle(j,i,s){ return j+'-'+i+'-'+s; }
   function nb(x){ return (+x).toString(); }   // 40.00 -> "40"
+
+  // Le RPE appartient au carnet V2 (cycles). En V1 l'élève note seulement ce
+  // qu'il a fait sur chaque série : la base PERFORMANCE V1 n'a pas de colonne RPE.
+  function avecRPE(){
+    return ((DATA && DATA.planification) || '').toUpperCase().indexOf('CYCLE') >= 0;
+  }
+
+  // Exercice réellement travaillé : celui du programme, ou son remplaçant si
+  // l'élève a basculé pendant la séance.
+  function exoEffectif(prevu, idx, i){
+    var s = (etat.subs || {})[idx + '-' + i];
+    if(!s) return prevu;
+    return {
+      exercice_id: s.exercice_id, nom: s.nom, image: s.image, type: s.type,
+      series: prevu.series, reps: s.reps || prevu.reps, repos: s.repos || prevu.repos,
+      derniere: s.derniere, objectif: null, prescription: null,
+      substituts: prevu.substituts, remplace: prevu.nom
+    };
+  }
+  function exoCourant(i){
+    return exoEffectif(DATA.jours[jourActif].exos[i], jourActif, i);
+  }
   function esc(s){ return String(s==null?'':s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -448,15 +481,22 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     return h + '</div>';
   }
 
-  function blocOutils(exo, i){
+  function blocOutils(prevu, i, exo){
+    var remplace = !!exo.remplace;
     var h = '<div class="outils">';
-    if(exo.substituts && exo.substituts.length){
-      h += '<button class="outil" type="button" data-subs="'+i+'">Faire un autre exercice ▾</button>'+
+    if(remplace){
+      h += '<button class="outil retour" type="button" data-retour="'+i+'">↩ Revenir à '+esc(exo.remplace)+'</button>';
+    }
+    if(prevu.substituts && prevu.substituts.length){
+      h += '<button class="outil" type="button" data-subs="'+i+'">'+
+             (remplace?'Changer encore':'Faire un autre exercice')+' ▾</button>'+
            '<div class="subs" id="subs-'+i+'">';
-      exo.substituts.forEach(function(s){
-        h += '<div class="sub">'+
+      prevu.substituts.forEach(function(s, k){
+        var actif = (s.exercice_id === exo.exercice_id);
+        h += '<button class="sub'+(actif?' actif':'')+'" type="button" data-choisir="'+i+'" data-k="'+k+'">'+
                (s.image?'<img loading="lazy" src="'+esc(s.image)+'" alt="">':'<img alt="">')+
-               '<span class="nom">'+esc(s.nom)+'</span></div>';
+               '<span class="nom">'+esc(s.nom)+'</span>'+
+               '<span class="go">'+(actif?'en cours':'choisir')+'</span></button>';
       });
       h += '</div>';
     }
@@ -506,7 +546,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
   // ---------- remontée des perfs (file d'attente si hors ligne) ----------
   function envoyer(exoIdx){
-    var exo = DATA.jours[jourActif].exos[exoIdx];
+    var exo = exoCourant(exoIdx);
     var faites = [];
     for(var s=0; s<exo.series; s++){
       var v = etat.sets[cle(jourActif, exoIdx, s)];
@@ -573,7 +613,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' exercices · '+nbSeries+' séries';
 
     var html='';
-    j.exos.forEach(function(exo,i){
+    j.exos.forEach(function(prevu,i){
+      var exo = exoEffectif(prevu, idx, i);
       var series='', un=uniteDe(exo), sug=chargeSuggeree(exo);
       var repsCible=(prescrit(exo)||{}).reps||'';
       for(var s=0;s<exo.series;s++){
@@ -585,11 +626,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
           '<button class="valider" type="button" data-valide aria-label="Valider la série '+(s+1)+'">✓</button>'+
         '</div>';
       }
-      var rpe='<div class="rpe"><div class="rpe-label">RPE de l\'exercice</div><div class="rpe-choix">';
-      [10,9,8,7,5].forEach(function(v){
-        rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+i+'" aria-pressed="'+(etat.rpe[idx+'-'+i]===v)+'">'+v+'</button>';
-      });
-      rpe+='</div></div>';
+      // RPE : carnet V2 uniquement (cycles). En V1 il n'existe pas.
+      var rpe='';
+      if(avecRPE()){
+        rpe='<div class="rpe"><div class="rpe-label">RPE de l\'exercice</div><div class="rpe-choix">';
+        [10,9,8,7,5].forEach(function(v){
+          rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+i+'" aria-pressed="'+(etat.rpe[idx+'-'+i]===v)+'">'+v+'</button>';
+        });
+        rpe+='</div></div>';
+      }
 
       // Vignette : chargée seulement quand elle entre à l'écran (un GIF ≈ 600 Ko).
       var vignette = exo.image
@@ -605,8 +650,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             '<span class="tag">Repos '+fmt(exo.repos)+'</span>'+
             (exo.technique?'<span class="tag tech">'+esc(exo.technique)+'</span>':'')+
         '</div></div>'+vignette+'</div>'+
+        (exo.remplace?'<div class="bandeau-sub">Remplace <b>'+esc(exo.remplace)+'</b> — tes séries seront enregistrées sur '+esc(exo.nom)+'.</div>':'')+
         blocCarte(exo)+
-        '<div class="series">'+series+'</div>'+rpe+blocOutils(exo,i)+'</article>';
+        '<div class="series">'+series+'</div>'+rpe+blocOutils(prevu,i,exo)+'</article>';
     });
     $('liste').innerHTML=html;
     majProgression();
@@ -624,6 +670,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     }
     var hb=ev.target.closest('[data-hist]');
     if(hb){ ouvrirHistorique(+hb.dataset.hist); return; }
+    var ch=ev.target.closest('[data-choisir]');
+    if(ch){ basculerVers(+ch.dataset.choisir, +ch.dataset.k); return; }
+    var rt=ev.target.closest('[data-retour]');
+    if(rt){ basculerVers(+rt.dataset.retour, null); return; }
     var b=ev.target.closest('[data-valide]');
     if(b){ validerSerie(b.closest('.serie')); return; }
     var r=ev.target.closest('[data-rpe]');
@@ -639,7 +689,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
   function validerSerie(ligne){
     var i=+ligne.dataset.exo, s=+ligne.dataset.serie, k=cle(jourActif,i,s);
-    var exo=DATA.jours[jourActif].exos[i];
+    var exo=exoCourant(i);
     reveiller();
     if(etat.sets[k]){
       delete etat.sets[k]; ligne.classList.remove('ok');
@@ -656,9 +706,26 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     sauver(); majProgression(); construireOnglets(); envoyer(i);
   }
 
+  // ---------- basculer vers un exercice de remplacement ----------
+  function basculerVers(i, k){
+    var prevu = DATA.jours[jourActif].exos[i];
+    var c = jourActif + '-' + i;
+    etat.subs = etat.subs || {};
+
+    // Les séries déjà validées appartenaient à l'autre exercice : on repart propre.
+    for(var s=0; s<prevu.series; s++) delete etat.sets[cle(jourActif, i, s)];
+    delete etat.rpe[c];
+
+    if(k === null) delete etat.subs[c];
+    else etat.subs[c] = prevu.substituts[k];
+
+    sauver(); afficherJour(jourActif); construireOnglets();
+    var el = $('exo-'+i); if(el) el.scrollIntoView({block:'start'});
+  }
+
   // ---------- historique complet d'un exercice ----------
   function ouvrirHistorique(i){
-    var exo=DATA.jours[jourActif].exos[i];
+    var exo=exoCourant(i);
     $('histNom').textContent=exo.nom;
     $('histSt').textContent='Chargement…';
     $('histListe').innerHTML='';
@@ -683,7 +750,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
   // ---------- loupe : le GIF en grand ----------
   function ouvrirLoupe(i){
-    var exo=DATA.jours[jourActif].exos[i];
+    var exo=exoCourant(i);
     if(!exo.image) return;
     // on recharge la même URL : l'image est déjà en cache et l'animation repart de zéro
     $('loupeImg').src = exo.image;
@@ -778,7 +845,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // ---------- bilan ----------
   $('btnTerminer').addEventListener('click',function(){
     var j=DATA.jours[jourActif], series=0, volume=0, recap='';
-    j.exos.forEach(function(exo,i){
+    j.exos.forEach(function(prevu,i){
+      var exo=exoCourant(i);
       var li='', n=0;
       for(var s=0;s<exo.series;s++){
         var v=etat.sets[cle(jourActif,i,s)];

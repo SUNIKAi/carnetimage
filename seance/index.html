@@ -16,8 +16,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap">
 <style>
-/* Carnet de seance : une colonne, saisie au pouce, minuteur plein ecran.
-   Identite du carnet Notion : noir chaud, rouge CC2200, Kanit. */
 :root{
   --noir:#121110; --surface:#1B1917; --surface-haut:#252120; --ligne:#332E2B;
   --rouge:#CC2200; --rouge-vif:#FF4A1F; --texte:#F4F0EC; --faible:#8B827B;
@@ -33,16 +31,13 @@ body{
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-top:env(safe-area-inset-top,0px);
-  -webkit-tap-highlight-color:transparent;
-  -webkit-text-size-adjust:100%;
+  -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;
 }
-.page{max-width:460px;margin:0 auto;padding-bottom:124px;}
+.page{max-width:460px;margin:0 auto;padding-bottom:190px;}
 
-/* ---------- entete ---------- */
-.entete{
-  position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--noir);
-  padding-block:14px 0;border-bottom:1px solid var(--ligne);margin-bottom:16px;
-}
+/* ---------- entête ---------- */
+.entete{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--noir);
+  padding-block:14px 0;border-bottom:1px solid var(--ligne);margin-bottom:16px;}
 .fil{display:flex;align-items:center;gap:7px;margin-bottom:4px;flex-wrap:wrap;}
 .pastille{width:6px;height:6px;border-radius:50%;background:var(--rouge);flex:none;}
 .semaine{font-size:10px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--faible);}
@@ -50,15 +45,27 @@ body{
 .sous-jour{font-size:12px;color:var(--faible);margin-top:2px;}
 .onglets{display:flex;gap:6px;margin-top:11px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;}
 .onglets::-webkit-scrollbar{display:none;}
-.onglet{
-  flex:none;min-height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--ligne);
-  background:var(--surface);color:var(--faible);font-family:inherit;font-size:12px;
-  font-weight:600;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;white-space:nowrap;
-}
+.onglet{flex:none;min-height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--ligne);
+  background:var(--surface);color:var(--faible);font-family:inherit;font-size:12px;font-weight:600;
+  letter-spacing:.8px;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .onglet[aria-selected="true"]{background:var(--rouge);border-color:var(--rouge);color:#fff;}
 .onglet .pt{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--vert);margin-left:6px;vertical-align:middle;}
 .barre{height:3px;background:var(--ligne);border-radius:2px;overflow:hidden;margin-bottom:-1px;}
 .barre span{display:block;height:100%;background:var(--rouge);width:0;transition:width .35s ease;}
+
+/* ---------- séance terminée ---------- */
+.verrou{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 13px;
+  border-radius:11px;background:rgba(74,155,104,.12);border:1px solid rgba(74,155,104,.4);}
+.verrou .ok{font-size:19px;line-height:1;}
+.verrou .txt{flex:1;min-width:0;}
+.verrou .t{font-size:14px;font-weight:600;color:var(--vert);}
+.verrou .d{font-size:11.5px;color:var(--faible);margin-top:1px;}
+.verrou button{min-height:38px;padding:0 13px;border-radius:8px;border:1px solid var(--ligne);
+  background:var(--surface);color:var(--texte);font-family:inherit;font-size:12px;font-weight:600;
+  letter-spacing:.8px;text-transform:uppercase;cursor:pointer;flex:none;}
+.jour-verrouille .exo{opacity:.62;}
+.jour-verrouille input,.jour-verrouille .valider,.jour-verrouille .outil,
+.jour-verrouille .unite-bascule{pointer-events:none;}
 
 /* ---------- exercice ---------- */
 .exo{background:var(--surface);border:1px solid var(--ligne);border-radius:13px;margin-bottom:13px;overflow:hidden;transition:border-color .25s;}
@@ -69,35 +76,17 @@ body{
 .exo.fait .num{background:rgba(74,155,104,.18);color:var(--vert);}
 .exo-titres{flex:1;min-width:0;}
 .exo-nom{font-size:17px;font-weight:600;line-height:1.2;margin:0;}
-.meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;align-items:center;}
 .tag{font-size:9.5px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;padding:3px 7px;border-radius:5px;background:var(--surface-haut);color:var(--faible);}
 .tag.tech{color:var(--ambre);background:rgba(200,130,10,.12);}
-.consigne{margin:0 14px 12px;padding:10px 12px;border-radius:9px;background:var(--surface-haut);border-left:2px solid var(--rouge);}
-.consigne dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;}
-.consigne dt{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--tres-faible);align-self:center;}
-.consigne dd{margin:0;font-size:13.5px;font-variant-numeric:tabular-nums;}
-.consigne dd.objectif{color:var(--rouge-vif);font-weight:600;}
-.series{padding:0 14px 4px;display:flex;flex-direction:column;gap:6px;}
-.serie{display:flex;align-items:center;gap:7px;}
-.serie-num{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--tres-faible);width:22px;flex:none;text-transform:uppercase;}
-.champ{position:relative;flex:1;min-width:0;}
-.champ input{width:100%;min-height:46px;background:var(--noir);color:var(--texte);border:1px solid var(--ligne);
-  border-radius:9px;padding:0 32px 0 11px;font-family:inherit;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;}
-.champ input:focus{outline:none;border-color:var(--rouge);}
-.champ .unite{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:var(--tres-faible);text-transform:uppercase;pointer-events:none;}
-.valider{width:46px;height:46px;flex:none;border-radius:9px;border:1px solid var(--ligne);background:var(--surface-haut);
-  color:var(--faible);cursor:pointer;font-size:17px;line-height:1;transition:transform .12s;}
-.valider:active{transform:scale(.94);}
-.serie.ok .valider{background:var(--vert);border-color:var(--vert);color:#fff;}
-.serie.ok .champ input{color:var(--faible);border-color:transparent;background:transparent;}
-.rpe{padding:11px 14px 14px;}
-.rpe-label{font-size:10px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--tres-faible);margin-bottom:7px;}
-.rpe-choix{display:flex;gap:6px;}
-.rpe-choix button{flex:1;min-height:42px;border-radius:8px;border:1px solid var(--ligne);background:var(--noir);
-  color:var(--faible);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums;}
-.rpe-choix button[aria-pressed="true"]{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+.tag.repos{cursor:pointer;border:1px solid var(--ligne);color:var(--texte);}
+.tag.repos:active{background:var(--ligne);}
+.unite-bascule{display:inline-flex;border:1px solid var(--ligne);border-radius:5px;overflow:hidden;}
+.unite-bascule button{border:none;background:var(--surface-haut);color:var(--tres-faible);
+  font-family:inherit;font-size:9.5px;font-weight:700;letter-spacing:1px;padding:3px 8px;cursor:pointer;min-height:22px;}
+.unite-bascule button[aria-pressed="true"]{background:var(--rouge);color:#fff;}
 
-/* ---------- carte du coach (ce qui etait grave dans le PNG) ---------- */
+/* ---------- carte du coach ---------- */
 .carte{margin:0 14px 12px;border:1px solid var(--ligne);border-radius:10px;overflow:hidden;}
 .carte-tete{display:flex;align-items:flex-start;gap:10px;padding:11px 12px 9px;background:var(--surface-haut);}
 .carte-tete .txt{flex:1;min-width:0;}
@@ -109,137 +98,117 @@ body{
 .carte dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 10px;padding:10px 12px;}
 .carte dt{font-size:9.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--tres-faible);align-self:center;}
 .carte dd{margin:0;font-size:13.5px;font-variant-numeric:tabular-nums;}
-.charge{
-  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
-  padding:11px 12px;border-top:1px solid var(--ligne);background:rgba(204,34,0,.07);
-}
+.charge{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:11px 12px;
+  border-top:1px solid var(--ligne);background:rgba(204,34,0,.07);}
 .charge .lab{font-size:9.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--rouge-vif);width:100%;}
 .charge .val{font-size:22px;font-weight:800;color:var(--rouge-vif);font-variant-numeric:tabular-nums;line-height:1.1;}
 .charge .alt{font-size:13px;color:var(--faible);font-weight:600;}
 .charge .paliers{width:100%;display:flex;flex-direction:column;gap:1px;margin:-2px 0 3px;}
 .charge .pal{font-size:12.5px;font-weight:600;color:var(--faible);font-variant-numeric:tabular-nums;}
-.serie-role{font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
-  color:var(--tres-faible);display:block;margin-top:1px;}
-.serie.rampe .serie-role{color:var(--ambre);}
-.cas-note{
-  font-size:10.5px;color:var(--faible);line-height:1.4;
-  padding:8px 12px;border-top:1px solid var(--ligne);display:flex;gap:6px;
-}
+.cas-note{font-size:10.5px;color:var(--faible);line-height:1.4;padding:8px 12px;border-top:1px solid var(--ligne);display:flex;gap:6px;}
 .cas-note b{color:var(--texte);font-weight:600;}
 .carte.test .charge{background:rgba(200,130,10,.1);}
 .carte.test .charge .lab,.carte.test .charge .val{color:var(--ambre);}
 
-/* ---------- volet substitutions + historique ---------- */
-.outils{display:flex;flex-direction:column;gap:7px;padding:0 14px 14px;}
-.outil{
-  width:100%;min-height:42px;border-radius:8px;border:1px solid var(--ligne);
-  background:var(--surface-haut);color:var(--faible);font-family:inherit;font-size:12px;
-  font-weight:600;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;text-align:left;padding:0 12px;
-}
+/* ---------- séries ---------- */
+.series{padding:0 14px 4px;display:flex;flex-direction:column;gap:6px;}
+.serie{display:flex;align-items:center;gap:7px;}
+.serie-num{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--tres-faible);width:26px;flex:none;text-transform:uppercase;}
+.serie-role{font-size:8px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--tres-faible);display:block;margin-top:1px;}
+.serie.rampe .serie-role{color:var(--ambre);}
+.champ{position:relative;flex:1;min-width:0;}
+.champ input{width:100%;min-height:46px;background:var(--noir);color:var(--texte);border:1px solid var(--ligne);
+  border-radius:9px;padding:0 34px 0 11px;font-family:inherit;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;}
+.champ input::placeholder{color:var(--tres-faible);font-weight:400;}
+.champ input:focus{outline:none;border-color:var(--rouge);}
+.champ .unite{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:var(--tres-faible);text-transform:uppercase;pointer-events:none;}
+.valider{width:46px;height:46px;flex:none;border-radius:9px;border:1px solid var(--ligne);background:var(--surface-haut);
+  color:var(--faible);cursor:pointer;font-size:17px;line-height:1;transition:transform .12s;}
+.valider:active{transform:scale(.94);}
+.serie.ok .valider{background:var(--vert);border-color:var(--vert);color:#fff;}
+.serie.ok .champ input{color:var(--faible);border-color:transparent;background:transparent;}
+
+/* ---------- aide à la saisie ---------- */
+.aide{display:flex;flex-wrap:wrap;gap:5px;padding:2px 0 4px 33px;}
+.aide button{min-height:36px;padding:0 11px;border-radius:8px;border:1px solid var(--ligne);
+  background:var(--surface-haut);color:var(--texte);font-family:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;font-variant-numeric:tabular-nums;}
+.aide button:active{background:var(--ligne);}
+.aide button.cible{border-color:var(--rouge);color:var(--rouge-vif);}
+.aide button.toutes{color:var(--faible);font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;}
+
+/* ---------- outils ---------- */
+.outils{display:flex;flex-direction:column;gap:7px;padding:4px 14px 14px;}
+.outil{width:100%;min-height:42px;border-radius:8px;border:1px solid var(--ligne);background:var(--surface-haut);
+  color:var(--faible);font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.8px;
+  text-transform:uppercase;cursor:pointer;text-align:left;padding:0 12px;}
 .outil:active{background:var(--ligne);}
+.outil.retour{border-color:var(--rouge);color:var(--rouge-vif);}
 .subs{display:none;flex-direction:column;gap:6px;margin-top:2px;}
 .subs.ouvert{display:flex;}
-.sub{
-  display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;
-  background:var(--noir);border:1px solid var(--ligne);width:100%;
-  font-family:inherit;color:var(--texte);cursor:pointer;text-align:left;
-}
+.sub{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;background:var(--noir);
+  border:1px solid var(--ligne);width:100%;font-family:inherit;color:var(--texte);cursor:pointer;text-align:left;}
 .sub:active{background:var(--surface-haut);}
 .sub.actif{border-color:var(--rouge);box-shadow:inset 0 0 0 1px var(--rouge);}
 .sub img{width:42px;height:42px;border-radius:6px;object-fit:cover;background:#fff;flex:none;}
 .sub .nom{font-size:13px;flex:1;min-width:0;}
 .sub .go{font-size:9.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tres-faible);flex:none;}
 .sub.actif .go{color:var(--rouge-vif);}
-.outil.retour{border-color:var(--rouge);color:var(--rouge-vif);}
-.bandeau-sub{
-  margin:0 14px 10px;padding:7px 10px;border-radius:7px;
-  background:rgba(200,130,10,.12);border-left:2px solid var(--ambre);
-  font-size:11.5px;color:var(--ambre);
-}
-.hist{position:fixed;inset:0;z-index:22;background:var(--noir);overflow-y:auto;
-  padding:0 max(16px,env(safe-area-inset-left,0px));}
-.hist[hidden]{display:none!important;}
-.hist-inner{max-width:460px;margin:0 auto;padding-block:36px;
-  padding-bottom:calc(36px + env(safe-area-inset-bottom,0px));}
-.hist h2{font-size:21px;font-weight:800;margin:0 0 3px;}
-.hist .st{font-size:12px;color:var(--faible);margin-bottom:18px;}
+.bandeau-sub{margin:0 14px 10px;padding:7px 10px;border-radius:7px;background:rgba(200,130,10,.12);
+  border-left:2px solid var(--ambre);font-size:11.5px;color:var(--ambre);}
+
+/* ---------- vignette + loupe ---------- */
+.vignette{width:58px;height:58px;flex:none;border-radius:9px;overflow:hidden;border:1px solid var(--ligne);
+  background:var(--surface-haut);padding:0;cursor:pointer;position:relative;display:block;transition:transform .12s;}
+.vignette:active{transform:scale(.94);}
+.vignette img{width:100%;height:100%;object-fit:cover;display:block;background:#fff;}
+.vignette .vide{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--tres-faible);font-size:19px;font-weight:800;}
+.vignette .loupe-ic{position:absolute;right:3px;bottom:3px;width:15px;height:15px;border-radius:4px;
+  background:rgba(18,17,16,.72);color:#fff;font-size:9px;line-height:15px;text-align:center;}
+.loupe{position:fixed;inset:0;z-index:25;background:rgba(10,9,8,.96);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;padding:24px max(16px,env(safe-area-inset-left,0px));
+  padding-top:calc(24px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));cursor:zoom-out;}
+.loupe[hidden]{display:none!important;}
+.loupe img{max-width:min(92vw,460px);max-height:64vh;border-radius:12px;background:#fff;object-fit:contain;}
+.loupe .nom{font-size:17px;font-weight:600;text-align:center;}
+.loupe .fermer-ic{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tres-faible);}
+
+/* ---------- pied : chrono + terminer ---------- */
+.pied{position:fixed;left:0;right:0;bottom:0;z-index:12;
+  background:linear-gradient(to top,var(--noir) 76%,rgba(18,17,16,0));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:24px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));}
+.pied-inner{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:8px;}
+.terminer{width:100%;min-height:54px;border:none;border-radius:11px;background:var(--rouge);color:#fff;
+  font-family:inherit;font-size:15px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.terminer.verrouille{background:var(--surface-haut);color:var(--faible);box-shadow:inset 0 0 0 1px var(--ligne);}
+
+/* chrono flottant : la page reste utilisable */
+.chrono{border-radius:12px;background:var(--surface);border:1px solid var(--ligne);overflow:hidden;}
+.chrono[hidden]{display:none!important;}
+.ch-barre{height:3px;background:var(--ligne);}
+.ch-barre span{display:block;height:100%;background:var(--rouge);width:100%;}
+.chrono.fini .ch-barre span{background:var(--rouge-vif);}
+.ch-corps{display:flex;align-items:center;gap:10px;padding:9px 11px;}
+.ch-temps{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;flex:none;min-width:66px;}
+.chrono.fini .ch-temps{color:var(--rouge-vif);animation:battement .55s infinite alternate;}
+@keyframes battement{to{opacity:.4;}}
+.ch-nom{flex:1;min-width:0;font-size:11px;color:var(--faible);line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ch-corps button{min-height:36px;padding:0 11px;border-radius:8px;border:1px solid var(--ligne);
+  background:var(--surface-haut);color:var(--faible);font-family:inherit;font-size:11px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;cursor:pointer;flex:none;}
+
+/* ---------- historique / bilan ---------- */
+.hist,.bilan{position:fixed;inset:0;z-index:22;background:var(--noir);overflow-y:auto;padding:0 max(16px,env(safe-area-inset-left,0px));}
+.hist[hidden],.bilan[hidden]{display:none!important;}
+.hist-inner,.bilan-inner{max-width:460px;margin:0 auto;padding-block:38px;padding-bottom:calc(38px + env(safe-area-inset-bottom,0px));}
+.hist h2,.bilan h2{font-size:22px;font-weight:800;margin:0 0 3px;}
+.hist .st,.bilan .date{font-size:12px;color:var(--faible);margin-bottom:18px;}
 .hligne{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--ligne);}
 .hligne .d{font-size:11px;color:var(--tres-faible);white-space:nowrap;}
 .hligne .s{font-size:13.5px;font-variant-numeric:tabular-nums;text-align:right;}
 .hligne .t{font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--ambre);}
-
-/* ---------- vignette GIF + loupe ---------- */
-.vignette{
-  width:58px;height:58px;flex:none;border-radius:9px;overflow:hidden;
-  border:1px solid var(--ligne);background:var(--surface-haut);padding:0;
-  cursor:pointer;position:relative;display:block;transition:transform .12s;
-}
-.vignette:active{transform:scale(.94);}
-.vignette img{width:100%;height:100%;object-fit:cover;display:block;background:#fff;}
-.vignette .vide{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  color:var(--tres-faible);font-size:19px;font-weight:800;
-}
-.vignette .loupe-ic{
-  position:absolute;right:3px;bottom:3px;width:15px;height:15px;border-radius:4px;
-  background:rgba(18,17,16,.72);color:#fff;font-size:9px;line-height:15px;text-align:center;
-}
-.loupe{
-  position:fixed;inset:0;z-index:25;background:rgba(10,9,8,.96);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  padding:24px max(16px,env(safe-area-inset-left,0px));
-  padding-top:calc(24px + env(safe-area-inset-top,0px));
-  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
-  cursor:zoom-out;
-}
-.loupe[hidden]{display:none!important;}
-.loupe img{
-  max-width:min(92vw,460px);max-height:64vh;border-radius:12px;
-  background:#fff;object-fit:contain;
-}
-.loupe .nom{font-size:17px;font-weight:600;text-align:center;}
-.loupe .fermer-ic{
-  font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tres-faible);
-}
-
-/* ---------- pied ---------- */
-.pied{position:fixed;left:0;right:0;bottom:0;z-index:11;
-  background:linear-gradient(to top,var(--noir) 72%,rgba(18,17,16,0));
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-top:22px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));}
-.pied-inner{max-width:460px;margin:0 auto;}
-.terminer{width:100%;min-height:54px;border:none;border-radius:11px;background:var(--rouge);color:#fff;
-  font-family:inherit;font-size:15px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
-.terminer[disabled]{background:var(--surface-haut);color:var(--tres-faible);cursor:default;}
-
-/* ---------- minuteur ---------- */
-.minuteur{position:fixed;inset:0;z-index:20;background:rgba(10,9,8,.97);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:22px;padding:24px;
-  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));padding-top:calc(24px + env(safe-area-inset-top,0px));}
-.minuteur[hidden]{display:none!important;}
-.m-label{font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--faible);text-align:center;}
-.anneau{position:relative;width:min(60vw,230px);aspect-ratio:1;max-width:100%;}
-.anneau svg{width:100%;height:100%;transform:rotate(-90deg);display:block;}
-.piste{fill:none;stroke:var(--ligne);stroke-width:8;}
-.jauge{fill:none;stroke:var(--rouge);stroke-width:8;stroke-linecap:round;}
-.anneau.fini .jauge{stroke:var(--rouge-vif);}
-.m-temps{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:clamp(40px,12vw,56px);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-1px;}
-.anneau.fini .m-temps{color:var(--rouge-vif);animation:battement .5s infinite alternate;}
-@keyframes battement{to{opacity:.35;}}
-.m-btns{display:flex;gap:8px;width:100%;max-width:330px;}
-.m-btns button{flex:1;min-height:50px;border-radius:10px;font-family:inherit;font-size:13px;font-weight:800;
-  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid var(--ligne);background:var(--surface);color:var(--faible);}
-.m-btns button.primaire{background:var(--rouge);border-color:var(--rouge);color:#fff;}
-.m-etat{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--tres-faible);min-height:14px;}
-
-/* ---------- bilan / etats ---------- */
-.bilan{position:fixed;inset:0;z-index:21;background:var(--noir);overflow-y:auto;
-  padding:0 max(16px,env(safe-area-inset-left,0px));}
-.bilan[hidden]{display:none!important;}
-.bilan-inner{max-width:460px;margin:0 auto;padding-block:40px;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));}
-.bilan h2{font-size:27px;font-weight:800;margin:0 0 4px;}
-.bilan .date{font-size:12px;color:var(--faible);margin-bottom:22px;}
 .recap{background:var(--surface);border:1px solid var(--ligne);border-radius:12px;padding:14px;margin-bottom:11px;}
 .recap h3{font-size:15px;font-weight:600;margin:0 0 8px;}
 .recap ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;}
@@ -250,7 +219,7 @@ body{
 .chiffre b{display:block;font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;}
 .chiffre span{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--tres-faible);}
 .note{font-size:12.5px;color:var(--faible);line-height:1.55;margin-top:18px;padding-top:16px;border-top:1px solid var(--ligne);}
-.bilan .fermer{width:100%;min-height:50px;margin-top:18px;border-radius:10px;border:1px solid var(--ligne);
+.fermer{width:100%;min-height:50px;margin-top:18px;border-radius:10px;border:1px solid var(--ligne);
   background:var(--surface);color:var(--faible);font-family:inherit;font-size:13px;font-weight:800;
   letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;}
 .msg{padding:60px 0;text-align:center;color:var(--faible);}
@@ -274,31 +243,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     <div class="onglets" id="onglets" role="tablist"></div>
     <div class="barre"><span id="hBarre"></span></div>
   </header>
-
-  <main id="liste">
-    <div class="msg"><h2>Chargement…</h2><p>Récupération de ta séance.</p></div>
-  </main>
+  <main id="liste"><div class="msg"><h2>Chargement…</h2><p>Récupération de ta séance.</p></div></main>
 </div>
 
 <div class="pied" id="pied" hidden>
   <div class="pied-inner">
-    <button class="terminer" id="btnTerminer" disabled>Terminer la séance</button>
-  </div>
-</div>
-
-<div class="minuteur" id="minuteur" hidden>
-  <div class="m-label" id="mLabel">Repos</div>
-  <div class="anneau" id="mAnneau">
-    <svg viewBox="0 0 280 280" aria-hidden="true">
-      <circle class="piste" cx="140" cy="140" r="124"></circle>
-      <circle class="jauge" id="mJauge" cx="140" cy="140" r="124" stroke-dasharray="779.1" stroke-dashoffset="0"></circle>
-    </svg>
-    <div class="m-temps" id="mTemps">0:00</div>
-  </div>
-  <div class="m-etat" id="mEtat"></div>
-  <div class="m-btns">
-    <button id="mPlus" type="button">+15 s</button>
-    <button id="mSkip" type="button" class="primaire">Passer</button>
+    <div class="chrono" id="chrono" hidden>
+      <div class="ch-barre"><span id="chBarre"></span></div>
+      <div class="ch-corps">
+        <span class="ch-temps" id="chTemps">0:00</span>
+        <span class="ch-nom" id="chNom"></span>
+        <button id="chPlus" type="button">+15s</button>
+        <button id="chStop" type="button">✕</button>
+      </div>
+    </div>
+    <button class="terminer" id="btnTerminer">Terminer la séance</button>
   </div>
 </div>
 
@@ -323,7 +282,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     <div class="date" id="bDate"></div>
     <div class="chiffres">
       <div class="chiffre"><b id="bSeries">0</b><span>Séries</span></div>
-      <div class="chiffre"><b id="bVolume">0</b><span>Tonnage kg</span></div>
+      <div class="chiffre"><b id="bVolume">0</b><span>Tonnage</span></div>
       <div class="chiffre"><b id="bDuree">0</b><span>Minutes</span></div>
     </div>
     <div id="bRecap"></div>
@@ -336,266 +295,131 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 (function(){
   "use strict";
 
-  var CIRC = 2*Math.PI*124;
-  // Le jeton vient du lien (#xxxx). Une fois ouvert, on le retient : lance depuis
-  // l'ecran d'accueil, l'application demarre sur start_url et n'a plus le #.
+  var API = 'https://aghftupaybcffvtzibds.supabase.co/rest/v1/rpc/';
+  var CLE_API = 'sb_publishable_vqFJ7bgqNbAtXfFFkAeSTg_diGfjPjz';
+  var CIRC = 0;
+
   var jeton = (location.hash||'').replace(/[^A-Za-z0-9_-]/g,'');
   try{
     if(jeton) localStorage.setItem('seance-jeton',jeton);
     else jeton = localStorage.getItem('seance-jeton') || '';
   }catch(e){}
-  var DATA = null, jourActif = 0, etat = {sets:{},rpe:{},debut:Date.now()};
-  var CLE_DATA = 'seance-data-'+jeton, CLE_ETAT = 'seance-etat-'+jeton;
 
-  var $ = function(id){ return document.getElementById(id); };
+  var DATA=null, jourActif=0;
+  var etat={sets:{},rpe:{},subs:{},unites:{},termine:{},debut:Date.now()};
+  var CLE_DATA='seance-data-'+jeton, CLE_ETAT='seance-etat-'+jeton;
+
+  var $=function(id){ return document.getElementById(id); };
   function lire(c){ try{ var v=localStorage.getItem(c); return v?JSON.parse(v):null; }catch(e){ return null; } }
   function ecrire(c,v){ try{ localStorage.setItem(c,JSON.stringify(v)); }catch(e){} }
   function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
   function cle(j,i,s){ return j+'-'+i+'-'+s; }
-  function nb(x){ return (+x).toString(); }   // 40.00 -> "40"
+  function nb(x){ return (+x).toString(); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  // Le RPE appartient au carnet V2 (cycles). En V1 l'élève note seulement ce
-  // qu'il a fait sur chaque série : la base PERFORMANCE V1 n'a pas de colonne RPE.
-  function avecRPE(){
-    return ((DATA && DATA.planification) || '').toUpperCase().indexOf('CYCLE') >= 0;
+  function avecRPE(){ return ((DATA&&DATA.planification)||'').toUpperCase().indexOf('CYCLE')>=0; }
+
+  // ---------- conversion d'unité ----------
+  // Arrondis pratiques en salle : 2,5 kg et 5 lbs.
+  function versKg(v){ return Math.round(v*0.453592/2.5)*2.5; }
+  function versLbs(v){ return Math.round(v*2.20462/5)*5; }
+  function uniteChoisie(i){
+    var u=etat.unites[jourActif+'-'+i];
+    return u || uniteDe(exoCourant(i));
   }
 
-  // Exercice réellement travaillé : celui du programme, ou son remplaçant si
-  // l'élève a basculé pendant la séance.
+  // ---------- exercice effectif (substitution éventuelle) ----------
   function exoEffectif(prevu, idx, i){
-    var s = (etat.subs || {})[idx + '-' + i];
+    var s=(etat.subs||{})[idx+'-'+i];
     if(!s) return prevu;
-    return {
-      exercice_id: s.exercice_id, nom: s.nom, image: s.image, type: s.type,
-      series: prevu.series, reps: s.reps || prevu.reps, repos: s.repos || prevu.repos,
-      derniere: s.derniere, objectif: null, prescription: null,
-      substituts: prevu.substituts, remplace: prevu.nom
-    };
+    return {exercice_id:s.exercice_id, nom:s.nom, image:s.image, type:s.type,
+            series:prevu.series, reps:s.reps||prevu.reps, repos:s.repos||prevu.repos,
+            derniere:s.derniere, objectif:null, prescription:null,
+            substituts:prevu.substituts, remplace:prevu.nom};
   }
-  function exoCourant(i){
-    return exoEffectif(DATA.jours[jourActif].exos[i], jourActif, i);
-  }
-  function esc(s){ return String(s==null?'':s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function exoCourant(i){ return exoEffectif(DATA.jours[jourActif].exos[i], jourActif, i); }
 
-  // Une perf sans série enregistrée ne compte pas comme un historique.
-  function derniereDe(exo){
-    var d = exo.derniere;
-    return (d && d.series && d.series.length) ? d : null;
-  }
-  // La prescription du moteur fait foi : c'est elle qui est affichée sur la
-  // carte, donc c'est elle qui doit pré-remplir les champs. Sans elle on
-  // retombe sur la dernière perf.
+  function derniereDe(exo){ var d=exo.derniere; return (d&&d.series&&d.series.length)?d:null; }
   function prescrit(exo){
-    var p = exo.prescription;
-    if(!p || !p.objectif) return null;
-    var m = p.objectif.match(/([\d.,]+)\s*(kg|lbs)/i);
+    var p=exo.prescription;
+    if(!p||!p.objectif) return null;
+    var m=p.objectif.match(/([\d.,]+)\s*(kg|lbs)/i);
     if(!m) return null;
-    var reps = p.objectif.match(/(\d+)\s*\+?\s*reps/i);
-    return {charge: nb(m[1].replace(',', '.')),
-            unite:  m[2].toLowerCase(),
-            reps:   reps ? reps[1] : ''};
+    var r=p.objectif.match(/(\d+)\s*\+?\s*reps/i);
+    return {charge:+m[1].replace(',','.'), unite:m[2].toLowerCase(), reps:r?r[1]:''};
   }
   function uniteDe(exo){
-    var pr = prescrit(exo);
-    if(pr) return pr.unite;
-    var d = derniereDe(exo);
-    return (d && d.unite ? d.unite : 'KG').toLowerCase();
-  }
-  function chargeSuggeree(exo){
-    var pr = prescrit(exo);
-    if(pr) return pr.charge;
-    var d = derniereDe(exo);
-    if(!d) return '';
-    return nb(Math.max.apply(null, d.series.map(function(z){ return +z.charge; })));
+    var pr=prescrit(exo); if(pr) return pr.unite;
+    var d=derniereDe(exo);
+    return (d&&d.unite?d.unite:'KG').toLowerCase();
   }
   function texteDerniere(exo){
-    var d = derniereDe(exo);
+    var d=derniereDe(exo);
     if(!d) return 'Première fois';
-    var u = uniteDe(exo);
-    var parCharge = {};
-    d.series.forEach(function(z){
-      var c = nb(z.charge);
-      (parCharge[c] = parCharge[c] || []).push(z.reps);
-    });
-    return Object.keys(parCharge).map(function(c){
-      return c + ' ' + u + ' × ' + parCharge[c].join('·');
-    }).join('&nbsp; | &nbsp;');
+    var u=(d.unite||'KG').toLowerCase(), g={};
+    d.series.forEach(function(z){ var c=nb(z.charge); (g[c]=g[c]||[]).push(z.reps); });
+    return Object.keys(g).map(function(c){ return c+' '+u+' × '+g[c].join('·'); }).join('&nbsp; | &nbsp;');
   }
 
-  // ---------- la carte du coach ----------
-  // Chaque CAS de carnet.py dit comment la charge a été trouvée. Notion ne
-  // savait pas l'afficher, d'où les images ; ici on le rend en clair.
-  var CAS = {
-    1: {t:'Première fois',        d:'Aucun historique sur cet exercice. Cherche ta charge, monte progressivement.'},
-    2: {t:'Repère approximatif',  d:'Technique et fourchette de reps différentes la dernière fois : la charge est recalculée depuis ton 1RM estimé.'},
-    3: {t:'Même charge',          d:'Même fourchette de reps mais technique différente la dernière fois : on garde la charge.'},
-    4: {t:'Charge recalculée',    d:'Même technique mais tu étais hors de la fourchette de reps : la charge est recalculée depuis ton 1RM estimé.'},
-    5: {t:'Progression',          d:'Même technique et même fourchette que la dernière fois : on progresse normalement.'}
-  };
-
-  function blocCarte(exo){
-    var p = exo.prescription;
-    // Sans prescription du moteur, on retombe sur l'affichage simple.
-    if(!p){
-      return '<div class="consigne"><dl>'+
-        '<dt>Dernière</dt><dd>'+texteDerniere(exo)+'</dd>'+
-        '<dt>Objectif</dt><dd class="objectif">'+
-          (derniereDe(exo)&&exo.objectif?exo.objectif.replace(/(\d)\.00\b/g,'$1'):'Trouve ta charge')+
-        '</dd></dl></div>';
-    }
-    var test = (p.cas===1);
-    var h = '<div class="carte'+(test?' test':'')+'">';
-
-    if(p.technique || p.philosophie || p.schema_svg){
-      h += '<div class="carte-tete"><div class="txt">'+
-             (p.technique?'<div class="technique">'+esc(p.technique)+'</div>':'')+
-             (p.philosophie?'<div class="philo">'+esc(p.philosophie)+'</div>':'')+
-           '</div>'+
-           (p.schema_svg?'<div class="schema">'+p.schema_svg+
-              (p.schema_label?'<div class="lbl">'+esc(p.schema_label)+'</div>':'')+'</div>':'')+
-           '</div>';
-    }
-
-    h += '<dl>';
-    if(p.format)   h += '<dt>Format</dt><dd>'+esc(p.format)+'</dd>';
-    if(p.derniere) h += '<dt>Dernière</dt><dd>'+esc(p.derniere)+'</dd>';
-    else           h += '<dt>Dernière</dt><dd>'+texteDerniere(exo)+'</dd>';
-    h += '</dl>';
-
-    if(p.objectif){
-      // "37.5kg (83lbs) 8+ reps" -> valeur principale / équivalence / reps
-      var m = p.objectif.match(/^\s*([\d.,]+\s*(?:kg|lbs))\s*(\([^)]*\))?\s*(.*)$/i);
-      if(m){
-        // PYRAMID / TOPSET-BACKOFF : la charge monte ou redescend selon les séries.
-        var paliers = '';
-        (p.series_prescrites||[]).forEach(function(r){
-          if(r.role !== 'travail') paliers += '<div class="pal">'+esc(r.texte)+'</div>';
-        });
-        h += '<div class="charge"><span class="lab">Charge de travail</span>'+
-             (paliers?'<div class="paliers">'+paliers+'</div>':'')+
-             '<span class="val">'+esc(m[1].toUpperCase())+'</span>'+
-             (m[2]?'<span class="alt">'+esc(m[2])+'</span>':'')+
-             (m[3]?'<span class="alt">'+esc(m[3])+'</span>':'')+
-             '</div>';
-      }else{
-        // poids de corps ou première fois : pas de charge à annoncer
-        h += '<div class="charge"><span class="lab">Objectif</span>'+
-             '<span class="val" style="font-size:15px">'+esc(p.objectif)+'</span></div>';
-      }
-    }
-
-    var c = CAS[p.cas];
-    if(c) h += '<div class="cas-note"><b>'+c.t+'</b> · '+c.d+'</div>';
-    if(p.reminder) h += '<div class="cas-note"><b>Note</b> · '+esc(p.reminder)+'</div>';
-
-    return h + '</div>';
+  // ---------- base ----------
+  function appeler(f,args){
+    return fetch(API+f,{method:'POST',
+      headers:{'apikey':CLE_API,'Authorization':'Bearer '+CLE_API,'Content-Type':'application/json'},
+      body:JSON.stringify(args)})
+      .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+' '+t); }); return r.json(); });
   }
 
-  function blocOutils(prevu, i, exo){
-    var remplace = !!exo.remplace;
-    var h = '<div class="outils">';
-    if(remplace){
-      h += '<button class="outil retour" type="button" data-retour="'+i+'">↩ Revenir à '+esc(exo.remplace)+'</button>';
-    }
-    if(prevu.substituts && prevu.substituts.length){
-      h += '<button class="outil" type="button" data-subs="'+i+'">'+
-             (remplace?'Changer encore':'Faire un autre exercice')+' ▾</button>'+
-           '<div class="subs" id="subs-'+i+'">';
-      prevu.substituts.forEach(function(s, k){
-        var actif = (s.exercice_id === exo.exercice_id);
-        h += '<button class="sub'+(actif?' actif':'')+'" type="button" data-choisir="'+i+'" data-k="'+k+'">'+
-               (s.image?'<img loading="lazy" src="'+esc(s.image)+'" alt="">':'<img alt="">')+
-               '<span class="nom">'+esc(s.nom)+'</span>'+
-               '<span class="go">'+(actif?'en cours':'choisir')+'</span></button>';
-      });
-      h += '</div>';
-    }
-    h += '<button class="outil" type="button" data-hist="'+i+'">Voir tout mon historique →</button>';
-    return h + '</div>';
-  }
-
-  // ---------- chargement ----------
   if(!jeton){
     $('liste').innerHTML='<div class="msg"><h2>Lien incomplet</h2>'+
       '<p>Ouvre le lien personnel que ton coach t\'a envoyé : il se termine par un code après le #.</p></div>';
     return;
   }
 
-  // ---------- base de données ----------
-  var API = 'https://aghftupaybcffvtzibds.supabase.co/rest/v1/rpc/';
-  var CLE_API = 'sb_publishable_vqFJ7bgqNbAtXfFFkAeSTg_diGfjPjz';
-
-  function appeler(fonction, args){
-    return fetch(API + fonction, {
-      method: 'POST',
-      headers: {'apikey': CLE_API, 'Authorization': 'Bearer ' + CLE_API,
-                'Content-Type': 'application/json'},
-      body: JSON.stringify(args)
-    }).then(function(r){
-      if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ' ' + t); });
-      return r.json();
-    });
-  }
-
-  var cache = lire(CLE_DATA);
+  var cache=lire(CLE_DATA);
   if(cache){ DATA=cache; demarrer(); }
-
-  appeler('seance_eleve', {p_jeton: jeton})
-    .then(function(d){
-      var neuf = !DATA || DATA.semaine !== d.semaine;
-      DATA=d; ecrire(CLE_DATA,d);
-      document.body.classList.remove('offline');
-      demarrer();
-      viderFile();
-    })
-    .catch(function(e){
+  appeler('seance_eleve',{p_jeton:jeton})
+    .then(function(d){ DATA=d; ecrire(CLE_DATA,d); document.body.classList.remove('offline'); demarrer(); viderFile(); })
+    .catch(function(){
       if(DATA){ document.body.classList.add('offline'); return; }
       $('liste').innerHTML='<div class="msg"><h2>Séance introuvable</h2>'+
         '<p>Impossible de charger les données. Vérifie ta connexion, ou demande un nouveau lien à ton coach.</p></div>';
     });
 
-  // ---------- remontée des perfs (file d'attente si hors ligne) ----------
-  function envoyer(exoIdx){
-    var exo = exoCourant(exoIdx);
-    var faites = [];
-    for(var s=0; s<exo.series; s++){
-      var v = etat.sets[cle(jourActif, exoIdx, s)];
-      if(v) faites.push({charge: v.kg, reps: v.reps});
+  function envoyer(i){
+    var exo=exoCourant(i), faites=[];
+    for(var s=0;s<exo.series;s++){
+      var v=etat.sets[cle(jourActif,i,s)];
+      if(v) faites.push({charge:v.kg, reps:v.reps});
     }
-    var envoi = {
-      p_jeton:       jeton,
-      p_exercice_id: exo.exercice_id,
-      p_series:      faites,
-      p_unite:       uniteDe(exo).toUpperCase(),
-      p_rpe:         etat.rpe[jourActif + '-' + exoIdx] || null
-    };
     if(!faites.length) return;
-    appeler('enregistrer_perf', envoi).catch(function(){
-      var f = lire('seance-file-' + jeton) || [];
-      f = f.filter(function(x){ return x.p_exercice_id !== envoi.p_exercice_id; });
-      f.push(envoi); ecrire('seance-file-' + jeton, f);
+    var envoi={p_jeton:jeton, p_exercice_id:exo.exercice_id, p_series:faites,
+               p_unite:uniteChoisie(i).toUpperCase(), p_rpe:etat.rpe[jourActif+'-'+i]||null};
+    appeler('enregistrer_perf',envoi).catch(function(){
+      var f=lire('seance-file-'+jeton)||[];
+      f=f.filter(function(x){ return x.p_exercice_id!==envoi.p_exercice_id; });
+      f.push(envoi); ecrire('seance-file-'+jeton,f);
       document.body.classList.add('offline');
     });
   }
-
   function viderFile(){
-    var f = lire('seance-file-' + jeton) || [];
+    var f=lire('seance-file-'+jeton)||[];
     if(!f.length) return;
-    Promise.all(f.map(function(x){ return appeler('enregistrer_perf', x).catch(function(){}); }))
-      .then(function(){ ecrire('seance-file-' + jeton, []); });
+    Promise.all(f.map(function(x){ return appeler('enregistrer_perf',x).catch(function(){}); }))
+      .then(function(){ ecrire('seance-file-'+jeton,[]); });
   }
 
   function demarrer(){
-    var e = lire(CLE_ETAT);
-    if(e && e.semaine===DATA.semaine) etat=e; else etat={sets:{},rpe:{},debut:Date.now(),semaine:DATA.semaine};
+    var e=lire(CLE_ETAT);
+    if(e&&e.semaine===DATA.semaine) etat=e; else etat={sets:{},rpe:{},subs:{},unites:{},termine:{},debut:Date.now(),semaine:DATA.semaine};
+    etat.subs=etat.subs||{}; etat.unites=etat.unites||{}; etat.termine=etat.termine||{};
     etat.semaine=DATA.semaine;
     $('entete').hidden=false; $('pied').hidden=false;
     $('hSemaine').textContent='Semaine '+DATA.semaine+(DATA.intensity?' · '+DATA.intensity:'');
-    construireOnglets();
-    afficherJour(jourActif);
+    construireOnglets(); afficherJour(jourActif);
   }
   function sauver(){ ecrire(CLE_ETAT,etat); }
+  function verrouille(){ return !!etat.termine[jourActif]; }
 
   function construireOnglets(){
     var o=$('onglets'); o.innerHTML='';
@@ -603,47 +427,117 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var b=document.createElement('button');
       b.className='onglet'; b.type='button'; b.setAttribute('role','tab');
       b.setAttribute('aria-selected',String(idx===jourActif));
-      b.innerHTML='Day '+j.num+'<span class="pt" style="display:'+(jourComplet(idx)?'inline-block':'none')+'"></span>';
+      b.innerHTML='Day '+j.num+'<span class="pt" style="display:'+(etat.termine[idx]?'inline-block':'none')+'"></span>';
       b.addEventListener('click',function(){ jourActif=idx; construireOnglets(); afficherJour(idx); window.scrollTo(0,0); });
       o.appendChild(b);
     });
   }
-  function jourComplet(idx){
-    var j=DATA.jours[idx];
-    return j.exos.every(function(ex,i){
-      for(var s=0;s<ex.series;s++){ if(!etat.sets[cle(idx,i,s)]) return false; }
-      return true;
-    });
+
+  // ---------- carte du coach ----------
+  var CAS={
+    1:{t:'Première fois',       d:'Aucun historique sur cet exercice. Cherche ta charge, monte progressivement.'},
+    2:{t:'Repère approximatif', d:'Technique et fourchette de reps différentes la dernière fois : la charge est recalculée depuis ton 1RM estimé.'},
+    3:{t:'Même charge',         d:'Même fourchette de reps mais technique différente la dernière fois : on garde la charge.'},
+    4:{t:'Charge recalculée',   d:'Même technique mais tu étais hors de la fourchette de reps : la charge est recalculée depuis ton 1RM estimé.'},
+    5:{t:'Progression',         d:'Même technique et même fourchette que la dernière fois : on progresse normalement.'}
+  };
+  function blocCarte(exo){
+    var p=exo.prescription;
+    if(!p){
+      return '<div class="carte"><dl><dt>Dernière</dt><dd>'+texteDerniere(exo)+'</dd>'+
+             '<dt>Objectif</dt><dd class="objectif">Trouve ta charge</dd></dl></div>';
+    }
+    var h='<div class="carte'+(p.cas===1?' test':'')+'">';
+    if(p.technique||p.philosophie||p.schema_svg){
+      h+='<div class="carte-tete"><div class="txt">'+
+           (p.technique?'<div class="technique">'+esc(p.technique)+'</div>':'')+
+           (p.philosophie?'<div class="philo">'+esc(p.philosophie)+'</div>':'')+
+         '</div>'+
+         (p.schema_svg?'<div class="schema">'+p.schema_svg+
+            (p.schema_label?'<div class="lbl">'+esc(p.schema_label)+'</div>':'')+'</div>':'')+'</div>';
+    }
+    h+='<dl>';
+    if(p.format) h+='<dt>Format</dt><dd>'+esc(p.format)+'</dd>';
+    h+='<dt>Dernière</dt><dd>'+(p.derniere?esc(p.derniere):texteDerniere(exo))+'</dd></dl>';
+    if(p.objectif){
+      var m=p.objectif.match(/^\s*([\d.,]+\s*(?:kg|lbs))\s*(\([^)]*\))?\s*(.*)$/i);
+      if(m){
+        var pal='';
+        (p.series_prescrites||[]).forEach(function(r){
+          if(r.role!=='travail') pal+='<div class="pal">'+esc(r.texte)+'</div>';
+        });
+        h+='<div class="charge"><span class="lab">Charge de travail</span>'+
+           (pal?'<div class="paliers">'+pal+'</div>':'')+
+           '<span class="val">'+esc(m[1].toUpperCase())+'</span>'+
+           (m[2]?'<span class="alt">'+esc(m[2])+'</span>':'')+
+           (m[3]?'<span class="alt">'+esc(m[3])+'</span>':'')+'</div>';
+      }else{
+        h+='<div class="charge"><span class="lab">Objectif</span>'+
+           '<span class="val" style="font-size:15px">'+esc(p.objectif)+'</span></div>';
+      }
+    }
+    var c=CAS[p.cas];
+    if(c) h+='<div class="cas-note"><b>'+c.t+'</b> · '+c.d+'</div>';
+    if(p.reminder) h+='<div class="cas-note"><b>Note</b> · '+esc(p.reminder)+'</div>';
+    return h+'</div>';
+  }
+
+  function blocOutils(prevu,i,exo){
+    var h='<div class="outils">';
+    if(exo.remplace) h+='<button class="outil retour" type="button" data-retour="'+i+'">↩ Revenir à '+esc(exo.remplace)+'</button>';
+    if(prevu.substituts&&prevu.substituts.length){
+      h+='<button class="outil" type="button" data-subs="'+i+'">'+(exo.remplace?'Changer encore':'Faire un autre exercice')+' ▾</button>'+
+         '<div class="subs" id="subs-'+i+'">';
+      prevu.substituts.forEach(function(s,k){
+        var actif=(s.exercice_id===exo.exercice_id);
+        h+='<button class="sub'+(actif?' actif':'')+'" type="button" data-choisir="'+i+'" data-k="'+k+'">'+
+             (s.image?'<img loading="lazy" src="'+esc(s.image)+'" alt="">':'<img alt="">')+
+             '<span class="nom">'+esc(s.nom)+'</span><span class="go">'+(actif?'en cours':'choisir')+'</span></button>';
+      });
+      h+='</div>';
+    }
+    h+='<button class="outil" type="button" data-hist="'+i+'">Voir tout mon historique →</button></div>';
+    return h;
   }
 
   // ---------- rendu d'un jour ----------
   function afficherJour(idx){
     var j=DATA.jours[idx];
-    var nbSeries=j.exos.reduce(function(a,e){return a+e.series;},0);
+    var nbs=j.exos.reduce(function(a,e){return a+e.series;},0);
     $('hJour').textContent='Day '+j.num+' — '+j.titre;
-    $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' exercices · '+nbSeries+' séries';
+    $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' exercices · '+nbs+' séries';
 
     var html='';
+    if(etat.termine[idx]){
+      var t=etat.termine[idx];
+      html+='<div class="verrou"><span class="ok">✓</span><div class="txt">'+
+            '<div class="t">Séance terminée</div><div class="d">'+esc(t.libelle||'')+'</div></div>'+
+            '<button type="button" id="btnModifier">Modifier</button></div>';
+    }
+
     j.exos.forEach(function(prevu,i){
-      var exo = exoEffectif(prevu, idx, i);
-      var series='', un=uniteDe(exo), sug=chargeSuggeree(exo);
-      var repsCible=(prescrit(exo)||{}).reps||'';
+      var exo=exoEffectif(prevu,idx,i);
+      var un=uniteChoisie(i);
       var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
-      var ROLE={rampe:'montée', backoff:'back-off', travail:''};
+      var ROLE={rampe:'montée',backoff:'back-off',travail:''};
+      var series='';
       for(var s=0;s<exo.series;s++){
         var v=etat.sets[cle(idx,i,s)];
-        var cons=sp&&sp[s]?sp[s]:null;              // consigne propre à cette série
-        var chS=v?v.kg:(cons?nb(cons.charge):sug);
-        var unS=cons?cons.unite:un;
+        var cons=sp&&sp[s]?sp[s]:null;
         var rol=cons?(ROLE[cons.role]||''):'';
+        // volontairement VIDE : la charge n'est plus pré-remplie, elle est suggérée
         series+='<div class="serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
           '<span class="serie-num">S'+(s+1)+(rol?'<span class="serie-role">'+rol+'</span>':'')+'</span>'+
-          '<label class="champ"><input id="kg-'+i+'-'+s+'" inputmode="decimal" aria-label="Charge série '+(s+1)+'" value="'+(v?v.kg:chS)+'"><span class="unite">'+unS+'</span></label>'+
-          '<label class="champ"><input id="rp-'+i+'-'+s+'" inputmode="numeric" aria-label="Répétitions série '+(s+1)+'" value="'+(v?v.reps:repsCible)+'"><span class="unite">reps</span></label>'+
+          '<label class="champ"><input data-champ="kg" data-exo="'+i+'" data-serie="'+s+'" inputmode="decimal" '+
+            'placeholder="charge" aria-label="Charge série '+(s+1)+'" value="'+(v?v.kg:'')+'">'+
+            '<span class="unite">'+un+'</span></label>'+
+          '<label class="champ"><input data-champ="reps" data-exo="'+i+'" data-serie="'+s+'" inputmode="numeric" '+
+            'placeholder="reps" aria-label="Répétitions série '+(s+1)+'" value="'+(v?v.reps:'')+'">'+
+            '<span class="unite">reps</span></label>'+
           '<button class="valider" type="button" data-valide aria-label="Valider la série '+(s+1)+'">✓</button>'+
         '</div>';
       }
-      // RPE : carnet V2 uniquement (cycles). En V1 il n'existe pas.
+
       var rpe='';
       if(avecRPE()){
         rpe='<div class="rpe"><div class="rpe-label">RPE de l\'exercice</div><div class="rpe-choix">';
@@ -653,131 +547,158 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         rpe+='</div></div>';
       }
 
-      // Vignette : chargée seulement quand elle entre à l'écran (un GIF ≈ 600 Ko).
       var vignette = exo.image
         ? '<button class="vignette" type="button" data-gif="'+i+'" aria-label="Voir la démonstration de '+esc(exo.nom)+'">'+
-            '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt="">'+
-            '<span class="loupe-ic">⤢</span></button>'
+            '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
         : '<span class="vignette"><span class="vide">—</span></span>';
 
       html+='<article class="exo" id="exo-'+i+'">'+
         '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
           '<h2 class="exo-nom">'+esc(exo.nom)+'</h2><div class="meta">'+
             '<span class="tag">'+exo.series+' × '+exo.reps+'</span>'+
-            '<span class="tag">Repos '+fmt(exo.repos)+'</span>'+
-            (exo.technique?'<span class="tag tech">'+esc(exo.technique)+'</span>':'')+
+            '<button class="tag repos" type="button" data-repos="'+i+'">⏱ Repos '+fmt(exo.repos)+'</button>'+
+            '<span class="unite-bascule">'+
+              '<button type="button" data-unite="kg" data-exo="'+i+'" aria-pressed="'+(un==='kg')+'">KG</button>'+
+              '<button type="button" data-unite="lbs" data-exo="'+i+'" aria-pressed="'+(un==='lbs')+'">LBS</button>'+
+            '</span>'+
         '</div></div>'+vignette+'</div>'+
         (exo.remplace?'<div class="bandeau-sub">Remplace <b>'+esc(exo.remplace)+'</b> — tes séries seront enregistrées sur '+esc(exo.nom)+'.</div>':'')+
         blocCarte(exo)+
         '<div class="series">'+series+'</div>'+rpe+blocOutils(prevu,i,exo)+'</article>';
     });
+
     $('liste').innerHTML=html;
+    $('liste').classList.toggle('jour-verrouille',!!etat.termine[idx]);
+    var bm=$('btnModifier');
+    if(bm) bm.addEventListener('click',function(){ delete etat.termine[idx]; sauver(); afficherJour(idx); construireOnglets(); });
     majProgression();
   }
 
+  // ---------- aide à la saisie ----------
+  function fermerAide(){
+    var a=document.querySelector('.aide'); if(a) a.remove();
+  }
+  function ouvrirAide(input){
+    fermerAide();
+    if(verrouille()) return;
+    var i=+input.dataset.exo, s=+input.dataset.serie, type=input.dataset.champ;
+    var exo=exoCourant(i);
+    var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
+    var cons=sp&&sp[s]?sp[s]:null;
+    var valeurs=[], cible=null;
+
+    if(type==='kg'){
+      var un=uniteChoisie(i), pas=(un==='lbs')?5:2.5;
+      var base=cons?+cons.charge:((prescrit(exo)||{}).charge||0);
+      if(base&&uniteDe(exo)!==un) base=(un==='lbs')?versLbs(base):versKg(base);
+      if(!base){
+        var d=derniereDe(exo);
+        if(d) base=Math.max.apply(null,d.series.map(function(z){return +z.charge;}));
+      }
+      if(!base) return;
+      cible=base;
+      valeurs=[base-2*pas,base-pas,base,base+pas,base+2*pas].filter(function(v){return v>0;});
+    }else{
+      var r=(exo.reps||'').match(/(\d+)\s*-\s*(\d+)/);
+      var min=r?+r[1]:((prescrit(exo)||{}).reps||8), max=r?+r[2]:min+2;
+      cible=min;
+      for(var v=min;v<=max+2;v++) valeurs.push(v);
+      valeurs=valeurs.slice(0,6);
+    }
+
+    var html='';
+    valeurs.forEach(function(v){
+      html+='<button type="button" data-pose="'+v+'" class="'+(v===cible?'cible':'')+'">'+nb(v)+'</button>';
+    });
+    html+='<button type="button" data-toutes="1" class="toutes">= toutes les séries</button>';
+    var div=document.createElement('div');
+    div.className='aide'; div.dataset.exo=i; div.dataset.serie=s; div.dataset.type=type;
+    div.innerHTML=html;
+    input.closest('.serie').insertAdjacentElement('afterend',div);
+  }
+
+  function champ(i,s,type){
+    return document.querySelector('input[data-champ="'+type+'"][data-exo="'+i+'"][data-serie="'+s+'"]');
+  }
+
   // ---------- interactions ----------
+  $('liste').addEventListener('focusin',function(ev){
+    var inp=ev.target.closest('input[data-champ]');
+    if(inp) ouvrirAide(inp); else fermerAide();
+  });
+
   $('liste').addEventListener('click',function(ev){
+    var a=ev.target.closest('.aide button');
+    if(a){
+      var box=a.closest('.aide'), i=+box.dataset.exo, s=+box.dataset.serie, type=box.dataset.type;
+      var exo=exoCourant(i);
+      if(a.dataset.toutes){
+        var src=champ(i,s,type).value;
+        for(var k=0;k<exo.series;k++){ var c=champ(i,k,type); if(c) c.value=src; }
+      }else{
+        champ(i,s,type).value=a.dataset.pose;
+      }
+      fermerAide();
+      return;
+    }
+    var u=ev.target.closest('[data-unite]');
+    if(u){ changerUnite(+u.dataset.exo, u.dataset.unite); return; }
+    var rp=ev.target.closest('[data-repos]');
+    if(rp){ var e=exoCourant(+rp.dataset.repos); lancerRepos(e.repos, e.nom, 'Repos'); return; }
     var g=ev.target.closest('[data-gif]');
     if(g){ ouvrirLoupe(+g.dataset.gif); return; }
     var sb=ev.target.closest('[data-subs]');
-    if(sb){
-      var bloc=$('subs-'+sb.dataset.subs), ouvert=bloc.classList.toggle('ouvert');
-      sb.textContent='Faire un autre exercice '+(ouvert?'▴':'▾');
-      return;
-    }
+    if(sb){ var bl=$('subs-'+sb.dataset.subs), ouv=bl.classList.toggle('ouvert');
+            sb.textContent='Faire un autre exercice '+(ouv?'▴':'▾'); return; }
+    var ch=ev.target.closest('[data-choisir]');
+    if(ch){ basculerVers(+ch.dataset.choisir,+ch.dataset.k); return; }
+    var rt=ev.target.closest('[data-retour]');
+    if(rt){ basculerVers(+rt.dataset.retour,null); return; }
     var hb=ev.target.closest('[data-hist]');
     if(hb){ ouvrirHistorique(+hb.dataset.hist); return; }
-    var ch=ev.target.closest('[data-choisir]');
-    if(ch){ basculerVers(+ch.dataset.choisir, +ch.dataset.k); return; }
-    var rt=ev.target.closest('[data-retour]');
-    if(rt){ basculerVers(+rt.dataset.retour, null); return; }
     var b=ev.target.closest('[data-valide]');
     if(b){ validerSerie(b.closest('.serie')); return; }
     var r=ev.target.closest('[data-rpe]');
     if(r){
-      var k=jourActif+'-'+r.dataset.exo, v=+r.dataset.rpe;
-      etat.rpe[k]=(etat.rpe[k]===v?null:v); sauver();
-      [].forEach.call(r.parentNode.children,function(x){
-        x.setAttribute('aria-pressed',String(+x.dataset.rpe===etat.rpe[k]));
-      });
+      var k2=jourActif+'-'+r.dataset.exo, v2=+r.dataset.rpe;
+      etat.rpe[k2]=(etat.rpe[k2]===v2?null:v2); sauver();
+      [].forEach.call(r.parentNode.children,function(x){ x.setAttribute('aria-pressed',String(+x.dataset.rpe===etat.rpe[k2])); });
       envoyer(+r.dataset.exo);
     }
   });
 
+  function changerUnite(i,vers){
+    var c=jourActif+'-'+i, avant=uniteChoisie(i);
+    if(avant===vers) return;
+    etat.unites[c]=vers;
+    var exo=exoCourant(i);
+    // convertir ce qui est déjà saisi, validé ou non
+    for(var s=0;s<exo.series;s++){
+      var inp=champ(i,s,'kg');
+      if(inp&&inp.value){ inp.value=nb(vers==='lbs'?versLbs(+inp.value):versKg(+inp.value)); }
+      var k=cle(jourActif,i,s);
+      if(etat.sets[k]) etat.sets[k].kg = vers==='lbs'?versLbs(etat.sets[k].kg):versKg(etat.sets[k].kg);
+    }
+    sauver(); afficherJour(jourActif); envoyer(i);
+  }
+
   function validerSerie(ligne){
+    if(verrouille()) return;
     var i=+ligne.dataset.exo, s=+ligne.dataset.serie, k=cle(jourActif,i,s);
     var exo=exoCourant(i);
-    reveiller();
-    if(etat.sets[k]){
-      delete etat.sets[k]; ligne.classList.remove('ok');
-    }else{
-      var kg=parseFloat($('kg-'+i+'-'+s).value)||0;
-      var reps=parseInt($('rp-'+i+'-'+s).value,10)||0;
-      if(!reps){ $('rp-'+i+'-'+s).focus(); return; }
+    reveiller(); fermerAide();
+    if(etat.sets[k]){ delete etat.sets[k]; ligne.classList.remove('ok'); }
+    else{
+      var kg=parseFloat(champ(i,s,'kg').value)||0;
+      var reps=parseInt(champ(i,s,'reps').value,10)||0;
+      if(!reps){ champ(i,s,'reps').focus(); return; }
       etat.sets[k]={kg:kg,reps:reps};
       ligne.classList.add('ok');
       try{ if(navigator.vibrate) navigator.vibrate(35); }catch(e){}
-      var dernier=(s===exo.series-1);
-      lancerRepos(exo.repos, exo.nom, dernier?'Exercice suivant':'Série '+(s+2));
+      lancerRepos(exo.repos, exo.nom, (s===exo.series-1)?'Exercice suivant':'Série '+(s+2));
     }
-    sauver(); majProgression(); construireOnglets(); envoyer(i);
+    sauver(); majProgression(); envoyer(i);
   }
-
-  // ---------- basculer vers un exercice de remplacement ----------
-  function basculerVers(i, k){
-    var prevu = DATA.jours[jourActif].exos[i];
-    var c = jourActif + '-' + i;
-    etat.subs = etat.subs || {};
-
-    // Les séries déjà validées appartenaient à l'autre exercice : on repart propre.
-    for(var s=0; s<prevu.series; s++) delete etat.sets[cle(jourActif, i, s)];
-    delete etat.rpe[c];
-
-    if(k === null) delete etat.subs[c];
-    else etat.subs[c] = prevu.substituts[k];
-
-    sauver(); afficherJour(jourActif); construireOnglets();
-    var el = $('exo-'+i); if(el) el.scrollIntoView({block:'start'});
-  }
-
-  // ---------- historique complet d'un exercice ----------
-  function ouvrirHistorique(i){
-    var exo=exoCourant(i);
-    $('histNom').textContent=exo.nom;
-    $('histSt').textContent='Chargement…';
-    $('histListe').innerHTML='';
-    $('hist').hidden=false; window.scrollTo(0,0);
-    appeler('historique_exercice',
-            {p_jeton:jeton, p_exercice_id:exo.exercice_id, p_limite:15})
-      .then(function(rows){
-        if(!rows.length){ $('histSt').textContent='Aucune performance enregistrée.'; return; }
-        $('histSt').textContent=rows.length+' dernière(s) séance(s)';
-        $('histListe').innerHTML=rows.map(function(p){
-          var s=(p.series||[]).map(function(z){ return nb(z.charge)+'×'+z.reps; }).join(' · ');
-          var d=new Date(p.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
-          return '<div class="hligne"><span class="d">'+d+
-                 (p.rpe?' · RPE '+nb(p.rpe):'')+'</span><span class="s">'+esc(s)+
-                 ' <small>'+(p.unite||'').toLowerCase()+'</small>'+
-                 (p.technique?'<div class="t">'+esc(p.technique)+'</div>':'')+'</span></div>';
-        }).join('');
-      })
-      .catch(function(){ $('histSt').textContent='Historique indisponible hors ligne.'; });
-  }
-  $('histFermer').addEventListener('click',function(){ $('hist').hidden=true; });
-
-  // ---------- loupe : le GIF en grand ----------
-  function ouvrirLoupe(i){
-    var exo=exoCourant(i);
-    if(!exo.image) return;
-    // on recharge la même URL : l'image est déjà en cache et l'animation repart de zéro
-    $('loupeImg').src = exo.image;
-    $('loupeNom').textContent = exo.nom;
-    $('loupe').hidden = false;
-  }
-  $('loupe').addEventListener('click',function(){
-    $('loupe').hidden = true;
-    $('loupeImg').removeAttribute('src');   // libère la mémoire sur téléphone
-  });
 
   function majProgression(){
     var j=DATA.jours[jourActif];
@@ -788,61 +709,89 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var el=$('exo-'+i); if(el) el.classList.toggle('fait',n===exo.series);
     });
     $('hBarre').style.width=(total?faits/total*100:0)+'%';
-    $('btnTerminer').disabled=(faits===0);
+    var t=$('btnTerminer');
+    t.textContent = verrouille()?'Séance terminée — voir le bilan':'Terminer la séance';
+    t.classList.toggle('verrouille',verrouille());
   }
 
-  // ---------- minuteur ----------
+  function basculerVers(i,k){
+    if(verrouille()) return;
+    var prevu=DATA.jours[jourActif].exos[i], c=jourActif+'-'+i;
+    for(var s=0;s<prevu.series;s++) delete etat.sets[cle(jourActif,i,s)];
+    delete etat.rpe[c]; delete etat.unites[c];
+    if(k===null) delete etat.subs[c]; else etat.subs[c]=prevu.substituts[k];
+    sauver(); afficherJour(jourActif); construireOnglets();
+    var el=$('exo-'+i); if(el) el.scrollIntoView({block:'start'});
+  }
+
+  // ---------- historique ----------
+  function ouvrirHistorique(i){
+    var exo=exoCourant(i);
+    $('histNom').textContent=exo.nom; $('histSt').textContent='Chargement…'; $('histListe').innerHTML='';
+    $('hist').hidden=false; window.scrollTo(0,0);
+    appeler('historique_exercice',{p_jeton:jeton,p_exercice_id:exo.exercice_id,p_limite:15})
+      .then(function(rows){
+        if(!rows.length){ $('histSt').textContent='Aucune performance enregistrée.'; return; }
+        $('histSt').textContent=rows.length+' dernière(s) séance(s)';
+        $('histListe').innerHTML=rows.map(function(p){
+          var s=(p.series||[]).map(function(z){ return nb(z.charge)+'×'+z.reps; }).join(' · ');
+          var d=new Date(p.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+          return '<div class="hligne"><span class="d">'+d+(p.rpe?' · RPE '+nb(p.rpe):'')+'</span>'+
+                 '<span class="s">'+esc(s)+' <small>'+(p.unite||'').toLowerCase()+'</small>'+
+                 (p.technique?'<div class="t">'+esc(p.technique)+'</div>':'')+'</span></div>';
+        }).join('');
+      })
+      .catch(function(){ $('histSt').textContent='Historique indisponible hors ligne.'; });
+  }
+  $('histFermer').addEventListener('click',function(){ $('hist').hidden=true; });
+
+  // ---------- loupe ----------
+  function ouvrirLoupe(i){
+    var exo=exoCourant(i);
+    if(!exo.image) return;
+    $('loupeImg').src=exo.image; $('loupeNom').textContent=exo.nom; $('loupe').hidden=false;
+  }
+  $('loupe').addEventListener('click',function(){ $('loupe').hidden=true; $('loupeImg').removeAttribute('src'); });
+
+  // ---------- chrono flottant ----------
   var total=0, finAt=0, raf=null, fini=false, audio=null, verrou=null;
   function lancerRepos(sec,nom,suite){
-    if(!sec){ return; }
+    if(!sec) return;
     total=sec; finAt=Date.now()+sec*1000; fini=false;
-    $('mLabel').textContent=nom+' · '+suite;
-    $('minuteur').hidden=false; garderEcran(); boucle();
+    $('chNom').textContent=nom+(suite?' · '+suite:'');
+    $('chrono').hidden=false; $('chrono').classList.remove('fini');
+    garderEcran(); boucle();
   }
   function restant(){ return Math.max(0,finAt-Date.now()); }
-  function dessiner(){
-    var ms=restant();
-    $('mTemps').textContent=fmt(Math.ceil(ms/1000));
-    $('mJauge').setAttribute('stroke-dashoffset',String(CIRC*(1-(total>0?ms/(total*1000):0))));
-    $('mAnneau').classList.toggle('fini',fini);
-  }
   function boucle(){
-    dessiner();
-    if(restant()<=0){ if(!fini) finirRepos(); return; }
+    var ms=restant();
+    $('chTemps').textContent=fmt(Math.ceil(ms/1000));
+    $('chBarre').style.width=(total>0?(ms/(total*1000))*100:0)+'%';
+    if(ms<=0){ if(!fini){ fini=true; $('chrono').classList.add('fini'); sonner();
+      try{ if(navigator.vibrate) navigator.vibrate([220,110,220,110,400]); }catch(e){} } return; }
     raf=requestAnimationFrame(boucle);
   }
-  function finirRepos(){
-    fini=true; dessiner(); sonner();
-    try{ if(navigator.vibrate) navigator.vibrate([220,110,220,110,400]); }catch(e){}
-  }
-  function fermerRepos(){
-    $('minuteur').hidden=true; if(raf) cancelAnimationFrame(raf);
-    relacherEcran(); $('mEtat').textContent='';
-  }
-  $('mSkip').addEventListener('click',fermerRepos);
-  $('mPlus').addEventListener('click',function(){
+  function arreterRepos(){ $('chrono').hidden=true; if(raf) cancelAnimationFrame(raf); relacherEcran(); }
+  $('chStop').addEventListener('click',arreterRepos);
+  $('chPlus').addEventListener('click',function(){
     reveiller(); finAt+=15000; total=Math.max(total,Math.ceil(restant()/1000));
-    if(fini){ fini=false; boucle(); } else dessiner();
+    if(fini){ fini=false; $('chrono').classList.remove('fini'); } boucle();
   });
   document.addEventListener('visibilitychange',function(){
-    if(document.visibilityState==='visible' && !$('minuteur').hidden){
-      if(restant()<=0){ if(!fini) finirRepos(); } else { garderEcran(); boucle(); }
+    if(document.visibilityState==='visible' && !$('chrono').hidden){
+      if(restant()>0){ garderEcran(); boucle(); } else if(!fini){ fini=true; $('chrono').classList.add('fini'); }
     }
   });
-
   function reveiller(){
-    try{
-      if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)();
-      if(audio.state==='suspended') audio.resume();
-    }catch(e){}
+    try{ if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)();
+         if(audio.state==='suspended') audio.resume(); }catch(e){}
   }
   function sonner(){
     try{
       if(!audio) return;
       [0,0.42,0.84].forEach(function(t){
         var o=audio.createOscillator(), g=audio.createGain();
-        o.connect(g); g.connect(audio.destination);
-        o.frequency.value=880; o.type='sine';
+        o.connect(g); g.connect(audio.destination); o.frequency.value=880; o.type='sine';
         g.gain.setValueAtTime(0.0001,audio.currentTime+t);
         g.gain.exponentialRampToValueAtTime(0.32,audio.currentTime+t+0.02);
         g.gain.exponentialRampToValueAtTime(0.0001,audio.currentTime+t+0.32);
@@ -852,48 +801,48 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   }
   function garderEcran(){
     if(!('wakeLock' in navigator)) return;
-    navigator.wakeLock.request('screen').then(function(v){
-      verrou=v; $('mEtat').textContent='Écran maintenu allumé';
-      v.addEventListener('release',function(){ $('mEtat').textContent=''; });
-    }).catch(function(){});
+    navigator.wakeLock.request('screen').then(function(v){ verrou=v; }).catch(function(){});
   }
   function relacherEcran(){ if(verrou){ try{ verrou.release(); }catch(e){} verrou=null; } }
 
-  // ---------- bilan ----------
+  // ---------- terminer / bilan ----------
   $('btnTerminer').addEventListener('click',function(){
     var j=DATA.jours[jourActif], series=0, volume=0, recap='';
     j.exos.forEach(function(prevu,i){
-      var exo=exoCourant(i);
-      var li='', n=0;
+      var exo=exoCourant(i), li='', n=0, un=uniteChoisie(i);
       for(var s=0;s<exo.series;s++){
         var v=etat.sets[cle(jourActif,i,s)];
         if(!v) continue;
         n++; series++; volume+=v.kg*v.reps;
-        li+='<li><span>Série '+(s+1)+'</span><b>'+v.kg+' '+uniteDe(exo)+' × '+v.reps+'</b></li>';
+        li+='<li><span>Série '+(s+1)+'</span><b>'+v.kg+' '+un+' × '+v.reps+'</b></li>';
       }
       if(!n) return;
       var r=etat.rpe[jourActif+'-'+i];
-      recap+='<div class="recap"><h3>'+exo.nom+(r?' · RPE '+r:'')+'</h3><ul>'+li+'</ul></div>';
+      recap+='<div class="recap"><h3>'+esc(exo.nom)+(r?' · RPE '+r:'')+'</h3><ul>'+li+'</ul></div>';
     });
+    var total=j.exos.reduce(function(a,e){return a+e.series;},0);
+    if(!etat.termine[jourActif]){
+      etat.termine[jourActif]={quand:Date.now(),
+        libelle:series+' série'+(series>1?'s':'')+' sur '+total+' · '+new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long'})};
+      sauver(); construireOnglets(); afficherJour(jourActif);
+    }
     $('bSeries').textContent=series;
     $('bVolume').textContent=Math.round(volume).toLocaleString('fr-FR');
     $('bDuree').textContent=Math.max(1,Math.round((Date.now()-(etat.debut||Date.now()))/60000));
-    $('bRecap').innerHTML=recap;
+    $('bRecap').innerHTML=recap||'<p class="note">Aucune série enregistrée.</p>';
     $('bDate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
     $('bNote').textContent='Tes séries sont déjà enregistrées : ton coach les voit de son côté. '
-      + 'Si tu étais hors ligne, elles partiront dès que tu retrouveras du réseau.';
-    fermerRepos();
+      +'Si tu étais hors ligne, elles partiront dès que tu retrouveras du réseau.';
+    arreterRepos();
     $('bilan').hidden=false; window.scrollTo(0,0);
   });
   $('bFermer').addEventListener('click',function(){ $('bilan').hidden=true; });
 
-  window.addEventListener('online',function(){ document.body.classList.remove('offline'); });
+  window.addEventListener('online',function(){ document.body.classList.remove('offline'); viderFile(); });
   window.addEventListener('offline',function(){ document.body.classList.add('offline'); });
 
   if('serviceWorker' in navigator){
-    window.addEventListener('load',function(){
-      navigator.serviceWorker.register('sw.js').catch(function(){});
-    });
+    window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
   }
 })();
 </script>

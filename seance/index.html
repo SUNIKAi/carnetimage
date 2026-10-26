@@ -624,7 +624,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // ---------- interactions ----------
   $('liste').addEventListener('focusin',function(ev){
     var inp=ev.target.closest('input[data-champ]');
-    if(inp) ouvrirAide(inp); else fermerAide();
+    if(inp){ ouvrirAide(inp); return; }
+    // ne pas fermer quand le focus part DANS l'aide : sinon elle disparaît
+    // avant que le clic n'ait eu lieu, et le bouton ne sert à rien.
+    if(ev.target.closest('.aide')) return;
+    fermerAide();
+  });
+  // garde le champ actif pendant qu'on touche un bouton d'aide
+  $('liste').addEventListener('pointerdown',function(ev){
+    if(ev.target.closest('.aide')) ev.preventDefault();
   });
 
   $('liste').addEventListener('click',function(ev){

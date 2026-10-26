@@ -116,6 +116,11 @@ body{
 .charge .lab{font-size:9.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--rouge-vif);width:100%;}
 .charge .val{font-size:22px;font-weight:800;color:var(--rouge-vif);font-variant-numeric:tabular-nums;line-height:1.1;}
 .charge .alt{font-size:13px;color:var(--faible);font-weight:600;}
+.charge .paliers{width:100%;display:flex;flex-direction:column;gap:1px;margin:-2px 0 3px;}
+.charge .pal{font-size:12.5px;font-weight:600;color:var(--faible);font-variant-numeric:tabular-nums;}
+.serie-role{font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--tres-faible);display:block;margin-top:1px;}
+.serie.rampe .serie-role{color:var(--ambre);}
 .cas-note{
   font-size:10.5px;color:var(--faible);line-height:1.4;
   padding:8px 12px;border-top:1px solid var(--ligne);display:flex;gap:6px;
@@ -462,7 +467,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       // "37.5kg (83lbs) 8+ reps" -> valeur principale / équivalence / reps
       var m = p.objectif.match(/^\s*([\d.,]+\s*(?:kg|lbs))\s*(\([^)]*\))?\s*(.*)$/i);
       if(m){
+        // PYRAMID / TOPSET-BACKOFF : la charge monte ou redescend selon les séries.
+        var paliers = '';
+        (p.series_prescrites||[]).forEach(function(r){
+          if(r.role !== 'travail') paliers += '<div class="pal">'+esc(r.texte)+'</div>';
+        });
         h += '<div class="charge"><span class="lab">Charge de travail</span>'+
+             (paliers?'<div class="paliers">'+paliers+'</div>':'')+
              '<span class="val">'+esc(m[1].toUpperCase())+'</span>'+
              (m[2]?'<span class="alt">'+esc(m[2])+'</span>':'')+
              (m[3]?'<span class="alt">'+esc(m[3])+'</span>':'')+
@@ -617,11 +628,17 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var exo = exoEffectif(prevu, idx, i);
       var series='', un=uniteDe(exo), sug=chargeSuggeree(exo);
       var repsCible=(prescrit(exo)||{}).reps||'';
+      var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
+      var ROLE={rampe:'montée', backoff:'back-off', travail:''};
       for(var s=0;s<exo.series;s++){
         var v=etat.sets[cle(idx,i,s)];
-        series+='<div class="serie'+(v?' ok':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
-          '<span class="serie-num">S'+(s+1)+'</span>'+
-          '<label class="champ"><input id="kg-'+i+'-'+s+'" inputmode="decimal" aria-label="Charge série '+(s+1)+'" value="'+(v?v.kg:sug)+'"><span class="unite">'+un+'</span></label>'+
+        var cons=sp&&sp[s]?sp[s]:null;              // consigne propre à cette série
+        var chS=v?v.kg:(cons?nb(cons.charge):sug);
+        var unS=cons?cons.unite:un;
+        var rol=cons?(ROLE[cons.role]||''):'';
+        series+='<div class="serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
+          '<span class="serie-num">S'+(s+1)+(rol?'<span class="serie-role">'+rol+'</span>':'')+'</span>'+
+          '<label class="champ"><input id="kg-'+i+'-'+s+'" inputmode="decimal" aria-label="Charge série '+(s+1)+'" value="'+(v?v.kg:chS)+'"><span class="unite">'+unS+'</span></label>'+
           '<label class="champ"><input id="rp-'+i+'-'+s+'" inputmode="numeric" aria-label="Répétitions série '+(s+1)+'" value="'+(v?v.reps:repsCible)+'"><span class="unite">reps</span></label>'+
           '<button class="valider" type="button" data-valide aria-label="Valider la série '+(s+1)+'">✓</button>'+
         '</div>';

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Coach</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#121110">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Coach">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap">
+<style>
+:root{
+  --noir:#121110; --surface:#1B1917; --surface-haut:#252120; --ligne:#332E2B;
+  --rouge:#CC2200; --rouge-vif:#FF4A1F; --texte:#F4F0EC; --faible:#8B827B;
+  --tres-faible:#5E5751; --vert:#4A9B68; --ambre:#C8820A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--noir);color:var(--texte);
+  font-family:'Kanit',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-weight:400;font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:env(safe-area-inset-top,0px);
+  -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;}
+.page{max-width:560px;margin:0 auto;padding-bottom:40px;}
+
+.entete{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--noir);
+  padding-block:14px 11px;border-bottom:1px solid var(--ligne);margin-bottom:16px;}
+.fil{display:flex;align-items:center;gap:7px;margin-bottom:3px;}
+.pastille{width:6px;height:6px;border-radius:50%;background:var(--rouge);flex:none;}
+.sur{font-size:10px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--faible);}
+h1{font-size:24px;font-weight:800;margin:0;letter-spacing:-.3px;}
+.sous{font-size:12px;color:var(--faible);margin-top:2px;}
+
+/* ---------- liste des élèves ---------- */
+.eleve{width:100%;text-align:left;display:block;background:var(--surface);border:1px solid var(--ligne);
+  border-radius:12px;padding:12px 13px;margin-bottom:9px;font-family:inherit;color:var(--texte);cursor:pointer;}
+.eleve:active{background:var(--surface-haut);}
+.e-haut{display:flex;align-items:center;gap:9px;}
+.e-nom{font-size:16px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.badge{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border-radius:5px;
+  background:var(--surface-haut);color:var(--faible);flex:none;}
+.badge.online{color:var(--vert);background:rgba(74,155,104,.14);}
+.badge.template{color:var(--ambre);background:rgba(200,130,10,.14);}
+.e-bas{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;}
+.puce{font-size:11px;color:var(--faible);font-variant-numeric:tabular-nums;}
+.puce b{color:var(--texte);font-weight:600;}
+.alerte{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:3px 7px;
+  border-radius:5px;background:rgba(204,34,0,.16);color:var(--rouge-vif);}
+.alerte.douce{background:rgba(200,130,10,.14);color:var(--ambre);}
+.jauge{height:4px;background:var(--ligne);border-radius:3px;overflow:hidden;margin-top:9px;}
+.jauge span{display:block;height:100%;background:var(--rouge);width:0;}
+.jauge.plein span{background:var(--vert);}
+
+/* ---------- fiche élève ---------- */
+.fiche{position:fixed;inset:0;z-index:20;background:var(--noir);overflow-y:auto;
+  padding:0 max(16px,env(safe-area-inset-left,0px));}
+.fiche[hidden]{display:none!important;}
+.fiche-inner{max-width:560px;margin:0 auto;padding-block:22px;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));}
+.retour{background:none;border:none;color:var(--faible);font-family:inherit;font-size:12px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;padding:0 0 12px;cursor:pointer;}
+.f-nom{font-size:25px;font-weight:800;margin:0;}
+.f-sous{font-size:12px;color:var(--faible);margin:2px 0 16px;}
+.liens{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;}
+.lien{min-height:40px;display:inline-flex;align-items:center;padding:0 12px;border-radius:9px;
+  border:1px solid var(--ligne);background:var(--surface);color:var(--texte);font-family:inherit;
+  font-size:12px;font-weight:600;letter-spacing:.6px;cursor:pointer;text-decoration:none;}
+.lien:active{background:var(--surface-haut);}
+.jour-titre{font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--faible);
+  margin:18px 0 8px;display:flex;align-items:center;gap:8px;}
+.jour-titre .n{flex:1;min-width:0;}
+.ex{background:var(--surface);border:1px solid var(--ligne);border-radius:10px;padding:10px 12px;margin-bottom:7px;}
+.ex.faite{border-color:rgba(74,155,104,.4);}
+.ex-haut{display:flex;align-items:baseline;gap:8px;}
+.ex-nom{font-size:14.5px;font-weight:600;flex:1;min-width:0;}
+.ex-ch{font-size:14px;font-weight:800;color:var(--rouge-vif);font-variant-numeric:tabular-nums;flex:none;}
+.ex-bas{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;font-size:11.5px;color:var(--faible);font-variant-numeric:tabular-nums;}
+.ex-bas .tech{color:var(--ambre);}
+.perfs{margin-top:22px;}
+.pligne{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--ligne);}
+.pligne .g{min-width:0;}
+.pligne .d{font-size:10.5px;color:var(--tres-faible);}
+.pligne .e{font-size:13px;}
+.pligne .s{font-size:13px;font-variant-numeric:tabular-nums;text-align:right;color:var(--faible);}
+.msg{padding:50px 0;text-align:center;color:var(--faible);}
+.msg h2{font-size:18px;font-weight:600;color:var(--texte);margin:0 0 8px;}
+.msg p{margin:0 auto;max-width:320px;font-size:13.5px;line-height:1.6;}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  background:var(--surface-haut);border:1px solid var(--ligne);border-radius:9px;padding:9px 14px;
+  font-size:12.5px;z-index:30;box-shadow:0 6px 22px rgba(0,0,0,.5);}
+.toast[hidden]{display:none!important;}
+button:focus-visible{outline:2px solid var(--rouge-vif);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="entete" id="entete" hidden>
+    <div class="fil"><span class="pastille"></span><span class="sur" id="hSem"></span></div>
+    <h1>Mes élèves</h1>
+    <div class="sous" id="hSous"></div>
+  </header>
+  <main id="liste"><div class="msg"><h2>Chargement…</h2><p>Lecture de la base.</p></div></main>
+</div>
+
+<div class="fiche" id="fiche" hidden>
+  <div class="fiche-inner">
+    <button class="retour" id="retour" type="button">← Mes élèves</button>
+    <h2 class="f-nom" id="fNom"></h2>
+    <div class="f-sous" id="fSous"></div>
+    <div class="liens" id="fLiens"></div>
+    <div id="fProg"></div>
+    <div class="perfs" id="fPerfs"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  "use strict";
+  var API='https://aghftupaybcffvtzibds.supabase.co/rest/v1/rpc/';
+  var CLE='sb_publishable_vqFJ7bgqNbAtXfFFkAeSTg_diGfjPjz';
+  var BASE_SEANCE='https://sunikai.com/carnetimage/seance/#';
+
+  var jeton=(location.hash||'').replace(/[^A-Za-z0-9_-]/g,'');
+  try{
+    if(jeton) localStorage.setItem('coach-jeton',jeton);
+    else jeton=localStorage.getItem('coach-jeton')||'';
+  }catch(e){}
+
+  var DATA=null;
+  var $=function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function nb(x){ return (+x).toString(); }
+
+  function appeler(f,args){
+    return fetch(API+f,{method:'POST',
+      headers:{'apikey':CLE,'Authorization':'Bearer '+CLE,'Content-Type':'application/json'},
+      body:JSON.stringify(args)})
+      .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+' '+t); }); return r.json(); });
+  }
+
+  function toast(txt){
+    var t=$('toast'); t.textContent=txt; t.hidden=false;
+    clearTimeout(t._t); t._t=setTimeout(function(){ t.hidden=true; },2200);
+  }
+
+  function joursDepuis(d){
+    if(!d) return null;
+    return Math.floor((Date.now()-new Date(d+'T00:00:00').getTime())/86400000);
+  }
+
+  // ---------- liste ----------
+  function rendre(){
+    $('entete').hidden=false;
+    $('hSem').textContent='Semaine '+DATA.semaine+(DATA.intensity?' · '+DATA.intensity:'')+
+                          (DATA.technique?' · '+DATA.technique:'');
+    var actifs=DATA.eleves.filter(function(e){ return e.etat!=='ARCHIVE'; });
+    $('hSous').textContent=actifs.length+' élève'+(actifs.length>1?'s':'');
+
+    if(!DATA.eleves.length){
+      $('liste').innerHTML='<div class="msg"><h2>Aucun élève</h2><p>La base ne contient encore personne.</p></div>';
+      return;
+    }
+    $('liste').innerHTML=DATA.eleves.map(function(e){
+      var j=joursDepuis(e.derniere_seance);
+      var al='';
+      if(j===null) al='<span class="alerte">jamais entraîné</span>';
+      else if(j>=10) al='<span class="alerte">'+j+' jours sans séance</span>';
+      else if(j>=5) al='<span class="alerte douce">'+j+' jours</span>';
+      if(!e.programme) al+='<span class="alerte">aucun programme</span>';
+      var part=e.series_prevues?Math.min(100,Math.round(e.series_semaine/e.series_prevues*100)):0;
+      var cls=e.etat==='ONLINE'?'online':(e.etat==='TEMPLATE'?'template':'');
+      return '<button class="eleve" type="button" data-id="'+e.id+'">'+
+        '<div class="e-haut"><span class="e-nom">'+esc(e.nom)+'</span>'+
+          '<span class="badge '+cls+'">'+esc(e.etat||'')+'</span></div>'+
+        '<div class="e-bas">'+
+          '<span class="puce"><b>'+e.series_semaine+'</b>/'+e.series_prevues+' séries cette semaine</span>'+
+          (j!==null?'<span class="puce">· dernière il y a <b>'+j+'</b> j</span>':'')+
+          al+
+        '</div>'+
+        '<div class="jauge'+(part>=100?' plein':'')+'"><span style="width:'+part+'%"></span></div>'+
+      '</button>';
+    }).join('');
+  }
+
+  $('liste').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-id]');
+    if(b) ouvrirFiche(b.dataset.id);
+  });
+
+  // ---------- fiche ----------
+  function ouvrirFiche(id){
+    $('fiche').hidden=false; window.scrollTo(0,0);
+    $('fNom').textContent='…'; $('fSous').textContent=''; $('fProg').innerHTML='';
+    $('fPerfs').innerHTML=''; $('fLiens').innerHTML='';
+    appeler('eleve_detail',{p_jeton:jeton,p_eleve:id}).then(function(d){
+      $('fNom').textContent=d.nom;
+      $('fSous').textContent=[d.etat,d.planification,d.lang,d.programme||'aucun programme']
+        .filter(Boolean).join(' · ');
+
+      var lien=BASE_SEANCE+d.jeton;
+      $('fLiens').innerHTML=
+        '<a class="lien" href="'+esc(lien)+'" target="_blank" rel="noopener">Ouvrir sa séance ↗</a>'+
+        '<button class="lien" type="button" id="copier">Copier son lien</button>';
+      $('copier').addEventListener('click',function(){
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          navigator.clipboard.writeText(lien).then(function(){ toast('Lien copié'); })
+            .catch(function(){ toast(lien); });
+        }else toast(lien);
+      });
+
+      $('fProg').innerHTML=(d.jours||[]).map(function(j){
+        var faits=j.exos.filter(function(x){ return x.faite_semaine; }).length;
+        return '<div class="jour-titre"><span class="n">Day '+esc(j.num)+' — '+esc(j.titre||'')+'</span>'+
+               '<span>'+faits+'/'+j.exos.length+'</span></div>'+
+          j.exos.map(function(x){
+            var p=x.prescription||{};
+            var der=x.derniere&&x.derniere.series&&x.derniere.series.length
+              ? x.derniere.series.map(function(z){return nb(z.charge)+'×'+z.reps;}).join(' · ')+' '+(x.derniere.unite||'').toLowerCase()
+              : 'aucun historique';
+            return '<div class="ex'+(x.faite_semaine?' faite':'')+'">'+
+              '<div class="ex-haut"><span class="ex-nom">'+(x.faite_semaine?'✓ ':'')+esc(x.nom)+'</span>'+
+                (p.objectif?'<span class="ex-ch">'+esc(p.objectif.split(/\s*\(/)[0])+'</span>':'')+'</div>'+
+              '<div class="ex-bas">'+
+                '<span>'+x.series+' × '+esc((p.format||'').split(/\s+-\s+/)[0].replace(/^\d+\s*x\s*/i,'')||'?')+'</span>'+
+                (p.technique?'<span class="tech">'+esc(p.technique)+'</span>':'')+
+                '<span>'+esc(der)+'</span>'+
+              '</div></div>';
+          }).join('');
+      }).join('');
+
+      $('fPerfs').innerHTML='<div class="jour-titre">Dernières performances</div>'+
+        ((d.dernieres_perfs||[]).map(function(p){
+          var s=(p.series||[]).map(function(z){return nb(z.charge)+'×'+z.reps;}).join(' · ');
+          var dt=new Date(p.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+          return '<div class="pligne"><div class="g"><div class="e">'+esc(p.exercice)+'</div>'+
+                 '<div class="d">'+dt+(p.technique?' · '+esc(p.technique):'')+'</div></div>'+
+                 '<div class="s">'+esc(s)+' <small>'+(p.unite||'').toLowerCase()+'</small></div></div>';
+        }).join('') || '<div class="msg"><p>Aucune performance enregistrée.</p></div>');
+    }).catch(function(){
+      $('fNom').textContent='Erreur';
+      $('fSous').textContent='Impossible de charger cette fiche.';
+    });
+  }
+  $('retour').addEventListener('click',function(){ $('fiche').hidden=true; });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+
+  // ---------- chargement ----------
+  if(!jeton){
+    $('liste').innerHTML='<div class="msg"><h2>Lien incomplet</h2>'+
+      '<p>Ouvre le lien coach complet : il se termine par un code après le #.</p></div>';
+    return;
+  }
+  appeler('tableau_coach',{p_jeton:jeton}).then(function(d){ DATA=d; rendre(); })
+    .catch(function(e){
+      $('liste').innerHTML='<div class="msg"><h2>Accès refusé</h2>'+
+        '<p>Ce lien coach n\'est pas valide. Vérifie le code après le #.</p></div>';
+    });
+})();
+</script>
+</body>
+</html>

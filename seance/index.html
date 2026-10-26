@@ -376,16 +376,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     return;
   }
 
-  var cache=lire(CLE_DATA);
-  if(cache){ DATA=cache; demarrer(); }
-  appeler('seance_eleve',{p_jeton:jeton})
-    .then(function(d){ DATA=d; ecrire(CLE_DATA,d); document.body.classList.remove('offline'); demarrer(); viderFile(); })
-    .catch(function(){
-      if(DATA){ document.body.classList.add('offline'); return; }
-      $('liste').innerHTML='<div class="msg"><h2>Séance introuvable</h2>'+
-        '<p>Impossible de charger les données. Vérifie ta connexion, ou demande un nouveau lien à ton coach.</p></div>';
-    });
-
   function envoyer(i){
     var exo=exoCourant(i), faites=[];
     for(var s=0;s<exo.series;s++){
@@ -852,6 +842,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   if('serviceWorker' in navigator){
     window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
   }
+
+  // ---------- chargement ----------
+  // EN DERNIER : dessiner la page appelle des constantes déclarées plus haut
+  // (CAS, helpers). Lancer le rendu avant leur affectation casse tout.
+  var cache=lire(CLE_DATA);
+  if(cache){ DATA=cache; demarrer(); }
+  appeler('seance_eleve',{p_jeton:jeton})
+    .then(function(d){ DATA=d; ecrire(CLE_DATA,d); document.body.classList.remove('offline'); demarrer(); viderFile(); })
+    .catch(function(){
+      if(DATA){ document.body.classList.add('offline'); return; }
+      $('liste').innerHTML='<div class="msg"><h2>Séance introuvable</h2>'+
+        '<p>Impossible de charger les données. Vérifie ta connexion, ou demande un nouveau lien à ton coach.</p></div>';
+    });
 })();
 </script>
 </body>

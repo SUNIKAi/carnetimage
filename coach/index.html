@@ -212,7 +212,10 @@ button:focus-visible{outline:2px solid var(--rouge-vif);outline-offset:2px;}
   "use strict";
   var API='https://aghftupaybcffvtzibds.supabase.co/rest/v1/rpc/';
   var CLE='sb_publishable_vqFJ7bgqNbAtXfFFkAeSTg_diGfjPjz';
-  var BASE_SEANCE='https://sunikai.com/carnetimage/seance/#';
+  // le lien de l'eleve se deduit de l'adresse de CETTE page : l'application
+  // marche telle quelle sur n'importe quel hebergeur, sans rien reecrire.
+  var BASE_SEANCE=location.origin+
+    location.pathname.replace(/coach\/.*$/,'').replace(/\/?$/,'/')+'seance/#';
 
   var jeton=(location.hash||'').replace(/[^A-Za-z0-9_-]/g,'');
   try{

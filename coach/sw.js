@@ -1,7 +1,7 @@
 /* Service worker de l'application coach.
    Meme regle que cote eleve : la PAGE part du reseau d'abord, pour qu'une
    correction publiee arrive tout de suite ; le reste du cache d'abord. */
-var CACHE = 'coach-v1';
+var CACHE = 'coach-v2';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function(e){

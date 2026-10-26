@@ -459,7 +459,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     // 1. ce qu'on fait : technique + format, sur une ligne
     h+='<div class="c-haut">'+
          '<span class="c-tech">'+esc(p.technique||'')+'</span>'+
-         (p.format?'<span class="c-fmt">'+esc((p.format.split('-')[0]||'').trim())+'</span>':'')+
+         // "4 x 6-8 - 2min-2min30 rest" : couper sur le tiret ENTOURÉ d'espaces,
+         // sinon la fourchette de reps elle-même est tronquée.
+         (p.format?'<span class="c-fmt">'+esc(p.format.split(/\s+-\s+/)[0].trim())+'</span>':'')+
        '</div>';
 
     // 2. la charge, en grand

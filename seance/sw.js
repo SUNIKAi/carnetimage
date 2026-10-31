@@ -10,7 +10,7 @@
    Les appels a Supabase sont d'une autre origine : on les laisse passer sans
    y toucher (la page gere elle-meme sa file d'attente hors ligne). */
 
-var CACHE = 'seance-v3';
+var CACHE = 'seance-v4';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function(e){

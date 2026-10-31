@@ -150,6 +150,36 @@ body.chrono-actif .page{padding-bottom:104px;}
   text-transform:uppercase;color:var(--tres-faible);margin-bottom:2px;}
 .c-ligne .v{font-variant-numeric:tabular-nums;color:var(--texte);}
 
+/* ---------- abdos ----------
+   Un bloc court en fin de seance : la consigne de la semaine, les exercices
+   au choix, et une seule ligne a remplir. Il n'apparait que si le coach a
+   active les abdos pour cet eleve. */
+.abdo{margin:18px 14px 8px;border:1px solid var(--ligne);border-radius:12px;
+  background:var(--surface-haut);overflow:hidden;}
+.abdo-tete{padding:11px 12px;border-bottom:1px solid var(--ligne);}
+.abdo-sur{display:block;font-size:9.5px;font-weight:800;letter-spacing:1.6px;
+  text-transform:uppercase;color:var(--tres-faible);margin-bottom:3px;}
+.abdo-nom{font-size:14px;font-weight:800;letter-spacing:.4px;
+  text-transform:uppercase;color:var(--rouge-vif);}
+.abdo-consigne{margin:0;padding:10px 12px;font-size:12.5px;line-height:1.5;
+  color:var(--faible);border-bottom:1px solid var(--ligne);}
+.abdo-choix{display:flex;flex-wrap:wrap;gap:6px;padding:11px 12px;}
+.abdo-x{padding:7px 10px;border-radius:8px;border:1px solid var(--ligne);
+  background:var(--surface);color:var(--faible);font-family:inherit;
+  font-size:11.5px;font-weight:600;cursor:pointer;}
+.abdo-x[aria-pressed="true"]{background:rgba(204,34,0,.16);color:var(--rouge-vif);
+  border-color:var(--rouge);}
+.abdo-bas{display:flex;gap:7px;padding:0 12px 12px;}
+.abdo-bas input{flex:1;min-width:0;min-height:46px;background:var(--surface);
+  color:var(--texte);border:1px solid var(--ligne);border-radius:10px;
+  padding:0 12px;font-family:inherit;font-size:15px;}
+.abdo-bas input:focus{outline:none;border-color:var(--rouge);}
+.abdo-bas button{flex:none;min-height:46px;padding:0 16px;border-radius:10px;
+  border:none;background:var(--rouge);color:#fff;font-family:inherit;
+  font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  cursor:pointer;}
+.abdo.fait .abdo-nom::after{content:" ✓";color:var(--vert);}
+
 /* ---------- séries ---------- */
 .series{padding:0 14px 4px;display:flex;flex-direction:column;gap:6px;}
 .serie{display:flex;align-items:center;gap:7px;}
@@ -465,6 +495,34 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     });
   }
 
+  // ---------- abdos ----------
+  // ABDO est nul tant que le coach n'a pas active les abdos pour cet eleve :
+  // dans ce cas on ne dessine rien du tout, pas meme un bloc vide.
+  var ABDO=null, abdoChoix={};
+
+  function blocAbdo(jour){
+    if(!ABDO||!ABDO.training) return '';
+    var dejaFait=(ABDO.faits||{})[String(jour)]||null;
+    var choisi=abdoChoix[jour]||(dejaFait&&dejaFait.exercice_id)||'';
+    var puces=(ABDO.exercices||[]).map(function(x){
+      return '<button class="abdo-x" type="button" data-abdox="'+jour+':'+x.id+'" '+
+             'aria-pressed="'+(x.id===choisi)+'"'+
+             (x.reminder?' title="'+esc(x.reminder)+'"':'')+'>'+esc(x.nom)+'</button>';
+    }).join('');
+    return '<section class="abdo'+(dejaFait?' fait':'')+'">'+
+      '<div class="abdo-tete"><span class="abdo-sur">Abdos — 5 min</span>'+
+        '<span class="abdo-nom">'+esc(ABDO.training.nom||'')+'</span></div>'+
+      (ABDO.training.description
+        ? '<p class="abdo-consigne">'+esc(ABDO.training.description)+'</p>' : '')+
+      '<div class="abdo-choix">'+puces+'</div>'+
+      '<div class="abdo-bas">'+
+        '<input id="abdoPerf" inputmode="text" placeholder="ta performance" '+
+          'value="'+esc(dejaFait&&dejaFait.performance||'')+'">'+
+        '<button type="button" data-abdook="'+jour+'">'+
+          (dejaFait?'Modifier':'Noter')+'</button>'+
+      '</div></section>';
+  }
+
   // ---------- carte du coach ----------
   // L'eleve n'a pas besoin de savoir POURQUOI la charge a ete calculee ainsi :
   // il a besoin de la technique, du format, de l'objectif, et de ce qu'il a
@@ -616,6 +674,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         '<div class="series">'+series+'</div>'+rpe+blocOutils(prevu,i,exo)+'</article>';
     });
 
+    html+=blocAbdo(j.num);
+
     $('liste').innerHTML=html;
     $('liste').classList.toggle('jour-verrouille',!!etat.termine[idx]);
     var bm=$('btnModifier');
@@ -711,6 +771,33 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var box=$('detail-'+dt.dataset.detail), ouv=box.hidden;
       box.hidden=!ouv;
       dt.textContent=dt.textContent.replace(ouv?'▾':'▴', ouv?'▴':'▾');
+      return;
+    }
+    var ax=ev.target.closest('[data-abdox]');
+    if(ax){
+      var pa=ax.dataset.abdox.split(':');
+      abdoChoix[pa[0]]=pa[1];
+      var zone=ax.parentNode.querySelectorAll('[data-abdox]');
+      for(var k=0;k<zone.length;k++){
+        zone[k].setAttribute('aria-pressed', zone[k]===ax?'true':'false');
+      }
+      return;
+    }
+    var ao=ev.target.closest('[data-abdook]');
+    if(ao){
+      var jr=ao.dataset.abdook, exo=abdoChoix[jr];
+      var champ=$('abdoPerf'), perf=champ?champ.value.trim():'';
+      if(!exo){ toast('Choisis d\u2019abord un exercice'); return; }
+      ao.disabled=true;
+      appeler('enregistrer_abdo',{p_jeton:jeton,p_jour:+jr,
+                                  p_exercice_id:exo,p_performance:perf})
+        .then(function(){
+          ABDO.faits=ABDO.faits||{};
+          ABDO.faits[String(jr)]={exercice_id:exo,performance:perf};
+          ao.disabled=false; toast('Abdos notés');
+          afficherJour(jourActif);
+        })
+        .catch(function(){ ao.disabled=false; toast('Enregistrement impossible'); });
       return;
     }
     var u=ev.target.closest('[data-unite]');
@@ -924,6 +1011,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // (CAS, helpers). Lancer le rendu avant leur affectation casse tout.
   var cache=lire(CLE_DATA);
   if(cache){ DATA=cache; demarrer(); }
+  // le bloc abdo se charge a part : s'il echoue, la seance s'affiche quand meme
+  appeler('abdo_semaine',{p_jeton:jeton})
+    .then(function(a){ ABDO=a; if(DATA) afficherJour(jourActif); })
+    .catch(function(){});
+
   appeler('seance_eleve',{p_jeton:jeton})
     .then(function(d){ DATA=d; ecrire(CLE_DATA,d); document.body.classList.remove('offline'); demarrer(); viderFile(); })
     .catch(function(){

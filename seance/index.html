@@ -226,6 +226,17 @@ body.chrono-actif .page{padding-bottom:104px;}
 .sub.actif .go{color:var(--rouge-vif);}
 .bandeau-sub{margin:0 14px 10px;padding:7px 10px;border-radius:7px;background:rgba(200,130,10,.12);
   border-left:2px solid var(--ambre);font-size:11.5px;color:var(--ambre);}
+/* enchainement sans repos avec l'exercice du dessus */
+.bandeau-sup{margin:0 14px 10px;padding:7px 10px;border-radius:7px;
+  background:var(--surface-haut);border-left:2px solid var(--rouge-vif);
+  font-size:11.5px;color:var(--faible);}
+/* ROPE : conditionnement, rien a saisir */
+.rope-go{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;}
+.go-rope{appearance:none;width:100%;border:1px solid var(--rouge-vif);
+  background:rgba(204,34,0,.12);color:var(--texte);font-size:14.5px;font-weight:700;
+  padding:13px 16px;border-radius:9px;cursor:pointer;}
+.go-rope:active{background:rgba(204,34,0,.26);}
+.rope-note{margin:0;font-size:11.5px;color:var(--tres-faible);}
 
 /* ---------- vignette + loupe ---------- */
 .vignette{width:58px;height:58px;flex:none;border-radius:9px;overflow:hidden;border:1px solid var(--ligne);
@@ -416,6 +427,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     "abdo:PYRAMID 10 / TIME CAP 5min":"Pick one abs exercise; the second one will be mountain climbers.\nExample with floor crunches\nCrunch 1 rep\nMountain climbers 2 reps\nCrunch 2 reps\nMountain climbers 4 reps\nCrunch 3 reps\nMountain climbers 6 reps\nand so on up to 10 crunches\n\nTime cap 5 min: if you cannot finish before that, stop there.\nhttps://raw.githubusercontent.com/SUNIKAI/training-exercise-gifs/main/0630-mountain-climber.gif",
     "abdo:SINGLE SET":"Pick a hard or weighted exercise.\nDo as many reps as you can, to failure.\nWith no rest, go straight into as many floor leg raises as you can.\nWith no rest, finish with as many crunches as you can.\nDone.",
     // --- fin abdos
+    'Conditionnement':'Conditioning',
+    'Protocole':'Protocol',
+    'Consigne':'Instructions',
+    'Lancer le chrono':'Start the timer',
+    'Rien à saisir sur cet exercice.':'Nothing to log on this one.',
+    'Protocole à compléter dans la consigne.':'Protocol missing from the instructions.',
+    'Travail':'Work',
+    'En superset avec':'Superset with',
+    'on enchaîne sans repos.':'no rest in between.',
     'Carnet de séance':'Training sheet',
     'Chargement…':'Loading…',
     'Récupération de ta séance.':'Fetching your session.',
@@ -685,6 +705,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
          '<span class="v">'+esc(p.format)+'</span></div>';
     }
 
+    // 2bis. la consigne de l'exercice. Visible, et non repliee sous
+    // « historique » : quand elle existe, c'est le protocole lui-meme.
+    if(p.reminder){
+      h+='<div class="c-info"><span class="lbl">'+tr('Consigne')+'</span>'+
+         '<span class="v">'+esc(p.reminder)+'</span></div>';
+    }
+
     // 3. l'objectif : la charge en grand, puis le plan des séries en chiffres réels
     var obj='';
     var m=p.objectif?p.objectif.match(/^\s*([\d.,]+)\s*(kg|lbs)\s*(\(([^)]*)\))?\s*(.*)$/i):null;
@@ -710,11 +737,83 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     // 4. l'historique, replié
     var det='<div class="c-ligne"><b>'+tr('Dernière fois')+'</b><span class="v">'+
             (p.derniere?esc(p.derniere):texteDerniere(exo))+'</span></div>';
-    if(p.reminder) det+='<div class="c-ligne"><b>'+tr('Note')+'</b><span class="v">'+esc(p.reminder)+'</span></div>';
 
     h+='<button class="c-plus" type="button" data-detail="'+i+'">'+tr('Historique')+' ▾</button>'+
        '<div class="c-detail" id="detail-'+i+'" hidden>'+det+'</div>';
     return h+'</div>';
+  }
+
+  // ---------- ROPE : conditionnement, rien a saisir ----------
+  // Meme syntaxe que prescrire.py : « 2min/1min x5 », « 90s/30s x8 ».
+  // Elle vit dans la consigne de l exercice : c est le seul endroit a changer.
+  function estRope(exo){
+    var m=(exo.prescription&&exo.prescription.mode)||'';
+    return String(m).toUpperCase()==='ROPE'
+        || String(exo.type||'').toUpperCase()==='ROPE';
+  }
+  function secondes(txt){
+    var t=String(txt||'').toLowerCase().replace(/\s+/g,'');
+    var m=t.match(/^(\d+)(?:min|mn|m)(\d{1,2})$/);
+    if(m) return (+m[1])*60+(+m[2]);
+    m=t.match(/^(\d+(?:[.,]\d+)?)(min|mn|m|sec|s)?$/);
+    if(!m) return null;
+    var v=parseFloat(m[1].replace(',','.')), u=m[2]||'s';
+    return Math.round(v*(u.charAt(0)==='m'?60:1));
+  }
+  function protocoleRope(exo){
+    var src=(exo.prescription&&exo.prescription.reminder)||'';
+    var m=String(src).match(/^\s*([0-9a-z.,\s]+?)\s*\/\s*([0-9a-z.,\s]+?)\s*[x*]\s*(\d+)/i);
+    if(!m) return null;
+    var t=secondes(m[1]), r=secondes(m[2]), n=+m[3];
+    if(!t||r===null||!n) return null;
+    return {travail:t, repos:r, tours:n, fin:m[0].length};
+  }
+  function phasesRope(exo){
+    var p=protocoleRope(exo); if(!p) return [];
+    var out=[];
+    for(var k=1;k<=p.tours;k++){
+      out.push({sec:p.travail, libelle:tr('Travail')+' '+k+'/'+p.tours});
+      if(p.repos>0 && k<p.tours)
+        out.push({sec:p.repos, libelle:tr('Repos')+' '+k+'/'+p.tours});
+    }
+    return out;
+  }
+  function blocRope(exo,i){
+    var p=exo.prescription||{}, pr=protocoleRope(exo);
+    // le protocole est deja ecrit en clair dans « format » : on ne garde de
+    // la consigne que ce qu'elle ajoute
+    var reste=String(p.reminder||'');
+    reste=(pr?reste.slice(pr.fin):reste).trim();
+    var vignette = exo.image
+      ? '<button class="vignette" type="button" data-gif="'+i+'" aria-label="'+tr('Voir la démonstration de')+' '+esc(exo.nom)+'">'+
+          '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
+      : '<span class="vignette"><span class="vide">—</span></span>';
+    return '<article class="exo rope" id="exo-'+i+'">'+
+      '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
+        '<h2 class="exo-nom">'+esc(exo.nom)+'</h2>'+
+        '<div class="meta"><span class="tag">'+tr('Conditionnement')+'</span></div>'+
+      '</div>'+vignette+'</div>'+
+      '<div class="carte">'+
+        (p.format?'<div class="c-info"><span class="lbl">'+tr('Protocole')+'</span>'+
+                  '<span class="v">'+esc(p.format)+'</span></div>':'')+
+        (reste?'<div class="c-info"><span class="lbl">'+tr('Consigne')+'</span>'+
+               '<span class="v">'+esc(reste)+'</span></div>':'')+
+      '</div>'+
+      '<div class="rope-go">'+
+        (pr?'<button class="go-rope" type="button" data-rope="'+i+'">▶ '+tr('Lancer le chrono')+'</button>'
+           :'<p class="rope-note">'+tr('Protocole à compléter dans la consigne.')+'</p>')+
+        '<p class="rope-note">'+tr('Rien à saisir sur cet exercice.')+'</p>'+
+      '</div></article>';
+  }
+  // SUPERSET porte sur la LIGNE de programme : on lit donc le mode de
+  // l'exercice prevu, pas celui d'un eventuel substitut.
+  function blocSuperset(prevu,idx,i){
+    var m=(prevu.prescription&&prevu.prescription.mode)||'';
+    if(String(m).toUpperCase()!=='SUPERSET' || i===0) return '';
+    var av=DATA.jours[idx].exos[i-1];
+    var nom=av?exoEffectif(av,idx,i-1).nom:'';
+    return '<div class="bandeau-sup">⇄ '+tr('En superset avec')+
+           (nom?' <b>'+esc(nom)+'</b>':'')+' — '+tr('on enchaîne sans repos.')+'</div>';
   }
 
   function blocOutils(prevu,i,exo){
@@ -738,7 +837,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // ---------- rendu d'un jour ----------
   function afficherJour(idx){
     var j=DATA.jours[idx];
-    var nbs=j.exos.reduce(function(a,e){return a+e.series;},0);
+    var nbs=j.exos.reduce(function(a,e){return a+(estRope(e)?0:e.series);},0);
     $('hJour').textContent='Day '+j.num+' — '+j.titre;
     $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' '+tr('exercices')+
                            ' · '+nbs+' '+tr('séries');
@@ -753,6 +852,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
     j.exos.forEach(function(prevu,i){
       var exo=exoEffectif(prevu,idx,i);
+      if(estRope(exo)){ html+=blocRope(exo,i); return; }
       var un=uniteChoisie(i);
       var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
       var ROLE={rampe:tr('montée'),backoff:'back-off',travail:''};
@@ -799,6 +899,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             '</span>'+
         '</div></div>'+vignette+'</div>'+
         (exo.remplace?'<div class="bandeau-sub">'+tr('Remplace')+' <b>'+esc(exo.remplace)+'</b> '+tr('— tes séries seront enregistrées sur')+' '+esc(exo.nom)+'.</div>':'')+
+        blocSuperset(prevu,idx,i)+
         blocCarte(exo,i)+
         '<div class="series">'+series+'</div>'+rpe+blocOutils(prevu,i,exo)+'</article>';
     });
@@ -933,6 +1034,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(u){ changerUnite(+u.dataset.exo, u.dataset.unite); return; }
     var rp=ev.target.closest('[data-repos]');
     if(rp){ var e=exoCourant(+rp.dataset.repos); lancerRepos(e.repos, e.nom, tr('Repos')); return; }
+    var rc=ev.target.closest('[data-rope]');
+    if(rc){ var ex=exoCourant(+rc.dataset.rope);
+            lancerIntervalles(phasesRope(ex), ex.nom); return; }
     var g=ev.target.closest('[data-gif]');
     if(g){ ouvrirLoupe(+g.dataset.gif); return; }
     var sb=ev.target.closest('[data-subs]');
@@ -991,7 +1095,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
   function majProgression(){
     var j=DATA.jours[jourActif];
-    var total=j.exos.reduce(function(a,e){return a+e.series;},0), faits=0;
+    var total=j.exos.reduce(function(a,e){return a+(estRope(e)?0:e.series);},0), faits=0;
     j.exos.forEach(function(exo,i){
       var n=0;
       for(var s=0;s<exo.series;s++){ if(etat.sets[cle(jourActif,i,s)]){n++;faits++;} }
@@ -1045,7 +1149,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
   // ---------- chrono flottant ----------
   var total=0, finAt=0, raf=null, fini=false, audio=null, verrou=null;
-  function lancerRepos(sec,nom,suite){
+  // chrono a intervalles (ROPE) : les phases qui restent a enchainer
+  var file=[], nomSeq='';
+  function lancerRepos(sec,nom,suite){ file=[]; _chrono(sec,nom,suite); }
+  function lancerIntervalles(phases,nom){
+    if(!phases||!phases.length) return;
+    file=phases.slice(); nomSeq=nom; reveiller(); phaseSuivante();
+  }
+  function phaseSuivante(){
+    var p=file.shift();
+    if(p) _chrono(p.sec,nomSeq,p.libelle);
+  }
+  function _chrono(sec,nom,suite){
     if(!sec) return;
     total=sec; finAt=Date.now()+sec*1000; fini=false;
     $('chNom').textContent=nom+(suite?' · '+suite:'');
@@ -1059,10 +1174,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     $('chTemps').textContent=fmt(Math.ceil(ms/1000));
     $('chBarre').style.width=(total>0?(ms/(total*1000))*100:0)+'%';
     if(ms<=0){ if(!fini){ fini=true; $('chrono').classList.add('fini'); sonner();
-      try{ if(navigator.vibrate) navigator.vibrate([220,110,220,110,400]); }catch(e){} } return; }
+      try{ if(navigator.vibrate) navigator.vibrate([220,110,220,110,400]); }catch(e){} }
+      if(file.length) phaseSuivante();
+      return; }
     raf=requestAnimationFrame(boucle);
   }
-  function arreterRepos(){ $('chronoZone').hidden=true; document.body.classList.remove('chrono-actif');
+  function arreterRepos(){ file=[]; $('chronoZone').hidden=true; document.body.classList.remove('chrono-actif');
     if(raf) cancelAnimationFrame(raf); relacherEcran(); }
   $('chStop').addEventListener('click',arreterRepos);
   $('chPlus').addEventListener('click',function(){
@@ -1112,7 +1229,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var r=etat.rpe[jourActif+'-'+i];
       recap+='<div class="recap"><h3>'+esc(exo.nom)+(r?' · RPE '+r:'')+'</h3><ul>'+li+'</ul></div>';
     });
-    var total=j.exos.reduce(function(a,e){return a+e.series;},0);
+    var total=j.exos.reduce(function(a,e){return a+(estRope(e)?0:e.series);},0);
     if(!etat.termine[jourActif]){
       etat.termine[jourActif]={quand:Date.now(),
         libelle:series+' '+tr(series>1?'séries':'série')+' '+tr('sur')+' '+total+' · '+new Date().toLocaleDateString(LOC,{day:'2-digit',month:'long'})};

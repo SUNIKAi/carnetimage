@@ -311,11 +311,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     <div class="fil"><span class="pastille"></span><span class="semaine" id="hSemaine"></span></div>
     <h1 class="jour" id="hJour"></h1>
     <div class="sous-jour" id="hSous"></div>
-    <div class="hors-ligne">● Hors ligne — données en cache</div>
+    <div class="hors-ligne" id="hHorsLigne">● Hors ligne — données en cache</div>
     <div class="onglets" id="onglets" role="tablist"></div>
     <div class="barre"><span id="hBarre"></span></div>
   </header>
-  <main id="liste"><div class="msg"><h2>Chargement…</h2><p>Récupération de ta séance.</p></div></main>
+  <main id="liste"><div class="msg"><h2 id="mChargeT">Chargement…</h2><p id="mChargeP">Récupération de ta séance.</p></div></main>
   <div class="fin" id="fin" hidden>
     <button class="terminer" id="btnTerminer">Terminer la séance</button>
   </div>
@@ -345,17 +345,17 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 <div class="loupe" id="loupe" hidden>
   <img id="loupeImg" alt="">
   <div class="nom" id="loupeNom"></div>
-  <div class="fermer-ic">Touche pour fermer</div>
+  <div class="fermer-ic" id="loupeFermer">Touche pour fermer</div>
 </div>
 
 <div class="bilan" id="bilan" hidden>
   <div class="bilan-inner">
-    <h2>Séance terminée</h2>
+    <h2 id="bTitre">Séance terminée</h2>
     <div class="date" id="bDate"></div>
     <div class="chiffres">
-      <div class="chiffre"><b id="bSeries">0</b><span>Séries</span></div>
-      <div class="chiffre"><b id="bVolume">0</b><span>Tonnage</span></div>
-      <div class="chiffre"><b id="bDuree">0</b><span>Minutes</span></div>
+      <div class="chiffre"><b id="bSeries">0</b><span id="lbSeries">Séries</span></div>
+      <div class="chiffre"><b id="bVolume">0</b><span id="lbVolume">Tonnage</span></div>
+      <div class="chiffre"><b id="bDuree">0</b><span id="lbDuree">Minutes</span></div>
     </div>
     <div id="bRecap"></div>
     <p class="note" id="bNote"></p>
@@ -389,6 +389,133 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function nb(x){ return (+x).toString(); }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+
+  // ---------- langue ----------
+  // L'app est ecrite en francais ; l'anglais est une surcouche indexee par la
+  // phrase francaise. `eleve.lang` vient de `seance_eleve`, mais il arrive
+  // APRES le premier dessin : on devine donc au demarrage (langue du
+  // telephone, ou le choix retenu la derniere fois), puis le serveur tranche.
+  var TRAD_EN = {
+    // --- abdos : des DONNEES, d'ou des cles lues dans la base
+    "CHAISE ROMAINE":"ROMAN CHAIR",
+    "CRUNCH PDC":"BODYWEIGHT CRUNCH",
+    "CRUNCH POULIE HAUTE":"HIGH PULLEY CRUNCH",
+    "CRUNCH SWISS BALL":"SWISS BALL CRUNCH",
+    "CRUNCH SWISS BALL WEIGHTED":"WEIGHTED SWISS BALL CRUNCH",
+    "CRUNCH WEIGHTED":"WEIGHTED CRUNCH",
+    "MOUNTAIN CLIMBERS":"MOUNTAIN CLIMBERS",
+    "OBLIQUE CRUNCH":"OBLIQUE CRUNCH",
+    "RELEVE DE JAMBE":"LEG RAISE",
+    "RELEVE DE JAMBE INCLINE 45°":"INCLINE LEG RAISE 45°",
+    "REVERSE CRUNCH":"REVERSE CRUNCH",
+    "abdo:AMRAP 5 min":"As many reps as possible in 5 minutes. Every time you stop, rest 15 to 30 seconds.",
+    "abdo:EMOM 5min":"Pick one exercise from the list.\nDo a fixed number of reps at the top of every minute. The rest of the minute is your rest. Repeat several times during the week, on the same exercise or on another one.",
+    "abdo:FOR TIME 100 reps":"Pick one exercise and do 100 reps as fast as you can. Time cap: 5 minutes.",
+    "abdo:HEAVY ABS":"Pick one exercise, preferably a hard or weighted one, that lets you reach 10 to 30 reps per set.\nDo 3 sets at most, with a full minute of rest between sets.",
+    "abdo:PYRAMID 10 / TIME CAP 5min":"Pick one abs exercise; the second one will be mountain climbers.\nExample with floor crunches\nCrunch 1 rep\nMountain climbers 2 reps\nCrunch 2 reps\nMountain climbers 4 reps\nCrunch 3 reps\nMountain climbers 6 reps\nand so on up to 10 crunches\n\nTime cap 5 min: if you cannot finish before that, stop there.\nhttps://raw.githubusercontent.com/SUNIKAI/training-exercise-gifs/main/0630-mountain-climber.gif",
+    "abdo:SINGLE SET":"Pick a hard or weighted exercise.\nDo as many reps as you can, to failure.\nWith no rest, go straight into as many floor leg raises as you can.\nWith no rest, finish with as many crunches as you can.\nDone.",
+    // --- fin abdos
+    'Carnet de séance':'Training sheet',
+    'Chargement…':'Loading…',
+    'Récupération de ta séance.':'Fetching your session.',
+    'Terminer la séance':'Finish session',
+    'Séance terminée — voir le bilan':'Session done — see summary',
+    'Revenir à la séance':'Back to session',
+    'Touche pour fermer':'Tap to close',
+    'Séance terminée':'Session done',
+    'Séries':'Sets',
+    'Tonnage':'Volume',
+    'Minutes':'Minutes',
+    '● Hors ligne — données en cache':'● Offline — cached data',
+    'Semaine':'Week',
+    'Première fois':'First time',
+    'Lien incomplet':'Incomplete link',
+    "Ouvre le lien personnel que ton coach t'a envoyé : il se termine par un code après le #.":
+      'Open the personal link your coach sent you: it ends with a code after the #.',
+    'Abdos — 5 min':'Abs — 5 min',
+    'ta performance':'your result',
+    'Modifier':'Edit',
+    'Noter':'Log',
+    'Trouve ta charge':'Find your weight',
+    'Dernière':'Last',
+    'Technique':'Technique',
+    'Format':'Format',
+    'Objectif':'Goal',
+    'Dernière fois':'Last time',
+    'Note':'Note',
+    'Historique':'History',
+    'Revenir à':'Back to',
+    'Changer encore':'Change again',
+    'Faire un autre exercice':'Do another exercise',
+    'en cours':'current',
+    'choisir':'choose',
+    'Voir tout mon historique':'See my full history',
+    'exercices':'exercises',
+    'séries':'sets',
+    'série':'set',
+    'sur':'of',
+    'montée':'ramp',
+    'charge':'weight',
+    'Charge série':'Weight, set',
+    'Répétitions série':'Reps, set',
+    'Valider la série':'Confirm set',
+    "RPE de l'exercice":'Exercise RPE',
+    'Voir la démonstration de':'Watch the demo for',
+    'Repos':'Rest',
+    'Remplace':'Replaces',
+    '— tes séries seront enregistrées sur':'— your sets will be saved under',
+    '= toutes les séries':'= all sets',
+    "Choisis d\u2019abord un exercice":'Pick an exercise first',
+    'Abdos notés':'Abs logged',
+    'Enregistrement impossible':'Could not save',
+    'Exercice suivant':'Next exercise',
+    'Série':'Set',
+    'Aucune performance enregistrée.':'No performance recorded yet.',
+    'dernière(s) séance(s)':'recent session(s)',
+    'Historique indisponible hors ligne.':'History unavailable offline.',
+    'Aucune série enregistrée.':'No sets recorded.',
+    'Séance introuvable':'Session not found',
+    'Impossible de charger les données. Vérifie ta connexion, ou demande un nouveau lien à ton coach.':
+      'Could not load your data. Check your connection, or ask your coach for a new link.',
+    'Tes séries sont déjà enregistrées : ton coach les voit de son côté. ':
+      'Your sets are already saved — your coach can see them. ',
+    'Si tu étais hors ligne, elles partiront dès que tu retrouveras du réseau.':
+      'If you were offline, they will be sent as soon as you are back online.'
+  };
+  var LANG='FR', LOC='fr-FR';
+  // ?lang=en force la langue et l'emporte sur celle de la fiche : c'est ainsi
+  // que le coach regarde la page telle que la voit un eleve anglais.
+  var LANG_FORCEE=(/[?&]lang=(fr|en)/i.exec(location.search)||[])[1];
+  LANG_FORCEE = LANG_FORCEE ? LANG_FORCEE.toUpperCase() : null;
+  try{
+    LANG = LANG_FORCEE || localStorage.getItem('seance-lang')
+        || ((navigator.language||'').toLowerCase().indexOf('en')===0 ? 'EN' : 'FR');
+  }catch(e){ LANG = LANG_FORCEE || 'FR'; }
+  function tr(p){ return (LANG==='EN' && TRAD_EN[p]) ? TRAD_EN[p] : p; }
+  function trConsigne(t){
+    var k='abdo:'+(t.nom||'');
+    return (LANG==='EN' && TRAD_EN[k]) ? TRAD_EN[k] : t.description;
+  }
+  function fixerLangue(l){
+    if(LANG_FORCEE) l=LANG_FORCEE;
+    LANG=String(l||'FR').toUpperCase()==='EN'?'EN':'FR';
+    LOC=LANG==='EN'?'en-GB':'fr-FR';
+    try{ localStorage.setItem('seance-lang',LANG); }catch(e){}
+    habiller();
+  }
+  // les libelles qui vivent dans le HTML et non dans une fonction de rendu
+  function habiller(){
+    LOC=LANG==='EN'?'en-GB':'fr-FR';
+    document.documentElement.lang=LANG.toLowerCase();
+    document.title=tr('Carnet de séance');
+    [['mChargeT','Chargement…'],['mChargeP','Récupération de ta séance.'],
+     ['btnTerminer','Terminer la séance'],['histFermer','Revenir à la séance'],
+     ['bFermer','Revenir à la séance'],['loupeFermer','Touche pour fermer'],
+     ['bTitre','Séance terminée'],['lbSeries','Séries'],['lbVolume','Tonnage'],
+     ['lbDuree','Minutes'],['hHorsLigne','● Hors ligne — données en cache']
+    ].forEach(function(x){ var e=$(x[0]); if(e) e.textContent=tr(x[1]); });
+  }
 
   function avecRPE(){ return ((DATA&&DATA.planification)||'').toUpperCase().indexOf('CYCLE')>=0; }
 
@@ -428,7 +555,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   }
   function texteDerniere(exo){
     var d=derniereDe(exo);
-    if(!d) return 'Première fois';
+    if(!d) return tr('Première fois');
     var u=(d.unite||'KG').toLowerCase(), g={};
     d.series.forEach(function(z){ var c=nb(z.charge); (g[c]=g[c]||[]).push(z.reps); });
     return Object.keys(g).map(function(c){ return c+' '+u+' × '+g[c].join('·'); }).join('&nbsp; | &nbsp;');
@@ -443,8 +570,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   }
 
   if(!jeton){
-    $('liste').innerHTML='<div class="msg"><h2>Lien incomplet</h2>'+
-      '<p>Ouvre le lien personnel que ton coach t\'a envoyé : il se termine par un code après le #.</p></div>';
+    $('liste').innerHTML='<div class="msg"><h2>'+tr('Lien incomplet')+'</h2>'+
+      '<p>'+tr("Ouvre le lien personnel que ton coach t'a envoyé : il se termine par un code après le #.")+'</p></div>';
     return;
   }
 
@@ -476,8 +603,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(e&&e.semaine===DATA.semaine) etat=e; else etat={sets:{},rpe:{},subs:{},unites:{},termine:{},debut:Date.now(),semaine:DATA.semaine};
     etat.subs=etat.subs||{}; etat.unites=etat.unites||{}; etat.termine=etat.termine||{};
     etat.semaine=DATA.semaine;
+    fixerLangue(DATA.lang);      // le serveur tranche, pas le telephone
     $('entete').hidden=false; $('fin').hidden=false;
-    $('hSemaine').textContent='Semaine '+DATA.semaine+(DATA.intensity?' · '+DATA.intensity:'');
+    $('hSemaine').textContent=tr('Semaine')+' '+DATA.semaine+(DATA.intensity?' · '+DATA.intensity:'');
     construireOnglets(); afficherJour(jourActif);
   }
   function sauver(){ ecrire(CLE_ETAT,etat); }
@@ -507,19 +635,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var puces=(ABDO.exercices||[]).map(function(x){
       return '<button class="abdo-x" type="button" data-abdox="'+jour+':'+x.id+'" '+
              'aria-pressed="'+(x.id===choisi)+'"'+
-             (x.reminder?' title="'+esc(x.reminder)+'"':'')+'>'+esc(x.nom)+'</button>';
+             (x.reminder?' title="'+esc(x.reminder)+'"':'')+'>'+esc(tr(x.nom))+'</button>';
     }).join('');
     return '<section class="abdo'+(dejaFait?' fait':'')+'">'+
-      '<div class="abdo-tete"><span class="abdo-sur">Abdos — 5 min</span>'+
-        '<span class="abdo-nom">'+esc(ABDO.training.nom||'')+'</span></div>'+
+      '<div class="abdo-tete"><span class="abdo-sur">'+tr('Abdos — 5 min')+'</span>'+
+        '<span class="abdo-nom">'+esc(tr(ABDO.training.nom||''))+'</span></div>'+
       (ABDO.training.description
-        ? '<p class="abdo-consigne">'+esc(ABDO.training.description)+'</p>' : '')+
+        ? '<p class="abdo-consigne">'+esc(trConsigne(ABDO.training))+'</p>' : '')+
       '<div class="abdo-choix">'+puces+'</div>'+
       '<div class="abdo-bas">'+
-        '<input id="abdoPerf" inputmode="text" placeholder="ta performance" '+
+        '<input id="abdoPerf" inputmode="text" placeholder="'+tr('ta performance')+'" '+
           'value="'+esc(dejaFait&&dejaFait.performance||'')+'">'+
         '<button type="button" data-abdook="'+jour+'">'+
-          (dejaFait?'Modifier':'Noter')+'</button>'+
+          (dejaFait?tr('Modifier'):tr('Noter'))+'</button>'+
       '</div></section>';
   }
 
@@ -531,9 +659,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var p=exo.prescription;
     if(!p){
       return '<div class="carte"><div class="c-charge">'+
-             '<span class="c-val" style="font-size:19px">Trouve ta charge</span></div>'+
+             '<span class="c-val" style="font-size:19px">'+tr('Trouve ta charge')+'</span></div>'+
              '<div class="c-detail" style="padding-top:0"><div class="c-ligne">'+
-             '<b>Dernière</b><span class="v">'+texteDerniere(exo)+'</span></div></div></div>';
+             '<b>'+tr('Dernière')+'</b><span class="v">'+texteDerniere(exo)+'</span></div></div></div>';
     }
     var h='<div class="carte'+(p.cas===1?' test':'')+'">';
 
@@ -542,7 +670,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var depliable=!!(expli||p.schema_label);
     h+='<button class="c-tete'+(depliable?'':' fixe')+'" type="button"'+
          (depliable?' data-tech="'+i+'" aria-expanded="false"':' disabled')+'>'+
-         '<span class="c-tech">'+esc(p.technique||'Technique')+'</span>'+
+         '<span class="c-tech">'+esc(p.technique||tr('Technique'))+'</span>'+
          (depliable?'<span class="fl">▾</span>':'')+
          (p.schema_svg?'<span class="mini">'+p.schema_svg+'</span>':'')+
        '</button>';
@@ -553,7 +681,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
     // 2. le format, en entier et une seule fois
     if(p.format){
-      h+='<div class="c-info"><span class="lbl">Format</span>'+
+      h+='<div class="c-info"><span class="lbl">'+tr('Format')+'</span>'+
          '<span class="v">'+esc(p.format)+'</span></div>';
     }
 
@@ -575,35 +703,35 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       sp.forEach(function(r){
         chips+='<span class="chip'+(r.role!=='travail'?' rampe':'')+'">'+nb(r.charge)+'</span>';
       });
-      obj+='<div class="c-plan"><span class="lbl">Séries</span>'+chips+'</div>';
+      obj+='<div class="c-plan"><span class="lbl">'+tr('Séries')+'</span>'+chips+'</div>';
     }
-    if(obj) h+='<div class="c-info c-obj"><span class="lbl">Objectif</span>'+obj+'</div>';
+    if(obj) h+='<div class="c-info c-obj"><span class="lbl">'+tr('Objectif')+'</span>'+obj+'</div>';
 
     // 4. l'historique, replié
-    var det='<div class="c-ligne"><b>Dernière fois</b><span class="v">'+
+    var det='<div class="c-ligne"><b>'+tr('Dernière fois')+'</b><span class="v">'+
             (p.derniere?esc(p.derniere):texteDerniere(exo))+'</span></div>';
-    if(p.reminder) det+='<div class="c-ligne"><b>Note</b><span class="v">'+esc(p.reminder)+'</span></div>';
+    if(p.reminder) det+='<div class="c-ligne"><b>'+tr('Note')+'</b><span class="v">'+esc(p.reminder)+'</span></div>';
 
-    h+='<button class="c-plus" type="button" data-detail="'+i+'">Historique ▾</button>'+
+    h+='<button class="c-plus" type="button" data-detail="'+i+'">'+tr('Historique')+' ▾</button>'+
        '<div class="c-detail" id="detail-'+i+'" hidden>'+det+'</div>';
     return h+'</div>';
   }
 
   function blocOutils(prevu,i,exo){
     var h='<div class="outils">';
-    if(exo.remplace) h+='<button class="outil retour" type="button" data-retour="'+i+'">↩ Revenir à '+esc(exo.remplace)+'</button>';
+    if(exo.remplace) h+='<button class="outil retour" type="button" data-retour="'+i+'">↩ '+tr('Revenir à')+' '+esc(exo.remplace)+'</button>';
     if(prevu.substituts&&prevu.substituts.length){
-      h+='<button class="outil" type="button" data-subs="'+i+'">'+(exo.remplace?'Changer encore':'Faire un autre exercice')+' ▾</button>'+
+      h+='<button class="outil" type="button" data-subs="'+i+'">'+(exo.remplace?tr('Changer encore'):tr('Faire un autre exercice'))+' ▾</button>'+
          '<div class="subs" id="subs-'+i+'">';
       prevu.substituts.forEach(function(s,k){
         var actif=(s.exercice_id===exo.exercice_id);
         h+='<button class="sub'+(actif?' actif':'')+'" type="button" data-choisir="'+i+'" data-k="'+k+'">'+
              (s.image?'<img loading="lazy" src="'+esc(s.image)+'" alt="">':'<img alt="">')+
-             '<span class="nom">'+esc(s.nom)+'</span><span class="go">'+(actif?'en cours':'choisir')+'</span></button>';
+             '<span class="nom">'+esc(s.nom)+'</span><span class="go">'+(actif?tr('en cours'):tr('choisir'))+'</span></button>';
       });
       h+='</div>';
     }
-    h+='<button class="outil" type="button" data-hist="'+i+'">Voir tout mon historique →</button></div>';
+    h+='<button class="outil" type="button" data-hist="'+i+'">'+tr('Voir tout mon historique')+' →</button></div>';
     return h;
   }
 
@@ -612,21 +740,22 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var j=DATA.jours[idx];
     var nbs=j.exos.reduce(function(a,e){return a+e.series;},0);
     $('hJour').textContent='Day '+j.num+' — '+j.titre;
-    $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' exercices · '+nbs+' séries';
+    $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' '+tr('exercices')+
+                           ' · '+nbs+' '+tr('séries');
 
     var html='';
     if(etat.termine[idx]){
       var t=etat.termine[idx];
       html+='<div class="verrou"><span class="ok">✓</span><div class="txt">'+
-            '<div class="t">Séance terminée</div><div class="d">'+esc(t.libelle||'')+'</div></div>'+
-            '<button type="button" id="btnModifier">Modifier</button></div>';
+            '<div class="t">'+tr('Séance terminée')+'</div><div class="d">'+esc(t.libelle||'')+'</div></div>'+
+            '<button type="button" id="btnModifier">'+tr('Modifier')+'</button></div>';
     }
 
     j.exos.forEach(function(prevu,i){
       var exo=exoEffectif(prevu,idx,i);
       var un=uniteChoisie(i);
       var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
-      var ROLE={rampe:'montée',backoff:'back-off',travail:''};
+      var ROLE={rampe:tr('montée'),backoff:'back-off',travail:''};
       var series='';
       for(var s=0;s<exo.series;s++){
         var v=etat.sets[cle(idx,i,s)];
@@ -636,18 +765,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         series+='<div class="serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
           '<span class="serie-num">S'+(s+1)+(rol?'<span class="serie-role">'+rol+'</span>':'')+'</span>'+
           '<label class="champ"><input data-champ="kg" data-exo="'+i+'" data-serie="'+s+'" inputmode="decimal" '+
-            'placeholder="charge" aria-label="Charge série '+(s+1)+'" value="'+(v?v.kg:'')+'">'+
+            'placeholder="'+tr('charge')+'" aria-label="'+tr('Charge série')+' '+(s+1)+'" value="'+(v?v.kg:'')+'">'+
             '<span class="unite">'+un+'</span></label>'+
           '<label class="champ"><input data-champ="reps" data-exo="'+i+'" data-serie="'+s+'" inputmode="numeric" '+
-            'placeholder="reps" aria-label="Répétitions série '+(s+1)+'" value="'+(v?v.reps:'')+'">'+
+            'placeholder="reps" aria-label="'+tr('Répétitions série')+' '+(s+1)+'" value="'+(v?v.reps:'')+'">'+
             '<span class="unite">reps</span></label>'+
-          '<button class="valider" type="button" data-valide aria-label="Valider la série '+(s+1)+'">✓</button>'+
+          '<button class="valider" type="button" data-valide aria-label="'+tr('Valider la série')+' '+(s+1)+'">✓</button>'+
         '</div>';
       }
 
       var rpe='';
       if(avecRPE()){
-        rpe='<div class="rpe"><div class="rpe-label">RPE de l\'exercice</div><div class="rpe-choix">';
+        rpe='<div class="rpe"><div class="rpe-label">'+tr("RPE de l'exercice")+'</div><div class="rpe-choix">';
         [10,9,8,7,5].forEach(function(v){
           rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+i+'" aria-pressed="'+(etat.rpe[idx+'-'+i]===v)+'">'+v+'</button>';
         });
@@ -655,7 +784,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       }
 
       var vignette = exo.image
-        ? '<button class="vignette" type="button" data-gif="'+i+'" aria-label="Voir la démonstration de '+esc(exo.nom)+'">'+
+        ? '<button class="vignette" type="button" data-gif="'+i+'" aria-label="'+tr('Voir la démonstration de')+' '+esc(exo.nom)+'">'+
             '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
         : '<span class="vignette"><span class="vide">—</span></span>';
 
@@ -663,13 +792,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
           '<h2 class="exo-nom">'+esc(exo.nom)+'</h2><div class="meta">'+
             // le format est dans la carte, juste dessous : ne pas le répéter ici
-            '<button class="tag repos" type="button" data-repos="'+i+'">⏱ Repos '+fmt(exo.repos)+'</button>'+
+            '<button class="tag repos" type="button" data-repos="'+i+'">⏱ '+tr('Repos')+' '+fmt(exo.repos)+'</button>'+
             '<span class="unite-bascule">'+
               '<button type="button" data-unite="kg" data-exo="'+i+'" aria-pressed="'+(un==='kg')+'">KG</button>'+
               '<button type="button" data-unite="lbs" data-exo="'+i+'" aria-pressed="'+(un==='lbs')+'">LBS</button>'+
             '</span>'+
         '</div></div>'+vignette+'</div>'+
-        (exo.remplace?'<div class="bandeau-sub">Remplace <b>'+esc(exo.remplace)+'</b> — tes séries seront enregistrées sur '+esc(exo.nom)+'.</div>':'')+
+        (exo.remplace?'<div class="bandeau-sub">'+tr('Remplace')+' <b>'+esc(exo.remplace)+'</b> '+tr('— tes séries seront enregistrées sur')+' '+esc(exo.nom)+'.</div>':'')+
         blocCarte(exo,i)+
         '<div class="series">'+series+'</div>'+rpe+blocOutils(prevu,i,exo)+'</article>';
     });
@@ -719,7 +848,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     valeurs.forEach(function(v){
       html+='<button type="button" data-pose="'+v+'" class="'+(v===cible?'cible':'')+'">'+nb(v)+'</button>';
     });
-    html+='<button type="button" data-toutes="1" class="toutes">= toutes les séries</button>';
+    html+='<button type="button" data-toutes="1" class="toutes">'+tr('= toutes les séries')+'</button>';
     var div=document.createElement('div');
     div.className='aide'; div.dataset.exo=i; div.dataset.serie=s; div.dataset.type=type;
     div.innerHTML=html;
@@ -787,28 +916,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(ao){
       var jr=ao.dataset.abdook, exo=abdoChoix[jr];
       var champ=$('abdoPerf'), perf=champ?champ.value.trim():'';
-      if(!exo){ toast('Choisis d\u2019abord un exercice'); return; }
+      if(!exo){ toast(tr('Choisis d\u2019abord un exercice')); return; }
       ao.disabled=true;
       appeler('enregistrer_abdo',{p_jeton:jeton,p_jour:+jr,
                                   p_exercice_id:exo,p_performance:perf})
         .then(function(){
           ABDO.faits=ABDO.faits||{};
           ABDO.faits[String(jr)]={exercice_id:exo,performance:perf};
-          ao.disabled=false; toast('Abdos notés');
+          ao.disabled=false; toast(tr('Abdos notés'));
           afficherJour(jourActif);
         })
-        .catch(function(){ ao.disabled=false; toast('Enregistrement impossible'); });
+        .catch(function(){ ao.disabled=false; toast(tr('Enregistrement impossible')); });
       return;
     }
     var u=ev.target.closest('[data-unite]');
     if(u){ changerUnite(+u.dataset.exo, u.dataset.unite); return; }
     var rp=ev.target.closest('[data-repos]');
-    if(rp){ var e=exoCourant(+rp.dataset.repos); lancerRepos(e.repos, e.nom, 'Repos'); return; }
+    if(rp){ var e=exoCourant(+rp.dataset.repos); lancerRepos(e.repos, e.nom, tr('Repos')); return; }
     var g=ev.target.closest('[data-gif]');
     if(g){ ouvrirLoupe(+g.dataset.gif); return; }
     var sb=ev.target.closest('[data-subs]');
     if(sb){ var bl=$('subs-'+sb.dataset.subs), ouv=bl.classList.toggle('ouvert');
-            sb.textContent='Faire un autre exercice '+(ouv?'▴':'▾'); return; }
+            sb.textContent=tr('Faire un autre exercice')+' '+(ouv?'▴':'▾'); return; }
     var ch=ev.target.closest('[data-choisir]');
     if(ch){ basculerVers(+ch.dataset.choisir,+ch.dataset.k); return; }
     var rt=ev.target.closest('[data-retour]');
@@ -854,7 +983,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       etat.sets[k]={kg:kg,reps:reps};
       ligne.classList.add('ok');
       try{ if(navigator.vibrate) navigator.vibrate(35); }catch(e){}
-      lancerRepos(exo.repos, exo.nom, (s===exo.series-1)?'Exercice suivant':'Série '+(s+2));
+      lancerRepos(exo.repos, exo.nom, (s===exo.series-1)?tr('Exercice suivant')
+                                                 :tr('Série')+' '+(s+2));
     }
     sauver(); majProgression(); envoyer(i);
   }
@@ -869,7 +999,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     });
     $('hBarre').style.width=(total?faits/total*100:0)+'%';
     var t=$('btnTerminer');
-    t.textContent = verrouille()?'Séance terminée — voir le bilan':'Terminer la séance';
+    t.textContent = verrouille()?tr('Séance terminée — voir le bilan')
+                               :tr('Terminer la séance');
     t.classList.toggle('verrouille',verrouille());
   }
 
@@ -886,21 +1017,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // ---------- historique ----------
   function ouvrirHistorique(i){
     var exo=exoCourant(i);
-    $('histNom').textContent=exo.nom; $('histSt').textContent='Chargement…'; $('histListe').innerHTML='';
+    $('histNom').textContent=exo.nom; $('histSt').textContent=tr('Chargement…'); $('histListe').innerHTML='';
     $('hist').hidden=false; window.scrollTo(0,0);
     appeler('historique_exercice',{p_jeton:jeton,p_exercice_id:exo.exercice_id,p_limite:15})
       .then(function(rows){
-        if(!rows.length){ $('histSt').textContent='Aucune performance enregistrée.'; return; }
-        $('histSt').textContent=rows.length+' dernière(s) séance(s)';
+        if(!rows.length){ $('histSt').textContent=tr('Aucune performance enregistrée.'); return; }
+        $('histSt').textContent=rows.length+' '+tr('dernière(s) séance(s)');
         $('histListe').innerHTML=rows.map(function(p){
           var s=(p.series||[]).map(function(z){ return nb(z.charge)+'×'+z.reps; }).join(' · ');
-          var d=new Date(p.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+          var d=new Date(p.date).toLocaleDateString(LOC,{day:'2-digit',month:'short'});
           return '<div class="hligne"><span class="d">'+d+(p.rpe?' · RPE '+nb(p.rpe):'')+'</span>'+
                  '<span class="s">'+esc(s)+' <small>'+(p.unite||'').toLowerCase()+'</small>'+
                  (p.technique?'<div class="t">'+esc(p.technique)+'</div>':'')+'</span></div>';
         }).join('');
       })
-      .catch(function(){ $('histSt').textContent='Historique indisponible hors ligne.'; });
+      .catch(function(){ $('histSt').textContent=tr('Historique indisponible hors ligne.'); });
   }
   $('histFermer').addEventListener('click',function(){ $('hist').hidden=true; });
 
@@ -975,7 +1106,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         var v=etat.sets[cle(jourActif,i,s)];
         if(!v) continue;
         n++; series++; volume+=v.kg*v.reps;
-        li+='<li><span>Série '+(s+1)+'</span><b>'+v.kg+' '+un+' × '+v.reps+'</b></li>';
+        li+='<li><span>'+tr('Série')+' '+(s+1)+'</span><b>'+v.kg+' '+un+' × '+v.reps+'</b></li>';
       }
       if(!n) return;
       var r=etat.rpe[jourActif+'-'+i];
@@ -984,16 +1115,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var total=j.exos.reduce(function(a,e){return a+e.series;},0);
     if(!etat.termine[jourActif]){
       etat.termine[jourActif]={quand:Date.now(),
-        libelle:series+' série'+(series>1?'s':'')+' sur '+total+' · '+new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long'})};
+        libelle:series+' '+tr(series>1?'séries':'série')+' '+tr('sur')+' '+total+' · '+new Date().toLocaleDateString(LOC,{day:'2-digit',month:'long'})};
       sauver(); construireOnglets(); afficherJour(jourActif);
     }
     $('bSeries').textContent=series;
-    $('bVolume').textContent=Math.round(volume).toLocaleString('fr-FR');
+    $('bVolume').textContent=Math.round(volume).toLocaleString(LOC);
     $('bDuree').textContent=Math.max(1,Math.round((Date.now()-(etat.debut||Date.now()))/60000));
-    $('bRecap').innerHTML=recap||'<p class="note">Aucune série enregistrée.</p>';
-    $('bDate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-    $('bNote').textContent='Tes séries sont déjà enregistrées : ton coach les voit de son côté. '
-      +'Si tu étais hors ligne, elles partiront dès que tu retrouveras du réseau.';
+    $('bRecap').innerHTML=recap||'<p class="note">'+tr('Aucune série enregistrée.')+'</p>';
+    $('bDate').textContent=new Date().toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'});
+    $('bNote').textContent=tr('Tes séries sont déjà enregistrées : ton coach les voit de son côté. ')
+      +tr('Si tu étais hors ligne, elles partiront dès que tu retrouveras du réseau.');
     arreterRepos();
     $('bilan').hidden=false; window.scrollTo(0,0);
   });
@@ -1009,6 +1140,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // ---------- chargement ----------
   // EN DERNIER : dessiner la page appelle des constantes déclarées plus haut
   // (CAS, helpers). Lancer le rendu avant leur affectation casse tout.
+  habiller();          // la langue devinee, en attendant le serveur
   var cache=lire(CLE_DATA);
   if(cache){ DATA=cache; demarrer(); }
   // le bloc abdo se charge a part : s'il echoue, la seance s'affiche quand meme
@@ -1020,8 +1152,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     .then(function(d){ DATA=d; ecrire(CLE_DATA,d); document.body.classList.remove('offline'); demarrer(); viderFile(); })
     .catch(function(){
       if(DATA){ document.body.classList.add('offline'); return; }
-      $('liste').innerHTML='<div class="msg"><h2>Séance introuvable</h2>'+
-        '<p>Impossible de charger les données. Vérifie ta connexion, ou demande un nouveau lien à ton coach.</p></div>';
+      $('liste').innerHTML='<div class="msg"><h2>'+tr('Séance introuvable')+'</h2>'+
+        '<p>'+tr('Impossible de charger les données. Vérifie ta connexion, ou demande un nouveau lien à ton coach.')+'</p></div>';
     });
 })();
 </script>

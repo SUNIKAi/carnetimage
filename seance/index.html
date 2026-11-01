@@ -807,8 +807,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   }
   // SUPERSET porte sur la LIGNE de programme : on lit donc le mode de
   // l'exercice prevu, pas celui d'un eventuel substitut.
+  //
+  // `prevu.mode` vient de la ligne de programme et vaut par JOUR : c'est lui
+  // qui fait foi. Le mode de la prescription, lui, est par EXERCICE — il ne
+  // sert que de repli tant que seance_mode.sql n'est pas applique.
   function blocSuperset(prevu,idx,i){
-    var m=(prevu.prescription&&prevu.prescription.mode)||'';
+    var m=prevu.mode||(prevu.prescription&&prevu.prescription.mode)||'';
     if(String(m).toUpperCase()!=='SUPERSET' || i===0) return '';
     var av=DATA.jours[idx].exos[i-1];
     var nom=av?exoEffectif(av,idx,i-1).nom:'';

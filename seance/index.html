@@ -82,6 +82,8 @@ body.chrono-actif .page{padding-bottom:104px;}
 .tag.tech{color:var(--ambre);background:rgba(200,130,10,.12);}
 .tag.repos{cursor:pointer;border:1px solid var(--ligne);color:var(--texte);}
 .tag.repos:active{background:var(--ligne);}
+.pdc-tag{text-transform:uppercase;letter-spacing:.5px;}
+.serie.pdc .champ{flex:1;}
 .unite-bascule{display:inline-flex;border:1px solid var(--ligne);border-radius:5px;overflow:hidden;}
 .unite-bascule button{border:none;background:var(--surface-haut);color:var(--tres-faible);
   font-family:inherit;font-size:9.5px;font-weight:700;letter-spacing:1px;padding:3px 8px;cursor:pointer;min-height:22px;}
@@ -483,6 +485,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     "RPE de l'exercice":'Exercise RPE',
     'Voir la démonstration de':'Watch the demo for',
     'Repos':'Rest',
+    'poids du corps':'bodyweight',
+    'reps':'reps',
     'Remplace':'Replaces',
     '— tes séries seront enregistrées sur':'— your sets will be saved under',
     '= toutes les séries':'= all sets',
@@ -568,6 +572,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var r=p.objectif.match(/(\d+)\s*\+?\s*reps/i);
     return {charge:+m[1].replace(',','.'), unite:m[2].toLowerCase(), reps:r?r[1]:''};
   }
+  // Poids du corps : rien a peser, donc pas de champ de charge ni de bascule
+  // KG/LBS. Le type vient de `seance_eleve` ; a defaut on regarde l'unite de la
+  // derniere perf, que Notion ecrit « PDC ».
+  function estPDC(exo){
+    if(String(exo.type||'').toUpperCase()==='PDC') return true;
+    var d=exo.derniere;
+    return !!(d && String(d.unite||'').toUpperCase()==='PDC');
+  }
   function uniteDe(exo){
     var pr=prescrit(exo); if(pr) return pr.unite;
     var d=derniereDe(exo);
@@ -577,6 +589,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var d=derniereDe(exo);
     if(!d) return tr('Première fois');
     var u=(d.unite||'KG').toLowerCase(), g={};
+    // au poids du corps, « 0 kg × 15 » n'a aucun sens : on ne montre que les reps
+    if(estPDC(exo)) return d.series.map(function(z){ return z.reps; }).join(' · ')+' '+tr('reps');
     d.series.forEach(function(z){ var c=nb(z.charge); (g[c]=g[c]||[]).push(z.reps); });
     return Object.keys(g).map(function(c){ return c+' '+u+' × '+g[c].join('·'); }).join('&nbsp; | &nbsp;');
   }
@@ -859,6 +873,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       if(estRope(exo)){ html+=blocRope(exo,i); return; }
       var un=uniteChoisie(i);
       var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
+      var pdc=estPDC(exo);
       var ROLE={rampe:tr('montée'),backoff:'back-off',travail:''};
       var series='';
       for(var s=0;s<exo.series;s++){
@@ -866,11 +881,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         var cons=sp&&sp[s]?sp[s]:null;
         var rol=cons?(ROLE[cons.role]||''):'';
         // volontairement VIDE : la charge n'est plus pré-remplie, elle est suggérée
-        series+='<div class="serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
+        series+='<div class="serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+(pdc?' pdc':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
           '<span class="serie-num">S'+(s+1)+(rol?'<span class="serie-role">'+rol+'</span>':'')+'</span>'+
+          (pdc ? '' :
           '<label class="champ"><input data-champ="kg" data-exo="'+i+'" data-serie="'+s+'" inputmode="decimal" '+
             'placeholder="'+tr('charge')+'" aria-label="'+tr('Charge série')+' '+(s+1)+'" value="'+(v?v.kg:'')+'">'+
-            '<span class="unite">'+un+'</span></label>'+
+            '<span class="unite">'+un+'</span></label>')+
           '<label class="champ"><input data-champ="reps" data-exo="'+i+'" data-serie="'+s+'" inputmode="numeric" '+
             'placeholder="reps" aria-label="'+tr('Répétitions série')+' '+(s+1)+'" value="'+(v?v.reps:'')+'">'+
             '<span class="unite">reps</span></label>'+
@@ -897,10 +913,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
           '<h2 class="exo-nom">'+esc(exo.nom)+'</h2><div class="meta">'+
             // le format est dans la carte, juste dessous : ne pas le répéter ici
             '<button class="tag repos" type="button" data-repos="'+i+'">⏱ '+tr('Repos')+' '+fmt(exo.repos)+'</button>'+
+            (pdc ? '<span class="tag pdc-tag">'+tr('poids du corps')+'</span>' :
             '<span class="unite-bascule">'+
               '<button type="button" data-unite="kg" data-exo="'+i+'" aria-pressed="'+(un==='kg')+'">KG</button>'+
               '<button type="button" data-unite="lbs" data-exo="'+i+'" aria-pressed="'+(un==='lbs')+'">LBS</button>'+
-            '</span>'+
+            '</span>')+
         '</div></div>'+vignette+'</div>'+
         (exo.remplace?'<div class="bandeau-sub">'+tr('Remplace')+' <b>'+esc(exo.remplace)+'</b> '+tr('— tes séries seront enregistrées sur')+' '+esc(exo.nom)+'.</div>':'')+
         blocSuperset(prevu,idx,i)+
@@ -1085,7 +1102,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     reveiller(); fermerAide();
     if(etat.sets[k]){ delete etat.sets[k]; ligne.classList.remove('ok'); }
     else{
-      var kg=parseFloat(champ(i,s,'kg').value)||0;
+      // au poids du corps le champ n'existe pas : la charge vaut 0
+      var chKg=champ(i,s,'kg');
+      var kg=chKg?(parseFloat(chKg.value)||0):0;
       var reps=parseInt(champ(i,s,'reps').value,10)||0;
       if(!reps){ champ(i,s,'reps').focus(); return; }
       etat.sets[k]={kg:kg,reps:reps};
@@ -1227,7 +1246,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         var v=etat.sets[cle(jourActif,i,s)];
         if(!v) continue;
         n++; series++; volume+=v.kg*v.reps;
-        li+='<li><span>'+tr('Série')+' '+(s+1)+'</span><b>'+v.kg+' '+un+' × '+v.reps+'</b></li>';
+        li+='<li><span>'+tr('Série')+' '+(s+1)+'</span><b>'+
+            (estPDC(exo) ? v.reps+' '+tr('reps') : v.kg+' '+un+' × '+v.reps)+'</b></li>';
       }
       if(!n) return;
       var r=etat.rpe[jourActif+'-'+i];

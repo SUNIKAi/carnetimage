@@ -218,6 +218,9 @@ body.chrono-actif .page{padding-bottom:104px;}
 .outil.retour{border-color:var(--rouge);color:var(--rouge-vif);}
 .subs{display:none;flex-direction:column;gap:6px;margin-top:2px;}
 .subs.ouvert{display:flex;}
+/* la liste n'est plus plafonnee a 5 : jusqu'a 15 propositions. On borne la
+   HAUTEUR, pas le nombre, pour que la carte reste tenable sur un telephone. */
+.subs.ouvert{max-height:46vh;overflow-y:auto;}
 .sub{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;background:var(--noir);
   border:1px solid var(--ligne);width:100%;font-family:inherit;color:var(--texte);cursor:pointer;text-align:left;}
 .sub:active{background:var(--surface-haut);}

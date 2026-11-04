@@ -235,7 +235,7 @@ body.chrono-actif .page{padding-bottom:104px;}
 .bandeau-sup{margin:0 14px 10px;padding:7px 10px;border-radius:7px;
   background:var(--surface-haut);border-left:2px solid var(--rouge-vif);
   font-size:11.5px;color:var(--faible);}
-/* ROPE : conditionnement, rien a saisir */
+/* FORMATS FIXES (ROPE, PLIO) : rien a saisir */
 .rope-go{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;}
 .go-rope{appearance:none;width:100%;border:1px solid var(--rouge-vif);
   background:rgba(204,34,0,.12);color:var(--texte);font-size:14.5px;font-weight:700;
@@ -433,6 +433,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     "abdo:SINGLE SET":"Pick a hard or weighted exercise.\nDo as many reps as you can, to failure.\nWith no rest, go straight into as many floor leg raises as you can.\nWith no rest, finish with as many crunches as you can.\nDone.",
     // --- fin abdos
     'Conditionnement':'Conditioning',
+    'Pliométrie':'Plyometrics',
     'Protocole':'Protocol',
     'Consigne':'Instructions',
     'Lancer le chrono':'Start the timer',
@@ -768,6 +769,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     return String(m).toUpperCase()==='ROPE'
         || String(exo.type||'').toUpperCase()==='ROPE';
   }
+  // ---------- PLIO : format fixe, rien a saisir non plus ----------
+  // Meme principe que ROPE, en plus simple : pas de chrono a regler, la
+  // consigne de l'exercice EST la prescription (« 8 sauts le plus haut
+  // possible en alternant les jambes »).
+  function estPlio(exo){
+    var m=(exo.prescription&&exo.prescription.mode)||'';
+    return String(m).toUpperCase()==='PLIO'
+        || String(exo.type||'').toUpperCase()==='PLIO';
+  }
+  // Un format fixe ne compte pas dans les series du jour : il n'y a pas de
+  // serie a valider dessus.
+  function sansSaisie(exo){ return estRope(exo)||estPlio(exo); }
+
   function secondes(txt){
     var t=String(txt||'').toLowerCase().replace(/\s+/g,'');
     var m=t.match(/^(\d+)(?:min|mn|m)(\d{1,2})$/);
@@ -795,7 +809,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     }
     return out;
   }
-  function blocRope(exo,i){
+  // `prevu` est la ligne de programme : il porte les substituts et le nom
+  // d'origine. Sans lui, un format fixe choisi EN REMPLACEMENT n'aurait aucun
+  // bouton pour revenir en arriere.
+  function blocRope(exo,i,prevu){
     var p=exo.prescription||{}, pr=protocoleRope(exo);
     // le protocole est deja ecrit en clair dans « format » : on ne garde de
     // la consigne que ce qu'elle ajoute
@@ -820,8 +837,38 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         (pr?'<button class="go-rope" type="button" data-rope="'+i+'">▶ '+tr('Lancer le chrono')+'</button>'
            :'<p class="rope-note">'+tr('Protocole à compléter dans la consigne.')+'</p>')+
         '<p class="rope-note">'+tr('Rien à saisir sur cet exercice.')+'</p>'+
-      '</div></article>';
+      '</div>'+blocSortie(prevu,i,exo)+'</article>';
   }
+
+  // Le bandeau « Remplace X » et les outils (revenir, changer, historique),
+  // communs aux cartes de format fixe. `prevu` manque quand la carte n'est pas
+  // un remplacement : on ne dessine rien plutot que de supposer.
+  function blocSortie(prevu,i,exo){
+    if(!prevu) return '';
+    return (exo.remplace?'<div class="bandeau-sub">'+tr('Remplace')+' <b>'+
+              esc(exo.remplace)+'</b>.</div>':'')+
+           blocOutils(prevu,i,exo);
+  }
+  function blocPlio(exo,i,prevu){
+    var p=exo.prescription||{};
+    var consigne=String(p.format||p.reminder||'').trim();
+    var vignette = exo.image
+      ? '<button class="vignette" type="button" data-gif="'+i+'" aria-label="'+tr('Voir la démonstration de')+' '+esc(exo.nom)+'">'+
+          '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
+      : '<span class="vignette"><span class="vide">—</span></span>';
+    return '<article class="exo plio" id="exo-'+i+'">'+
+      '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
+        '<h2 class="exo-nom">'+esc(exo.nom)+'</h2>'+
+        '<div class="meta"><span class="tag">'+tr('Pliométrie')+'</span></div>'+
+      '</div>'+vignette+'</div>'+
+      (consigne?'<div class="carte">'+
+        '<div class="c-info"><span class="lbl">'+tr('Consigne')+'</span>'+
+        '<span class="v">'+esc(consigne)+'</span></div></div>':'')+
+      '<div class="rope-go">'+
+        '<p class="rope-note">'+tr('Rien à saisir sur cet exercice.')+'</p>'+
+      '</div>'+blocSortie(prevu,i,exo)+'</article>';
+  }
+
   // SUPERSET porte sur la LIGNE de programme : on lit donc le mode de
   // l'exercice prevu, pas celui d'un eventuel substitut.
   //
@@ -858,7 +905,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // ---------- rendu d'un jour ----------
   function afficherJour(idx){
     var j=DATA.jours[idx];
-    var nbs=j.exos.reduce(function(a,e){return a+(estRope(e)?0:e.series);},0);
+    var nbs=j.exos.reduce(function(a,e){return a+(sansSaisie(e)?0:e.series);},0);
     $('hJour').textContent='Day '+j.num+' — '+j.titre;
     $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' '+tr('exercices')+
                            ' · '+nbs+' '+tr('séries');
@@ -873,7 +920,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
     j.exos.forEach(function(prevu,i){
       var exo=exoEffectif(prevu,idx,i);
-      if(estRope(exo)){ html+=blocRope(exo,i); return; }
+      if(estRope(exo)){ html+=blocRope(exo,i,prevu); return; }
+      if(estPlio(exo)){ html+=blocPlio(exo,i,prevu); return; }
       var un=uniteChoisie(i);
       var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
       var pdc=estPDC(exo);
@@ -1121,7 +1169,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
   function majProgression(){
     var j=DATA.jours[jourActif];
-    var total=j.exos.reduce(function(a,e){return a+(estRope(e)?0:e.series);},0), faits=0;
+    var total=j.exos.reduce(function(a,e){return a+(sansSaisie(e)?0:e.series);},0), faits=0;
     j.exos.forEach(function(exo,i){
       var n=0;
       for(var s=0;s<exo.series;s++){ if(etat.sets[cle(jourActif,i,s)]){n++;faits++;} }
@@ -1256,7 +1304,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var r=etat.rpe[jourActif+'-'+i];
       recap+='<div class="recap"><h3>'+esc(exo.nom)+(r?' · RPE '+r:'')+'</h3><ul>'+li+'</ul></div>';
     });
-    var total=j.exos.reduce(function(a,e){return a+(estRope(e)?0:e.series);},0);
+    var total=j.exos.reduce(function(a,e){return a+(sansSaisie(e)?0:e.series);},0);
     if(!etat.termine[jourActif]){
       etat.termine[jourActif]={quand:Date.now(),
         libelle:series+' '+tr(series>1?'séries':'série')+' '+tr('sur')+' '+total+' · '+new Date().toLocaleDateString(LOC,{day:'2-digit',month:'long'})};

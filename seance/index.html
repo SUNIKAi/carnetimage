@@ -86,7 +86,34 @@ body.chrono-actif .page{padding-bottom:104px;}
 .serie.pdc .champ{flex:1;}
 .unite-bascule{display:inline-flex;border:1px solid var(--ligne);border-radius:5px;overflow:hidden;}
 .unite-bascule button{border:none;background:var(--surface-haut);color:var(--tres-faible);
-  font-family:inherit;font-size:9.5px;font-weight:700;letter-spacing:1px;padding:3px 8px;cursor:pointer;min-height:22px;}
+  font-family:inherit;font-size:13px;font-weight:800;letter-spacing:1px;padding:7px 16px;cursor:pointer;min-height:38px;}
+/* la bascule vit desormais DANS l'objectif, a cote de la charge */
+.c-obj .unite-bascule{align-self:center;margin-left:10px;}
+/* ---------- superset : les deux exercices dans un seul encadre ---------- */
+.duo{border:2px solid var(--rouge);border-radius:16px;padding:0 0 4px;margin:18px 0;
+  background:linear-gradient(180deg,rgba(204,34,0,.10),transparent 120px);}
+.duo .exo{margin:0 10px 10px;border-radius:12px;}
+.duo .exo:first-of-type{margin-top:4px;}
+.duo-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:11px 14px 9px;border-bottom:1px solid rgba(204,34,0,.28);}
+.duo-tag{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
+  color:#fff;background:var(--rouge);border-radius:6px;padding:4px 10px;}
+.duo-note{font-size:12px;font-weight:600;color:var(--faible);}
+.duo-exos{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px 10px;}
+.duo-exo{display:flex;align-items:center;gap:9px;min-width:0;flex:1;}
+.duo-exo img{width:52px;height:52px;object-fit:cover;border-radius:9px;
+  background:#fff;flex:none;}
+.duo-vide{width:52px;height:52px;border-radius:9px;background:var(--surface-haut);flex:none;}
+.duo-nom{font-size:13.5px;font-weight:700;color:var(--texte);line-height:1.25;}
+.duo-plus{font-size:22px;font-weight:800;color:var(--rouge-vif);flex:none;padding:0 2px;}
+.duo-ordre{font-size:9.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--tres-faible);display:block;}
+.serie-outils{display:flex;gap:8px;flex-wrap:wrap;padding:9px 0 2px;}
+.s-out{flex:1;min-width:130px;border:1px solid var(--ligne);border-radius:9px;
+  background:var(--surface-haut);color:var(--faible);font-family:inherit;font-size:12px;
+  font-weight:700;letter-spacing:.3px;padding:10px 8px;cursor:pointer;min-height:40px;}
+.s-out:hover{color:var(--texte);border-color:var(--rouge);}
+.jour-verrouille .serie-outils{display:none;}
 .unite-bascule button[aria-pressed="true"]{background:var(--rouge);color:#fff;}
 
 /* ---------- carte du coach ----------
@@ -402,6 +429,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function ecrire(c,v){ try{ localStorage.setItem(c,JSON.stringify(v)); }catch(e){} }
   function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
   function cle(j,i,s){ return j+'-'+i+'-'+s; }
+  // Series effectives = celles du programme + celles que l'eleve ajoute.
+  // TOUT ce qui compte des series passe par nbSeries() : la saisie, l'envoi,
+  // la progression et l'en-tete du jour.
+  function enPlus(j,i){ return (etat.enPlus||{})[j+'-'+i]||0; }
+  function nbSeries(j,i,exo){ return (exo.series||0)+enPlus(j,i); }
   function nb(x){ return (+x).toString(); }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -437,6 +469,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     'Protocole':'Protocol',
     'Consigne':'Instructions',
     'Lancer le chrono':'Start the timer',
+    'Tout marquer fait':'Mark all done',
+    'Superset':'Superset',
+    'on enchaîne sans reposer la charge':'go straight from one to the next',
+    'Isométrie':'Isometric hold',
+    'Ajouter une série':'Add a set',
+    'Retirer une série':'Remove a set',
+    'Rien à marquer : aucune répétition prévue.':'Nothing to mark: no reps planned.',
     'Rien à saisir sur cet exercice.':'Nothing to log on this one.',
     'Protocole à compléter dans la consigne.':'Protocol missing from the instructions.',
     'Travail':'Work',
@@ -551,6 +590,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // Arrondis pratiques en salle : 2,5 kg et 5 lbs.
   function versKg(v){ return Math.round(v*0.453592/2.5)*2.5; }
   function versLbs(v){ return Math.round(v*2.20462/5)*5; }
+  // Convertit une charge d'une unite vers une autre. Sert partout : objectif,
+  // plan des series, champs de saisie. Sans elle, la bascule ne changeait que
+  // les champs et l'objectif restait dans son unite d'origine.
+  function conv(v,de,vers){
+    de=String(de||'').toLowerCase(); vers=String(vers||'').toLowerCase();
+    if(!v||de===vers) return +v||0;
+    return vers==='lbs'?versLbs(+v):versKg(+v);
+  }
   function uniteChoisie(i){
     var u=etat.unites[jourActif+'-'+i];
     return u || uniteDe(exoCourant(i));
@@ -615,7 +662,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
   function envoyer(i){
     var exo=exoCourant(i), faites=[];
-    for(var s=0;s<exo.series;s++){
+    for(var s=0;s<nbSeries(jourActif,i,exo);s++){
       var v=etat.sets[cle(jourActif,i,s)];
       if(v) faites.push({charge:v.kg, reps:v.reps});
     }
@@ -640,6 +687,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var e=lire(CLE_ETAT);
     if(e&&e.semaine===DATA.semaine) etat=e; else etat={sets:{},rpe:{},subs:{},unites:{},termine:{},debut:Date.now(),semaine:DATA.semaine};
     etat.subs=etat.subs||{}; etat.unites=etat.unites||{}; etat.termine=etat.termine||{};
+    etat.enPlus=etat.enPlus||{};
     etat.semaine=DATA.semaine;
     fixerLangue(DATA.lang);      // le serveur tranche, pas le telephone
     $('entete').hidden=false; $('fin').hidden=false;
@@ -695,9 +743,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // fait la derniere fois. Le reste etait du bruit.
   function blocCarte(exo,i){
     var p=exo.prescription;
+    // L'unite choisie commande TOUT l'affichage des charges : l'objectif, le
+    // plan des series et les champs. Avant, la bascule ne touchait que les
+    // champs et l'objectif restait dans son unite d'origine.
+    var unCarte=uniteChoisie(i), pdcCarte=estPDC(exo);
+    var bascule = pdcCarte ? '' :
+      '<span class="unite-bascule">'+
+        '<button type="button" data-unite="kg" data-exo="'+i+'" aria-pressed="'+(unCarte==='kg')+'">KG</button>'+
+        '<button type="button" data-unite="lbs" data-exo="'+i+'" aria-pressed="'+(unCarte==='lbs')+'">LBS</button>'+
+      '</span>';
     if(!p){
       return '<div class="carte"><div class="c-charge">'+
-             '<span class="c-val" style="font-size:19px">'+tr('Trouve ta charge')+'</span></div>'+
+             '<span class="c-val" style="font-size:19px">'+tr('Trouve ta charge')+'</span>'+bascule+'</div>'+
              '<div class="c-detail" style="padding-top:0"><div class="c-ligne">'+
              '<b>'+tr('Dernière')+'</b><span class="v">'+texteDerniere(exo)+'</span></div></div></div>';
     }
@@ -734,19 +791,26 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var obj='';
     var m=p.objectif?p.objectif.match(/^\s*([\d.,]+)\s*(kg|lbs)\s*(\(([^)]*)\))?\s*(.*)$/i):null;
     if(m){
+      // la charge est reecrite dans l'unite choisie, et l'autre unite reste
+      // affichee en petit a cote : on ne perd jamais l'equivalence
+      var uSrc=m[2].toLowerCase(), vSrc=+String(m[1]).replace(',','.');
+      var vAff=conv(vSrc,uSrc,unCarte);
+      var autre=(unCarte==='lbs')?'kg':'lbs';
       obj+='<div class="c-charge">'+
-             '<span class="c-val">'+esc(m[1])+'<span class="u">'+esc(m[2].toLowerCase())+'</span></span>'+
-             (m[4]?'<span class="c-alt">'+esc(m[4])+'</span>':'')+
+             '<span class="c-val">'+esc(nb(vAff))+'<span class="u">'+esc(unCarte)+'</span></span>'+
+             '<span class="c-alt">'+esc(nb(conv(vSrc,uSrc,autre))+autre)+'</span>'+
              (m[5]?'<span class="c-reps">'+esc(m[5])+'</span>':'')+
+             bascule+
            '</div>';
     }else if(p.objectif){
-      obj+='<div class="c-charge"><span class="c-val" style="font-size:19px">'+esc(p.objectif)+'</span></div>';
+      obj+='<div class="c-charge"><span class="c-val" style="font-size:19px">'+esc(p.objectif)+'</span>'+bascule+'</div>';
     }
     var sp=p.series_prescrites||[];
     if(sp.length>1){
       var chips='';
       sp.forEach(function(r){
-        chips+='<span class="chip'+(r.role!=='travail'?' rampe':'')+'">'+nb(r.charge)+'</span>';
+        chips+='<span class="chip'+(r.role!=='travail'?' rampe':'')+'">'+
+               nb(conv(+r.charge,r.unite,unCarte))+'</span>';
       });
       obj+='<div class="c-plan"><span class="lbl">'+tr('Séries')+'</span>'+chips+'</div>';
     }
@@ -780,7 +844,47 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   }
   // Un format fixe ne compte pas dans les series du jour : il n'y a pas de
   // serie a valider dessus.
-  function sansSaisie(exo){ return estRope(exo)||estPlio(exo); }
+  // ---------- ISO : un temps a tenir, rien a saisir ----------
+  // Meme famille que PLIO : la consigne du coach EST la prescription.
+  function estIso(exo){
+    var m=(exo.prescription&&exo.prescription.mode)||'';
+    return String(m).toUpperCase()==='ISO'
+        || String(exo.type||'').toUpperCase()==='ISO';
+  }
+  function sansSaisie(exo){ return estRope(exo)||estPlio(exo)||estIso(exo); }
+
+  // ---------- le groupe superset ----------
+  // `mode` vit sur la LIGNE de programme et vaut par JOUR. Il est porte par le
+  // DEUXIEME des deux : « je m'enchaine avec celui du dessus ». Un groupe peut
+  // donc compter plus de deux exercices, si plusieurs se suivent.
+  function modeDe(prevu){
+    return String(prevu.mode||(prevu.prescription&&prevu.prescription.mode)||'').toUpperCase();
+  }
+  function duoDebut(idx,i){
+    var ex=DATA.jours[idx].exos;
+    return modeDe(ex[i])!=='SUPERSET' && !!ex[i+1] && modeDe(ex[i+1])==='SUPERSET';
+  }
+  function duoFin(idx,i){
+    var ex=DATA.jours[idx].exos;
+    return modeDe(ex[i])==='SUPERSET' && (!ex[i+1] || modeDe(ex[i+1])!=='SUPERSET');
+  }
+  function enteteDuo(idx,i){
+    var ex=DATA.jours[idx].exos, g=[i], bouts='';
+    for(var k=i+1;k<ex.length&&modeDe(ex[k])==='SUPERSET';k++) g.push(k);
+    g.forEach(function(k,n){
+      var e=exoEffectif(ex[k],idx,k);
+      if(n) bouts+='<span class="duo-plus">+</span>';
+      bouts+='<span class="duo-exo">'+
+        (e.image?'<img loading="lazy" decoding="async" src="'+esc(e.image)+'" alt="">'
+                :'<span class="duo-vide"></span>')+
+        '<span><span class="duo-ordre">'+(n+1)+'<sup>'+(n?'e':'er')+'</sup></span>'+
+        '<span class="duo-nom">'+esc(e.nom)+'</span></span></span>';
+    });
+    return '<section class="duo"><div class="duo-tete">'+
+             '<span class="duo-tag">⇄ '+tr('Superset')+'</span>'+
+             '<span class="duo-note">'+tr('on enchaîne sans reposer la charge')+'</span>'+
+           '</div><div class="duo-exos">'+bouts+'</div>';
+  }
 
   function secondes(txt){
     var t=String(txt||'').toLowerCase().replace(/\s+/g,'');
@@ -849,9 +953,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
               esc(exo.remplace)+'</b>.</div>':'')+
            blocOutils(prevu,i,exo);
   }
-  function blocPlio(exo,i,prevu){
+  // Carte d'un format fixe (PLIO, ISO) : le nom, l'image, l'etiquette, la
+  // consigne du coach, et rien a saisir. Le libelle est passe par l'appelant.
+  function blocFixe(exo,i,prevu,libelle){
     var p=exo.prescription||{};
-    var consigne=String(p.format||p.reminder||'').trim();
+    var consigne=String(p.reminder||p.format||'').trim();
     var vignette = exo.image
       ? '<button class="vignette" type="button" data-gif="'+i+'" aria-label="'+tr('Voir la démonstration de')+' '+esc(exo.nom)+'">'+
           '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
@@ -859,7 +965,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     return '<article class="exo plio" id="exo-'+i+'">'+
       '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
         '<h2 class="exo-nom">'+esc(exo.nom)+'</h2>'+
-        '<div class="meta"><span class="tag">'+tr('Pliométrie')+'</span></div>'+
+        '<div class="meta"><span class="tag">'+esc(libelle||tr('Pliométrie'))+'</span></div>'+
       '</div>'+vignette+'</div>'+
       (consigne?'<div class="carte">'+
         '<div class="c-info"><span class="lbl">'+tr('Consigne')+'</span>'+
@@ -867,21 +973,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       '<div class="rope-go">'+
         '<p class="rope-note">'+tr('Rien à saisir sur cet exercice.')+'</p>'+
       '</div>'+blocSortie(prevu,i,exo)+'</article>';
-  }
-
-  // SUPERSET porte sur la LIGNE de programme : on lit donc le mode de
-  // l'exercice prevu, pas celui d'un eventuel substitut.
-  //
-  // `prevu.mode` vient de la ligne de programme et vaut par JOUR : c'est lui
-  // qui fait foi. Le mode de la prescription, lui, est par EXERCICE — il ne
-  // sert que de repli tant que seance_mode.sql n'est pas applique.
-  function blocSuperset(prevu,idx,i){
-    var m=prevu.mode||(prevu.prescription&&prevu.prescription.mode)||'';
-    if(String(m).toUpperCase()!=='SUPERSET' || i===0) return '';
-    var av=DATA.jours[idx].exos[i-1];
-    var nom=av?exoEffectif(av,idx,i-1).nom:'';
-    return '<div class="bandeau-sup">⇄ '+tr('En superset avec')+
-           (nom?' <b>'+esc(nom)+'</b>':'')+' — '+tr('on enchaîne sans repos.')+'</div>';
   }
 
   function blocOutils(prevu,i,exo){
@@ -905,7 +996,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // ---------- rendu d'un jour ----------
   function afficherJour(idx){
     var j=DATA.jours[idx];
-    var nbs=j.exos.reduce(function(a,e){return a+(sansSaisie(e)?0:e.series);},0);
+    var nbs=j.exos.reduce(function(a,e,i){return a+(sansSaisie(e)?0:nbSeries(idx,i,e));},0);
     $('hJour').textContent='Day '+j.num+' — '+j.titre;
     $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' '+tr('exercices')+
                            ' · '+nbs+' '+tr('séries');
@@ -918,16 +1009,25 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             '<button type="button" id="btnModifier">'+tr('Modifier')+'</button></div>';
     }
 
+    var duoOuvert=false;
     j.exos.forEach(function(prevu,i){
       var exo=exoEffectif(prevu,idx,i);
-      if(estRope(exo)){ html+=blocRope(exo,i,prevu); return; }
-      if(estPlio(exo)){ html+=blocPlio(exo,i,prevu); return; }
+      // enveloppe le groupe superset : l'en-tete avant le premier, la
+      // fermeture apres le dernier, quel que soit le type de chaque carte.
+      function poser(h){
+        if(!duoOuvert && duoDebut(idx,i)){ h=enteteDuo(idx,i)+h; duoOuvert=true; }
+        if(duoOuvert && duoFin(idx,i)){ h=h+'</section>'; duoOuvert=false; }
+        return h;
+      }
+      if(estRope(exo)){ html+=poser(blocRope(exo,i,prevu)); return; }
+      if(estIso(exo)){ html+=poser(blocFixe(exo,i,prevu,tr('Isométrie'))); return; }
+      if(estPlio(exo)){ html+=poser(blocFixe(exo,i,prevu,tr('Pliométrie'))); return; }
       var un=uniteChoisie(i);
       var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
       var pdc=estPDC(exo);
       var ROLE={rampe:tr('montée'),backoff:'back-off',travail:''};
       var series='';
-      for(var s=0;s<exo.series;s++){
+      for(var s=0;s<nbSeries(idx,i,exo);s++){
         var v=etat.sets[cle(idx,i,s)];
         var cons=sp&&sp[s]?sp[s]:null;
         var rol=cons?(ROLE[cons.role]||''):'';
@@ -944,6 +1044,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
           '<button class="valider" type="button" data-valide aria-label="'+tr('Valider la série')+' '+(s+1)+'">✓</button>'+
         '</div>';
       }
+      series+='<div class="serie-outils">'+
+        '<button type="button" class="s-out" data-toutfait="'+i+'">✓ '+tr('Tout marquer fait')+'</button>'+
+        '<button type="button" class="s-out" data-plusserie="'+i+'">+ '+tr('Ajouter une série')+'</button>'+
+        (enPlus(idx,i)>0?'<button type="button" class="s-out" data-moinsserie="'+i+'">− '+tr('Retirer une série')+'</button>':'')+
+      '</div>';
 
       var rpe='';
       if(avecRPE()){
@@ -959,22 +1064,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
         : '<span class="vignette"><span class="vide">—</span></span>';
 
+      var debutCarte=html.length;
       html+='<article class="exo" id="exo-'+i+'">'+
         '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
           '<h2 class="exo-nom">'+esc(exo.nom)+'</h2><div class="meta">'+
             // le format est dans la carte, juste dessous : ne pas le répéter ici
             '<button class="tag repos" type="button" data-repos="'+i+'">⏱ '+tr('Repos')+' '+fmt(exo.repos)+'</button>'+
-            (pdc ? '<span class="tag pdc-tag">'+tr('poids du corps')+'</span>' :
-            '<span class="unite-bascule">'+
-              '<button type="button" data-unite="kg" data-exo="'+i+'" aria-pressed="'+(un==='kg')+'">KG</button>'+
-              '<button type="button" data-unite="lbs" data-exo="'+i+'" aria-pressed="'+(un==='lbs')+'">LBS</button>'+
-            '</span>')+
+            // la bascule KG/LBS a rejoint l'objectif, dans la carte
+            (pdc ? '<span class="tag pdc-tag">'+tr('poids du corps')+'</span>' : '')+
         '</div></div>'+vignette+'</div>'+
         (exo.remplace?'<div class="bandeau-sub">'+tr('Remplace')+' <b>'+esc(exo.remplace)+'</b> '+tr('— tes séries seront enregistrées sur')+' '+esc(exo.nom)+'.</div>':'')+
-        blocSuperset(prevu,idx,i)+
         blocCarte(exo,i)+
         '<div class="series">'+series+'</div>'+rpe+blocOutils(prevu,i,exo)+'</article>';
+      html=html.slice(0,debutCarte)+poser(html.slice(debutCarte));
     });
+    if(duoOuvert){ html+='</section>'; duoOuvert=false; }
 
     html+=blocAbdo(j.num);
 
@@ -1010,11 +1114,17 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       cible=base;
       valeurs=[base-2*pas,base-pas,base,base+pas,base+2*pas].filter(function(v){return v>0;});
     }else{
-      var r=(exo.reps||'').match(/(\d+)\s*-\s*(\d+)/);
-      var min=r?+r[1]:((prescrit(exo)||{}).reps||8), max=r?+r[2]:min+2;
+      // L'OBJECTIF fait foi, pas la fourchette du type. Aux tractions
+      // l'objectif disait « 10+ reps » et on suggerait 20 a 25 : exo.reps
+      // vient de regle_serie pour le TYPE (PDC), pas de la prescription.
+      var ro=(prescrit(exo)||{}).reps, min, max;
+      if(ro){ min=+ro; max=min+4; }
+      else{
+        var r=(exo.reps||'').match(/(\d+)\s*-\s*(\d+)/);
+        min=r?+r[1]:8; max=r?+r[2]:min+2;
+      }
       cible=min;
-      for(var v=min;v<=max+2;v++) valeurs.push(v);
-      valeurs=valeurs.slice(0,6);
+      for(var v=Math.max(1,min-1);v<=max+2&&valeurs.length<6;v++) valeurs.push(v);
     }
 
     var html='';
@@ -1053,7 +1163,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var exo=exoCourant(i);
       if(a.dataset.toutes){
         var src=champ(i,s,type).value;
-        for(var k=0;k<exo.series;k++){ var c=champ(i,k,type); if(c) c.value=src; }
+        for(var k=0;k<nbSeries(jourActif,i,exo);k++){ var c=champ(i,k,type); if(c) c.value=src; }
       }else{
         champ(i,s,type).value=a.dataset.pose;
       }
@@ -1088,7 +1198,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var ao=ev.target.closest('[data-abdook]');
     if(ao){
       var jr=ao.dataset.abdook, exo=abdoChoix[jr];
-      var champ=$('abdoPerf'), perf=champ?champ.value.trim():'';
+      // NE PAS appeler cette variable `champ` : `var` porte sur TOUTE la
+      // fonction, donc elle masquait la fonction champ() declaree plus haut
+      // et choisir une suggestion mourait sur « champ is not a function ».
+      var zoneAbdo=$('abdoPerf'), perf=zoneAbdo?zoneAbdo.value.trim():'';
       if(!exo){ toast(tr('Choisis d\u2019abord un exercice')); return; }
       ao.disabled=true;
       appeler('enregistrer_abdo',{p_jeton:jeton,p_jour:+jr,
@@ -1102,6 +1215,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         .catch(function(){ ao.disabled=false; toast(tr('Enregistrement impossible')); });
       return;
     }
+    var tf=ev.target.closest('[data-toutfait]');
+    if(tf){ toutMarquerFait(+tf.dataset.toutfait); return; }
+    var ps=ev.target.closest('[data-plusserie]');
+    if(ps){ ajouterSerie(+ps.dataset.plusserie,1); return; }
+    var mo=ev.target.closest('[data-moinsserie]');
+    if(mo){ ajouterSerie(+mo.dataset.moinsserie,-1); return; }
     var u=ev.target.closest('[data-unite]');
     if(u){ changerUnite(+u.dataset.exo, u.dataset.unite); return; }
     var rp=ev.target.closest('[data-repos]');
@@ -1137,7 +1256,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     etat.unites[c]=vers;
     var exo=exoCourant(i);
     // convertir ce qui est déjà saisi, validé ou non
-    for(var s=0;s<exo.series;s++){
+    for(var s=0;s<nbSeries(jourActif,i,exo);s++){
       var inp=champ(i,s,'kg');
       if(inp&&inp.value){ inp.value=nb(vers==='lbs'?versLbs(+inp.value):versKg(+inp.value)); }
       var k=cle(jourActif,i,s);
@@ -1161,19 +1280,58 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       etat.sets[k]={kg:kg,reps:reps};
       ligne.classList.add('ok');
       try{ if(navigator.vibrate) navigator.vibrate(35); }catch(e){}
-      lancerRepos(exo.repos, exo.nom, (s===exo.series-1)?tr('Exercice suivant')
-                                                 :tr('Série')+' '+(s+2));
+      // Plus de chrono automatique a la validation : il partait a chaque
+      // serie sans qu'on le demande. Le bouton « ⏱ Repos » de l'en-tete le
+      // lance quand on le veut.
     }
     sauver(); majProgression(); envoyer(i);
   }
 
+  // Ajouter — ou retirer — une serie que le programme ne prevoyait pas.
+  function ajouterSerie(i,delta){
+    if(verrouille()) return;
+    var c=jourActif+'-'+i, exo=exoCourant(i);
+    var n=enPlus(jourActif,i)+delta;
+    if(n<0) n=0;
+    // en retirant, la saisie de la serie qui disparait part avec elle
+    if(delta<0) delete etat.sets[cle(jourActif,i,(exo.series||0)+n)];
+    etat.enPlus=etat.enPlus||{}; etat.enPlus[c]=n;
+    sauver(); afficherJour(jourActif); envoyer(i);
+  }
+
+  // Marquer toutes les series d'un coup. Un champ vide prend ce qui etait
+  // prescrit : la charge de SA serie si le plan en donne une, sinon celle de
+  // l'objectif ; et les reps de l'objectif.
+  function toutMarquerFait(i){
+    if(verrouille()) return;
+    var exo=exoCourant(i), ns=nbSeries(jourActif,i,exo), pdc=estPDC(exo);
+    var pr=prescrit(exo)||{}, un=uniteChoisie(i);
+    var sp=(exo.prescription&&exo.prescription.series_prescrites)||[];
+    var repsPrevu=parseInt(pr.reps,10)||0, pose=0;
+    for(var s=0;s<ns;s++){
+      var k=cle(jourActif,i,s);
+      if(etat.sets[k]) continue;
+      var ch=champ(i,s,'kg'), cr=champ(i,s,'reps');
+      var prevue=0;
+      if(!pdc) prevue = sp[s] ? conv(+sp[s].charge,sp[s].unite,un)
+                              : (pr.charge?conv(pr.charge,pr.unite,un):0);
+      var kg = ch ? (parseFloat(ch.value)||prevue) : 0;
+      var reps = parseInt(cr?cr.value:'',10) || repsPrevu;
+      if(!reps) continue;
+      etat.sets[k]={kg:kg,reps:reps}; pose++;
+    }
+    if(!pose){ toast(tr('Rien à marquer : aucune répétition prévue.')); return; }
+    try{ if(navigator.vibrate) navigator.vibrate(35); }catch(e){}
+    sauver(); afficherJour(jourActif); envoyer(i);
+  }
+
   function majProgression(){
     var j=DATA.jours[jourActif];
-    var total=j.exos.reduce(function(a,e){return a+(sansSaisie(e)?0:e.series);},0), faits=0;
+    var total=j.exos.reduce(function(a,e,i){return a+(sansSaisie(e)?0:nbSeries(jourActif,i,e));},0), faits=0;
     j.exos.forEach(function(exo,i){
-      var n=0;
-      for(var s=0;s<exo.series;s++){ if(etat.sets[cle(jourActif,i,s)]){n++;faits++;} }
-      var el=$('exo-'+i); if(el) el.classList.toggle('fait',n===exo.series);
+      var n=0, ns=nbSeries(jourActif,i,exo);
+      for(var s=0;s<ns;s++){ if(etat.sets[cle(jourActif,i,s)]){n++;faits++;} }
+      var el=$('exo-'+i); if(el) el.classList.toggle('fait',n===ns);
     });
     $('hBarre').style.width=(total?faits/total*100:0)+'%';
     var t=$('btnTerminer');
@@ -1185,8 +1343,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function basculerVers(i,k){
     if(verrouille()) return;
     var prevu=DATA.jours[jourActif].exos[i], c=jourActif+'-'+i;
-    for(var s=0;s<prevu.series;s++) delete etat.sets[cle(jourActif,i,s)];
+    for(var s=0;s<nbSeries(jourActif,i,prevu);s++) delete etat.sets[cle(jourActif,i,s)];
     delete etat.rpe[c]; delete etat.unites[c];
+    if(etat.enPlus) delete etat.enPlus[c];
     if(k===null) delete etat.subs[c]; else etat.subs[c]=prevu.substituts[k];
     sauver(); afficherJour(jourActif); construireOnglets();
     var el=$('exo-'+i); if(el) el.scrollIntoView({block:'start'});

@@ -89,25 +89,39 @@ body.chrono-actif .page{padding-bottom:104px;}
   font-family:inherit;font-size:13px;font-weight:800;letter-spacing:1px;padding:7px 16px;cursor:pointer;min-height:38px;}
 /* la bascule vit desormais DANS l'objectif, a cote de la charge */
 .c-obj .unite-bascule{align-self:center;margin-left:10px;}
-/* ---------- superset : les deux exercices dans un seul encadre ---------- */
-.duo{border:2px solid var(--rouge);border-radius:16px;padding:0 0 4px;margin:18px 0;
-  background:linear-gradient(180deg,rgba(204,34,0,.10),transparent 120px);}
-.duo .exo{margin:0 10px 10px;border-radius:12px;}
-.duo .exo:first-of-type{margin-top:4px;}
-.duo-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  padding:11px 14px 9px;border-bottom:1px solid rgba(204,34,0,.28);}
-.duo-tag{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
-  color:#fff;background:var(--rouge);border-radius:6px;padding:4px 10px;}
-.duo-note{font-size:12px;font-weight:600;color:var(--faible);}
-.duo-exos{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px 10px;}
-.duo-exo{display:flex;align-items:center;gap:9px;min-width:0;flex:1;}
-.duo-exo img{width:52px;height:52px;object-fit:cover;border-radius:9px;
-  background:#fff;flex:none;}
-.duo-vide{width:52px;height:52px;border-radius:9px;background:var(--surface-haut);flex:none;}
-.duo-nom{font-size:13.5px;font-weight:700;color:var(--texte);line-height:1.25;}
-.duo-plus{font-size:22px;font-weight:800;color:var(--rouge-vif);flex:none;padding:0 2px;}
-.duo-ordre{font-size:9.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
-  color:var(--tres-faible);display:block;}
+/* ---------- superset : UNE carte, deux mouvements ---------- */
+.exo.superset{border:2px solid var(--rouge);
+  background:linear-gradient(180deg,rgba(204,34,0,.10),transparent 150px);}
+.sup-tete{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:2px 0 10px;}
+.sup-tag{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
+  color:#fff;background:var(--rouge);border-radius:6px;padding:5px 11px;}
+.sup-tech{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--rouge-vif);}
+.sup-mvts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sup-mvt{display:flex;align-items:center;gap:9px;min-width:0;flex:1 1 180px;}
+.sup-gif{border:none;padding:0;background:#fff;border-radius:11px;position:relative;
+  width:66px;height:66px;flex:none;cursor:pointer;overflow:hidden;}
+.sup-gif img{width:100%;height:100%;object-fit:cover;display:block;}
+.sup-gif .vide{color:var(--tres-faible);font-size:18px;line-height:66px;display:block;text-align:center;}
+.sup-lettre{font-size:13px;font-weight:800;color:#fff;background:var(--rouge);
+  border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;flex:none;}
+.sup-nom{font-size:14px;font-weight:700;color:var(--texte);line-height:1.25;min-width:0;}
+.sup-plus{font-size:26px;font-weight:800;color:var(--rouge-vif);flex:none;}
+.sup-regle{margin:10px 0 0;font-size:12px;color:var(--faible);}
+.sup-fiches{margin:10px 0 2px;display:flex;flex-direction:column;gap:8px;}
+.sup-fiche{display:flex;gap:9px;background:var(--surface-haut);border-radius:11px;padding:9px 11px;}
+.sup-badge{font-size:12px;font-weight:800;color:#fff;background:var(--rouge);
+  border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;flex:none;}
+.sup-t{font-size:12.5px;font-weight:700;color:var(--texte);}
+.sup-cons{font-size:12.5px;color:var(--faible);margin-top:2px;}
+.sup-obj{font-size:12.5px;color:var(--texte);margin-top:3px;}
+.sup-obj b{color:var(--rouge-vif);}
+.sup-tour{border:1px solid var(--ligne);border-radius:12px;padding:8px 9px 4px;margin-bottom:9px;}
+.sup-tour-t{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--tres-faible);padding:0 2px 6px;}
+.serie.rien .rien-txt{flex:1;font-size:12.5px;color:var(--tres-faible);}
+.sup-outils-t{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--tres-faible);padding:10px 2px 0;}
 .serie-outils{display:flex;gap:8px;flex-wrap:wrap;padding:9px 0 2px;}
 .s-out{flex:1;min-width:130px;border:1px solid var(--ligne);border-radius:9px;
   background:var(--surface-haut);color:var(--faible);font-family:inherit;font-size:12px;
@@ -473,7 +487,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     'Superset':'Superset',
     'on enchaîne sans reposer la charge':'go straight from one to the next',
     'Isométrie':'Isometric hold',
-    'de repos entre les deux':'rest between the two',
+    'entre les tours':'between rounds',
+    'Tour':'Round',
+    'Ajouter un tour':'Add a round',
+    'Retirer un tour':'Remove a round',
+    'Tour suivant':'Next round',
+    'rien à saisir':'nothing to log',
+    'Dernière fois':'Last time',
+    'Un tour = A puis B enchaînés. Repos à la fin du tour.':
+      'One round = A then B back to back. Rest at the end of the round.',
     'Ajouter une série':'Add a set',
     'Retirer une série':'Remove a set',
     'Rien à marquer : aucune répétition prévue.':'Nothing to mark: no reps planned.',
@@ -662,6 +684,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var u=(d.unite||'KG').toLowerCase(), g={};
     // au poids du corps, « 0 kg × 15 » n'a aucun sens : on ne montre que les reps
     if(estPDC(exo)) return d.series.map(function(z){ return z.reps; }).join(' · ')+' '+tr('reps');
+    // une isometrie n'a pas de reps : « 40 kg x 0 » ne veut rien dire
+    if(!champsDe(exo).reps)
+      return d.series.map(function(z){ return nb(z.charge); }).join(' · ')+' '+u;
     d.series.forEach(function(z){ var c=nb(z.charge); (g[c]=g[c]||[]).push(z.reps); });
     return Object.keys(g).map(function(c){ return c+' '+u+' × '+g[c].join('·'); }).join('&nbsp; | &nbsp;');
   }
@@ -867,12 +892,32 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // serie a valider dessus.
   // ---------- ISO : un temps a tenir, rien a saisir ----------
   // Meme famille que PLIO : la consigne du coach EST la prescription.
+  // Deux isometries, parce que « tenir » et « tenir AVEC une charge » ne se
+  // saisissent pas pareil, et que rien dans la base ne permet de deviner
+  // laquelle : `increment` est vide sur tous les exercices de Vincent.
+  //   ISO     tenue AVEC charge  -> un champ charge par tour, pas de reps
+  //   ISOPDC  tenue au poids du corps -> rien a saisir
   function estIso(exo){
     var m=(exo.prescription&&exo.prescription.mode)||'';
     return String(m).toUpperCase()==='ISO'
         || String(exo.type||'').toUpperCase()==='ISO';
   }
-  function sansSaisie(exo){ return estRope(exo)||estPlio(exo)||estIso(exo); }
+  function estIsoPdc(exo){
+    var m=(exo.prescription&&exo.prescription.mode)||'';
+    return String(m).toUpperCase()==='ISOPDC'
+        || String(exo.type||'').toUpperCase()==='ISOPDC';
+  }
+  // Quels champs cet exercice demande. Un seul endroit a lire, partout.
+  function champsDe(exo){
+    if(estRope(exo)||estPlio(exo)||estIsoPdc(exo)) return {charge:false,reps:false};
+    if(estIso(exo))  return {charge:true,  reps:false};   // un temps, pas des reps
+    if(estPDC(exo))  return {charge:false, reps:true};
+    return {charge:true, reps:true};
+  }
+  function sansSaisie(exo){
+    var c=champsDe(exo);
+    return !c.charge && !c.reps;
+  }
 
   // ---------- le groupe superset ----------
   // `mode` vit sur la LIGNE de programme et vaut par JOUR. Il est porte par le
@@ -881,49 +926,17 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function modeDe(prevu){
     return String(prevu.mode||(prevu.prescription&&prevu.prescription.mode)||'').toUpperCase();
   }
-  function duoDebut(idx,i){
-    var ex=DATA.jours[idx].exos;
-    return modeDe(ex[i])!=='SUPERSET' && !!ex[i+1] && modeDe(ex[i+1])==='SUPERSET';
-  }
-  function duoFin(idx,i){
-    var ex=DATA.jours[idx].exos;
-    return modeDe(ex[i])==='SUPERSET' && (!ex[i+1] || modeDe(ex[i+1])!=='SUPERSET');
-  }
-  // Combien de repos entre les deux, s'il y en a. C'est porte par le
-  // DEUXIEME des deux, comme le mode : « je m'enchaine avec celui du dessus,
-  // apres tant de secondes ». NULL = on enchaine.
-  function reposDuo(ex,g){
-    for(var n=1;n<g.length;n++){
-      var r=ex[g[n]].superset_repos;
-      if(r) return +r;
-    }
-    return 0;
-  }
-  function dureeCourte(sec){
-    if(sec%60===0) return (sec/60)+' min';
-    return sec<60 ? sec+' s' : Math.floor(sec/60)+' min '+(sec%60)+' s';
-  }
-  function enteteDuo(idx,i){
-    var ex=DATA.jours[idx].exos, g=[i], bouts='';
-    for(var k=i+1;k<ex.length&&modeDe(ex[k])==='SUPERSET';k++) g.push(k);
-    var rep=reposDuo(ex,g);
-    g.forEach(function(k,n){
-      var e=exoEffectif(ex[k],idx,k);
-      if(n) bouts+='<span class="duo-plus">+</span>';
-      bouts+='<span class="duo-exo">'+
-        (e.image?'<img loading="lazy" decoding="async" src="'+esc(e.image)+'" alt="">'
-                :'<span class="duo-vide"></span>')+
-        '<span><span class="duo-ordre">'+(n+1)+'<sup>'+(n?'e':'er')+'</sup></span>'+
-        '<span class="duo-nom">'+esc(e.nom)+'</span></span></span>';
+  // Decoupe le jour en groupes : [[0],[1,2],[3]] par exemple. Un exercice
+  // marque SUPERSET rejoint le groupe precedent ; s'il n'y en a pas (premier
+  // du jour), il fait groupe tout seul plutot que de disparaitre.
+  function groupes(idx){
+    var ex=DATA.jours[idx].exos, out=[];
+    ex.forEach(function(e,i){
+      if(modeDe(e)==='SUPERSET' && out.length) out[out.length-1].push(i);
+      else out.push([i]);
     });
-    return '<section class="duo"><div class="duo-tete">'+
-             '<span class="duo-tag">⇄ '+tr('Superset')+'</span>'+
-             '<span class="duo-note">'+(rep
-                 ? dureeCourte(rep)+' '+tr('de repos entre les deux')
-                 : tr('on enchaîne sans reposer la charge'))+'</span>'+
-           '</div><div class="duo-exos">'+bouts+'</div>';
+    return out;
   }
-
   function secondes(txt){
     var t=String(txt||'').toLowerCase().replace(/\s+/g,'');
     var m=t.match(/^(\d+)(?:min|mn|m)(\d{1,2})$/);
@@ -1031,6 +1044,135 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     return h;
   }
 
+  // ---------- une ligne de saisie ----------
+  // La meme brique sert la carte simple et la carte superset : memes
+  // attributs `data-exo` / `data-serie`, donc `validerSerie`, `champ()` et
+  // l'aide a la saisie marchent a l'identique dans les deux.
+  function ligneSerie(idx,i,exo,s,etiquette){
+    var v=etat.sets[cle(idx,i,s)];
+    var ch=champsDe(exo), un=uniteChoisie(i);
+    var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
+    var cons=sp&&sp[s]?sp[s]:null;
+    var ROLE={rampe:tr('montée'),backoff:'back-off',travail:''};
+    var rol=cons?(ROLE[cons.role]||''):'';
+    var classe='serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+
+               (!ch.charge?' pdc':'')+(!ch.charge&&!ch.reps?' rien':'');
+    return '<div class="'+classe+'" data-exo="'+i+'" data-serie="'+s+'">'+
+      '<span class="serie-num">'+esc(etiquette)+
+        (rol?'<span class="serie-role">'+rol+'</span>':'')+'</span>'+
+      (ch.charge?'<label class="champ"><input data-champ="kg" data-exo="'+i+'" data-serie="'+s+'" inputmode="decimal" '+
+         'placeholder="'+tr('charge')+'" aria-label="'+tr('Charge série')+' '+(s+1)+'" value="'+(v?v.kg:'')+'">'+
+         '<span class="unite">'+un+'</span></label>':'')+
+      (ch.reps?'<label class="champ"><input data-champ="reps" data-exo="'+i+'" data-serie="'+s+'" inputmode="numeric" '+
+         'placeholder="reps" aria-label="'+tr('Répétitions série')+' '+(s+1)+'" value="'+(v?v.reps:'')+'">'+
+         '<span class="unite">reps</span></label>':'')+
+      (!ch.charge&&!ch.reps?'<span class="rien-txt">'+tr('rien à saisir')+'</span>':'')+
+      '<button class="valider" type="button" data-valide aria-label="'+tr('Valider la série')+' '+(s+1)+'">✓</button>'+
+    '</div>';
+  }
+
+  // ---------- la carte d'un SUPERSET : un seul bloc, pas deux colles ----------
+  // Un superset n'est pas « l'exercice A puis l'exercice B » : c'est UN
+  // exercice a deux mouvements, qu'on fait tour par tour. La carte suit donc
+  // les TOURS, et chaque tour porte les deux lignes de saisie.
+  //
+  // L'etat reste range par exercice (`cle(idx, i, s)`), donc l'envoi,
+  // l'historique et la progression ne changent pas d'un iota.
+  function carteSuperset(idx,g){
+    var ex=DATA.jours[idx].exos;
+    var membres=g.map(function(i){ return {i:i, prevu:ex[i], exo:exoEffectif(ex[i],idx,i)}; });
+    var repos=0;
+    g.forEach(function(i){ if(ex[i].superset_repos) repos=+ex[i].superset_repos; });
+    var tours=Math.max.apply(null, membres.map(function(m){
+      return nbSeries(idx,m.i,m.exo); }));
+    var lettres='AB CDEF'.replace(' ','');
+
+    // 1. l'en-tete : les deux mouvements, cote a cote
+    var tete='';
+    membres.forEach(function(m,n){
+      if(n) tete+='<span class="sup-plus">+</span>';
+      tete+='<div class="sup-mvt">'+
+        (m.exo.image
+          ? '<button class="sup-gif" type="button" data-gif="'+m.i+'" aria-label="'+tr('Voir la démonstration de')+' '+esc(m.exo.nom)+'">'+
+              '<img loading="lazy" decoding="async" src="'+esc(m.exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
+          : '<span class="sup-gif"><span class="vide">—</span></span>')+
+        '<span class="sup-lettre">'+lettres.charAt(n)+'</span>'+
+        '<span class="sup-nom">'+esc(m.exo.nom)+'</span></div>';
+    });
+
+    // 2. ce qu'il faut savoir sur chaque mouvement : consigne et objectif
+    var fiches='';
+    membres.forEach(function(m,n){
+      var p=m.exo.prescription||{}, cons=consigneDe(m.exo);
+      var obj='';
+      var mm=p.objectif?String(p.objectif).match(/^\s*([\d.,]+)\s*(kg|lbs)\s*(\(([^)]*)\))?\s*(.*)$/i):null;
+      if(mm){
+        var un=uniteChoisie(m.i), uSrc=mm[2].toLowerCase();
+        var vSrc=+String(mm[1]).replace(',','.');
+        obj=nb(conv(vSrc,uSrc,un))+un+(mm[5]?' '+mm[5]:'');
+      }else if(p.objectif){ obj=p.objectif; }
+      fiches+='<div class="sup-fiche">'+
+        '<span class="sup-badge">'+lettres.charAt(n)+'</span>'+
+        '<div class="sup-txt"><div class="sup-t">'+esc(m.exo.nom)+'</div>'+
+          (cons?'<div class="sup-cons">'+esc(cons)+'</div>':'')+
+          (obj?'<div class="sup-obj">'+tr('Objectif')+' : <b>'+esc(obj)+'</b></div>':'')+
+          (sansSaisie(m.exo)?'':'<div class="sup-der">'+tr('Dernière fois')+' : '+
+            texteDerniere(m.exo)+'</div>')+
+        '</div></div>';
+    });
+
+    // 3. les tours
+    var corps='';
+    for(var s=0;s<tours;s++){
+      var lignes='';
+      membres.forEach(function(m,n){
+        if(s>=nbSeries(idx,m.i,m.exo)) return;
+        lignes+=ligneSerie(idx,m.i,m.exo,s,lettres.charAt(n));
+      });
+      corps+='<div class="sup-tour"><div class="sup-tour-t">'+tr('Tour')+' '+(s+1)+
+             '</div>'+lignes+'</div>';
+    }
+
+    // 4. RPE, un par mouvement qui en demande
+    var rpe='';
+    if(avecRPE()){
+      membres.forEach(function(m,n){
+        if(sansSaisie(m.exo)) return;
+        rpe+='<div class="rpe"><div class="rpe-label">'+tr('RPE')+' — '+
+             lettres.charAt(n)+' '+esc(m.exo.nom)+'</div><div class="rpe-choix">';
+        [10,9,8,7,5].forEach(function(v){
+          rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+m.i+'" aria-pressed="'+
+               (etat.rpe[idx+'-'+m.i]===v)+'">'+v+'</button>';
+        });
+        rpe+='</div></div>';
+      });
+    }
+
+    var outils='';
+    membres.forEach(function(m,n){
+      outils+='<div class="sup-outils-t">'+lettres.charAt(n)+' — '+esc(m.exo.nom)+'</div>'+
+              blocOutils(m.prevu,m.i,m.exo);
+    });
+
+    var tech=(membres[0].exo.prescription||{}).technique||'';
+    return '<article class="exo superset" id="exo-'+g[0]+'">'+
+      '<div class="sup-tete">'+
+        '<span class="sup-tag">⇄ '+tr('Superset')+'</span>'+
+        '<button class="tag repos" type="button" data-reposup="'+g[0]+'" data-sec="'+(repos||0)+'">⏱ '+
+          (repos?fmt(repos):fmt(membres[0].exo.repos))+' '+tr('entre les tours')+'</button>'+
+        (tech?'<span class="sup-tech">'+esc(tech)+'</span>':'')+
+      '</div>'+
+      '<div class="sup-mvts">'+tete+'</div>'+
+      '<p class="sup-regle">'+tr('Un tour = A puis B enchaînés. Repos à la fin du tour.')+'</p>'+
+      '<div class="sup-fiches">'+fiches+'</div>'+
+      '<div class="series sup-tours">'+corps+'</div>'+
+      '<div class="serie-outils">'+
+        '<button type="button" class="s-out" data-toutfaitsup="'+g.join(',')+'">✓ '+tr('Tout marquer fait')+'</button>'+
+        '<button type="button" class="s-out" data-plussup="'+g.join(',')+'">+ '+tr('Ajouter un tour')+'</button>'+
+        (enPlus(idx,g[0])>0?'<button type="button" class="s-out" data-moinssup="'+g.join(',')+'">− '+tr('Retirer un tour')+'</button>':'')+
+      '</div>'+rpe+'<div class="sup-outils">'+outils+'</div></article>';
+  }
+
   // ---------- rendu d'un jour ----------
   function afficherJour(idx){
     var j=DATA.jours[idx];
@@ -1047,40 +1189,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             '<button type="button" id="btnModifier">'+tr('Modifier')+'</button></div>';
     }
 
-    var duoOuvert=false;
-    j.exos.forEach(function(prevu,i){
-      var exo=exoEffectif(prevu,idx,i);
-      // enveloppe le groupe superset : l'en-tete avant le premier, la
-      // fermeture apres le dernier, quel que soit le type de chaque carte.
-      function poser(h){
-        if(!duoOuvert && duoDebut(idx,i)){ h=enteteDuo(idx,i)+h; duoOuvert=true; }
-        if(duoOuvert && duoFin(idx,i)){ h=h+'</section>'; duoOuvert=false; }
-        return h;
-      }
-      if(estRope(exo)){ html+=poser(blocRope(exo,i,prevu)); return; }
-      if(estIso(exo)){ html+=poser(blocFixe(exo,i,prevu,tr('Isométrie'))); return; }
-      if(estPlio(exo)){ html+=poser(blocFixe(exo,i,prevu,tr('Pliométrie'))); return; }
+    // Les exercices enchaines forment UN groupe, donc UNE carte. Le `mode`
+    // SUPERSET est porte par le deuxieme : « je m'enchaine avec celui du
+    // dessus ». Une suite de trois tient donc dans un seul groupe.
+    groupes(idx).forEach(function(g){
+      if(g.length>1){ html+=carteSuperset(idx,g); return; }
+      var i=g[0], prevu=j.exos[i], exo=exoEffectif(prevu,idx,i);
+      if(estRope(exo)){ html+=blocRope(exo,i,prevu); return; }
+      if(estIsoPdc(exo)){ html+=blocFixe(exo,i,prevu,tr('Isométrie')); return; }
+      if(estPlio(exo)){ html+=blocFixe(exo,i,prevu,tr('Pliométrie')); return; }
       var un=uniteChoisie(i);
-      var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
       var pdc=estPDC(exo);
-      var ROLE={rampe:tr('montée'),backoff:'back-off',travail:''};
       var series='';
+      // la charge n'est plus pre-remplie : elle est suggeree a la saisie
       for(var s=0;s<nbSeries(idx,i,exo);s++){
-        var v=etat.sets[cle(idx,i,s)];
-        var cons=sp&&sp[s]?sp[s]:null;
-        var rol=cons?(ROLE[cons.role]||''):'';
-        // volontairement VIDE : la charge n'est plus pré-remplie, elle est suggérée
-        series+='<div class="serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+(pdc?' pdc':'')+'" data-exo="'+i+'" data-serie="'+s+'">'+
-          '<span class="serie-num">S'+(s+1)+(rol?'<span class="serie-role">'+rol+'</span>':'')+'</span>'+
-          (pdc ? '' :
-          '<label class="champ"><input data-champ="kg" data-exo="'+i+'" data-serie="'+s+'" inputmode="decimal" '+
-            'placeholder="'+tr('charge')+'" aria-label="'+tr('Charge série')+' '+(s+1)+'" value="'+(v?v.kg:'')+'">'+
-            '<span class="unite">'+un+'</span></label>')+
-          '<label class="champ"><input data-champ="reps" data-exo="'+i+'" data-serie="'+s+'" inputmode="numeric" '+
-            'placeholder="reps" aria-label="'+tr('Répétitions série')+' '+(s+1)+'" value="'+(v?v.reps:'')+'">'+
-            '<span class="unite">reps</span></label>'+
-          '<button class="valider" type="button" data-valide aria-label="'+tr('Valider la série')+' '+(s+1)+'">✓</button>'+
-        '</div>';
+        series+=ligneSerie(idx,i,exo,s,'S'+(s+1));
       }
       series+='<div class="serie-outils">'+
         '<button type="button" class="s-out" data-toutfait="'+i+'">✓ '+tr('Tout marquer fait')+'</button>'+
@@ -1102,7 +1225,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
         : '<span class="vignette"><span class="vide">—</span></span>';
 
-      var debutCarte=html.length;
       html+='<article class="exo" id="exo-'+i+'">'+
         '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
           '<h2 class="exo-nom">'+esc(exo.nom)+'</h2><div class="meta">'+
@@ -1114,9 +1236,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         (exo.remplace?'<div class="bandeau-sub">'+tr('Remplace')+' <b>'+esc(exo.remplace)+'</b> '+tr('— tes séries seront enregistrées sur')+' '+esc(exo.nom)+'.</div>':'')+
         blocCarte(exo,i)+
         '<div class="series">'+series+'</div>'+rpe+blocOutils(prevu,i,exo)+'</article>';
-      html=html.slice(0,debutCarte)+poser(html.slice(debutCarte));
     });
-    if(duoOuvert){ html+='</section>'; duoOuvert=false; }
 
     html+=blocAbdo(j.num);
 
@@ -1253,6 +1373,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         .catch(function(){ ao.disabled=false; toast(tr('Enregistrement impossible')); });
       return;
     }
+    var rsu=ev.target.closest('[data-reposup]');
+    if(rsu){
+      var e0=exoCourant(+rsu.dataset.reposup);
+      lancerRepos(+rsu.dataset.sec||e0.repos, e0.nom, tr('Tour suivant'));
+      return;
+    }
+    var tfs=ev.target.closest('[data-toutfaitsup]');
+    if(tfs){ tfs.dataset.toutfaitsup.split(',').forEach(function(k){
+               toutMarquerFait(+k); }); return; }
+    var pss=ev.target.closest('[data-plussup]');
+    if(pss){ pss.dataset.plussup.split(',').forEach(function(k){
+               ajouterSerie(+k,1); }); return; }
+    var mss=ev.target.closest('[data-moinssup]');
+    if(mss){ mss.dataset.moinssup.split(',').forEach(function(k){
+               ajouterSerie(+k,-1); }); return; }
     var tf=ev.target.closest('[data-toutfait]');
     if(tf){ toutMarquerFait(+tf.dataset.toutfait); return; }
     var ps=ev.target.closest('[data-plusserie]');
@@ -1310,11 +1445,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     reveiller(); fermerAide();
     if(etat.sets[k]){ delete etat.sets[k]; ligne.classList.remove('ok'); }
     else{
-      // au poids du corps le champ n'existe pas : la charge vaut 0
-      var chKg=champ(i,s,'kg');
+      // Les champs varient : au poids du corps il n'y a pas de charge, sur
+      // une isometrie il n'y a pas de reps, sur un format fixe il n'y a rien.
+      // On n'exige que ce qui est demande.
+      var ch=champsDe(exo);
+      var chKg=champ(i,s,'kg'), chRp=champ(i,s,'reps');
       var kg=chKg?(parseFloat(chKg.value)||0):0;
-      var reps=parseInt(champ(i,s,'reps').value,10)||0;
-      if(!reps){ champ(i,s,'reps').focus(); return; }
+      var reps=chRp?(parseInt(chRp.value,10)||0):0;
+      if(ch.reps && !reps){ chRp.focus(); return; }
+      if(ch.charge && !ch.reps && !kg){ chKg.focus(); return; }
       etat.sets[k]={kg:kg,reps:reps};
       ligne.classList.add('ok');
       try{ if(navigator.vibrate) navigator.vibrate(35); }catch(e){}
@@ -1342,7 +1481,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // l'objectif ; et les reps de l'objectif.
   function toutMarquerFait(i){
     if(verrouille()) return;
-    var exo=exoCourant(i), ns=nbSeries(jourActif,i,exo), pdc=estPDC(exo);
+    var exo=exoCourant(i), ns=nbSeries(jourActif,i,exo);
     var pr=prescrit(exo)||{}, un=uniteChoisie(i);
     var sp=(exo.prescription&&exo.prescription.series_prescrites)||[];
     var repsPrevu=parseInt(pr.reps,10)||0, pose=0;
@@ -1350,12 +1489,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var k=cle(jourActif,i,s);
       if(etat.sets[k]) continue;
       var ch=champ(i,s,'kg'), cr=champ(i,s,'reps');
+      var dem=champsDe(exo);
       var prevue=0;
-      if(!pdc) prevue = sp[s] ? conv(+sp[s].charge,sp[s].unite,un)
-                              : (pr.charge?conv(pr.charge,pr.unite,un):0);
+      if(dem.charge) prevue = sp[s] ? conv(+sp[s].charge,sp[s].unite,un)
+                                    : (pr.charge?conv(pr.charge,pr.unite,un):0);
       var kg = ch ? (parseFloat(ch.value)||prevue) : 0;
       var reps = parseInt(cr?cr.value:'',10) || repsPrevu;
-      if(!reps) continue;
+      // une isometrie n'a pas de reps, un format fixe n'a rien : on les
+      // marque faits quand meme, sinon « tout marquer » en saute la moitie
+      if(dem.reps && !reps) continue;
+      if(dem.charge && !dem.reps && !kg) continue;
       etat.sets[k]={kg:kg,reps:reps}; pose++;
     }
     if(!pose){ toast(tr('Rien à marquer : aucune répétition prévue.')); return; }

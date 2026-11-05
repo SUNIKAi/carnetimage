@@ -473,6 +473,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     'Superset':'Superset',
     'on enchaîne sans reposer la charge':'go straight from one to the next',
     'Isométrie':'Isometric hold',
+    'de repos entre les deux':'rest between the two',
     'Ajouter une série':'Add a set',
     'Retirer une série':'Remove a set',
     'Rien à marquer : aucune répétition prévue.':'Nothing to mark: no reps planned.',
@@ -635,6 +636,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // unite (kg|lbs) et rend null au poids du corps — c'est ce qui faisait
   // retomber les tractions sur la fourchette du type (20-25) malgre un
   // objectif a 3 reps.
+  // La consigne affichee. `exo.consigne` vient de la LIGNE de programme :
+  // c'est celle que le coach a ecrite pour CET eleve, et elle prime sur
+  // `exercices.reminder`, qui est partage par les neuf. Un substitut n'a pas
+  // de ligne de programme, donc il garde la sienne — la consigne du coach
+  // parlait de l'exercice remplace.
+  function consigneDe(exo){
+    return String(exo.consigne
+                  || (exo.prescription && exo.prescription.reminder)
+                  || '').trim();
+  }
   function repsObjectif(exo){
     var o=(exo.prescription&&exo.prescription.objectif)||'';
     var m=String(o).match(/(\d+)\s*\+?\s*reps/i);
@@ -791,9 +802,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
     // 2bis. la consigne de l'exercice. Visible, et non repliee sous
     // « historique » : quand elle existe, c'est le protocole lui-meme.
-    if(p.reminder){
+    var consigneCoach=consigneDe(exo);
+    if(consigneCoach){
       h+='<div class="c-info"><span class="lbl">'+tr('Consigne')+'</span>'+
-         '<span class="v">'+esc(p.reminder)+'</span></div>';
+         '<span class="v">'+esc(consigneCoach)+'</span></div>';
     }
 
     // 3. l'objectif : la charge en grand, puis le plan des séries en chiffres réels
@@ -877,9 +889,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var ex=DATA.jours[idx].exos;
     return modeDe(ex[i])==='SUPERSET' && (!ex[i+1] || modeDe(ex[i+1])!=='SUPERSET');
   }
+  // Combien de repos entre les deux, s'il y en a. C'est porte par le
+  // DEUXIEME des deux, comme le mode : « je m'enchaine avec celui du dessus,
+  // apres tant de secondes ». NULL = on enchaine.
+  function reposDuo(ex,g){
+    for(var n=1;n<g.length;n++){
+      var r=ex[g[n]].superset_repos;
+      if(r) return +r;
+    }
+    return 0;
+  }
+  function dureeCourte(sec){
+    if(sec%60===0) return (sec/60)+' min';
+    return sec<60 ? sec+' s' : Math.floor(sec/60)+' min '+(sec%60)+' s';
+  }
   function enteteDuo(idx,i){
     var ex=DATA.jours[idx].exos, g=[i], bouts='';
     for(var k=i+1;k<ex.length&&modeDe(ex[k])==='SUPERSET';k++) g.push(k);
+    var rep=reposDuo(ex,g);
     g.forEach(function(k,n){
       var e=exoEffectif(ex[k],idx,k);
       if(n) bouts+='<span class="duo-plus">+</span>';
@@ -891,7 +918,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     });
     return '<section class="duo"><div class="duo-tete">'+
              '<span class="duo-tag">⇄ '+tr('Superset')+'</span>'+
-             '<span class="duo-note">'+tr('on enchaîne sans reposer la charge')+'</span>'+
+             '<span class="duo-note">'+(rep
+                 ? dureeCourte(rep)+' '+tr('de repos entre les deux')
+                 : tr('on enchaîne sans reposer la charge'))+'</span>'+
            '</div><div class="duo-exos">'+bouts+'</div>';
   }
 
@@ -905,7 +934,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     return Math.round(v*(u.charAt(0)==='m'?60:1));
   }
   function protocoleRope(exo){
-    var src=(exo.prescription&&exo.prescription.reminder)||'';
+    var src=consigneDe(exo);
     var m=String(src).match(/^\s*([0-9a-z.,\s]+?)\s*\/\s*([0-9a-z.,\s]+?)\s*[x*]\s*(\d+)/i);
     if(!m) return null;
     var t=secondes(m[1]), r=secondes(m[2]), n=+m[3];
@@ -929,7 +958,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var p=exo.prescription||{}, pr=protocoleRope(exo);
     // le protocole est deja ecrit en clair dans « format » : on ne garde de
     // la consigne que ce qu'elle ajoute
-    var reste=String(p.reminder||'');
+    var reste=consigneDe(exo);
     reste=(pr?reste.slice(pr.fin):reste).trim();
     var vignette = exo.image
       ? '<button class="vignette" type="button" data-gif="'+i+'" aria-label="'+tr('Voir la démonstration de')+' '+esc(exo.nom)+'">'+
@@ -966,7 +995,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // consigne du coach, et rien a saisir. Le libelle est passe par l'appelant.
   function blocFixe(exo,i,prevu,libelle){
     var p=exo.prescription||{};
-    var consigne=String(p.reminder||p.format||'').trim();
+    var consigne=consigneDe(exo)||String(p.format||'').trim();
     var vignette = exo.image
       ? '<button class="vignette" type="button" data-gif="'+i+'" aria-label="'+tr('Voir la démonstration de')+' '+esc(exo.nom)+'">'+
           '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'

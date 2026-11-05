@@ -41,7 +41,11 @@ body.chrono-actif .page{padding-bottom:104px;}
   padding-block:14px 0;border-bottom:1px solid var(--ligne);margin-bottom:16px;}
 .fil{display:flex;align-items:center;gap:7px;margin-bottom:4px;flex-wrap:wrap;}
 .pastille{width:6px;height:6px;border-radius:50%;background:var(--rouge);flex:none;}
-.semaine{font-size:10px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--faible);}
+.semaine{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.s-sem{font-size:10px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--faible);}
+.s-int{font-size:12.5px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;
+  color:#fff;background:var(--rouge);border-radius:5px;padding:2px 10px;}
+.s-tech{font-size:10.5px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;color:var(--rouge-vif);}
 .jour{font-size:24px;font-weight:800;letter-spacing:-.3px;margin:0;line-height:1.15;}
 .sous-jour{font-size:12px;color:var(--faible);margin-top:2px;}
 .onglets{display:flex;gap:6px;margin-top:11px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;}
@@ -116,7 +120,14 @@ body.chrono-actif .page{padding-bottom:104px;}
 .sup-cons{font-size:12.5px;color:var(--faible);margin-top:2px;}
 .sup-obj{font-size:12.5px;color:var(--texte);margin-top:3px;}
 .sup-obj b{color:var(--rouge-vif);}
-.sup-tour{border:1px solid var(--ligne);border-radius:12px;padding:8px 9px 4px;margin-bottom:9px;}
+.sup-tour{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-top:1px solid var(--ligne);}
+.sup-tour:first-child{border-top:none;padding-top:2px;}
+.sup-tour-n{flex:none;width:22px;height:22px;border-radius:50%;margin-top:12px;
+  background:var(--surface-haut);color:var(--tres-faible);font-size:11px;font-weight:800;
+  line-height:22px;text-align:center;font-variant-numeric:tabular-nums;}
+.sup-tour-l{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+.sup-tour-l .serie-num{width:18px;}
+.sup-rien{font-size:12px;color:var(--tres-faible);padding:6px 0;margin:0;}
 .sup-tour-t{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
   color:var(--tres-faible);padding:0 2px 6px;}
 .serie.rien .rien-txt{flex:1;font-size:12.5px;color:var(--tres-faible);}
@@ -192,6 +203,52 @@ body.chrono-actif .page{padding-bottom:104px;}
 .c-ligne b{color:var(--texte);font-weight:600;display:block;font-size:9.5px;letter-spacing:1.2px;
   text-transform:uppercase;color:var(--tres-faible);margin-bottom:2px;}
 .c-ligne .v{font-variant-numeric:tabular-nums;color:var(--texte);}
+
+/* ---------- le format : combien de series, de reps, de repos ----------
+   Trois chiffres sur une ligne. Le repos est un BOUTON : c'est lui qui lance
+   le chrono, l'etiquette de l'en-tete a disparu. */
+.c-fmtline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;
+  border-bottom:1px solid var(--ligne);}
+.f-it{font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
+  color:var(--tres-faible);}
+.f-it b{font-size:16px;font-weight:800;color:var(--texte);letter-spacing:0;
+  font-variant-numeric:tabular-nums;margin-right:4px;}
+.f-repos{margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--ligne);border-radius:8px;background:var(--surface);
+  color:var(--tres-faible);font-family:inherit;font-size:10px;font-weight:700;
+  letter-spacing:1.1px;text-transform:uppercase;padding:7px 11px;cursor:pointer;min-height:40px;}
+.f-repos b{font-size:13.5px;font-weight:800;color:var(--texte);letter-spacing:0;
+  font-variant-numeric:tabular-nums;}
+.f-repos .ic{font-size:15px;color:var(--rouge-vif);}
+.f-repos:active{background:var(--ligne);}
+
+/* ---------- l'objectif : libelle a gauche, charge x reps, bascule a droite --- */
+.c-objline{display:flex;align-items:center;gap:10px;padding:12px 12px 4px;}
+.c-objline .lbl{font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--tres-faible);flex:none;}
+.c-objv{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  justify-content:flex-end;}
+.c-objv .c-val{font-size:34px;}
+.c-objv .c-val.texte{font-size:21px;line-height:1.2;}
+.c-objv .c-reps{font-size:19px;font-weight:800;color:var(--rouge-vif);margin-left:0;}
+.c-objline .unite-bascule{flex:none;align-self:center;margin-left:0;}
+
+/* ---------- superset : de l'air entre le cadre et son contenu ---------- */
+.exo.superset{padding:13px 13px 6px;}
+.exo.superset .series{padding:0;}
+.exo.superset .outils{padding:6px 0 10px;}
+.exo.superset .bandeau-sub{margin:0 0 10px;}
+
+/* le chrono d'une tenue isometrique : rouge, c'est un temps a tenir */
+.go-iso{appearance:none;display:inline-flex;align-items:center;gap:8px;margin-top:8px;
+  border:1px solid var(--rouge);background:rgba(204,34,0,.16);color:var(--rouge-vif);
+  font-family:inherit;font-size:13px;font-weight:800;letter-spacing:.5px;
+  padding:9px 14px;border-radius:9px;cursor:pointer;min-height:42px;}
+.go-iso:active{background:rgba(204,34,0,.3);}
+.sup-fiche .go-iso{font-size:12.5px;padding:7px 12px;min-height:38px;}
+
+/* une suggestion retenue reste visible : la barre ne se ferme plus toute seule */
+.aide button.choisi{background:var(--rouge);border-color:var(--rouge);color:#fff;}
 
 /* ---------- abdos ----------
    Un bloc court en fin de seance : la consigne de la semaine, les exercices
@@ -442,6 +499,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function lire(c){ try{ var v=localStorage.getItem(c); return v?JSON.parse(v):null; }catch(e){ return null; } }
   function ecrire(c,v){ try{ localStorage.setItem(c,JSON.stringify(v)); }catch(e){} }
   function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+  // La duree telle qu'un coach l'ecrit : 150 -> « 2min30 », 120 -> « 2min »,
+  // 45 -> « 45s ». « 2:30 » se lit mal dans une phrase.
+  function fmtMin(s){
+    s=Math.max(0,Math.round(s||0));
+    if(!s) return '—';
+    if(s<60) return s+'s';
+    var m=Math.floor(s/60), r=s%60;
+    return m+'min'+(r?('0'+r).slice(-2):'');
+  }
   function cle(j,i,s){ return j+'-'+i+'-'+s; }
   // Series effectives = celles du programme + celles que l'eleve ajoute.
   // TOUT ce qui compte des series passe par nbSeries() : la saisie, l'envoi,
@@ -478,6 +544,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     "abdo:PYRAMID 10 / TIME CAP 5min":"Pick one abs exercise; the second one will be mountain climbers.\nExample with floor crunches\nCrunch 1 rep\nMountain climbers 2 reps\nCrunch 2 reps\nMountain climbers 4 reps\nCrunch 3 reps\nMountain climbers 6 reps\nand so on up to 10 crunches\n\nTime cap 5 min: if you cannot finish before that, stop there.\nhttps://raw.githubusercontent.com/SUNIKAI/training-exercise-gifs/main/0630-mountain-climber.gif",
     "abdo:SINGLE SET":"Pick a hard or weighted exercise.\nDo as many reps as you can, to failure.\nWith no rest, go straight into as many floor leg raises as you can.\nWith no rest, finish with as many crunches as you can.\nDone.",
     // --- fin abdos
+    'Tenue':'Hold',
+    'Charge':'Weight',
+    'Remplacer tout le superset':'Replace the whole superset',
+    'Rien à saisir sur ce superset.':'Nothing to log on this superset.',
     'Conditionnement':'Conditioning',
     'Pliométrie':'Plyometrics',
     'Protocole':'Protocol',
@@ -627,7 +697,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   }
 
   // ---------- exercice effectif (substitution éventuelle) ----------
+  // Deux niveaux. `gsubs` remplace TOUT un superset par un seul exercice
+  // (« je fais une presse a la place des deux ») ; `subs` remplace un
+  // mouvement par un autre. Le premier l'emporte : il porte sur le groupe.
   function exoEffectif(prevu, idx, i){
+    var gs=(etat.gsubs||{})[idx+'-'+i];
+    if(gs) return {exercice_id:gs.exercice_id, nom:gs.nom, image:gs.image, type:gs.type,
+            series:prevu.series, reps:gs.reps||prevu.reps, repos:gs.repos||prevu.repos,
+            derniere:gs.derniere, objectif:null, prescription:null,
+            substituts:prevu.substituts, remplace:gs._remplace, groupe:true};
     var s=(etat.subs||{})[idx+'-'+i];
     if(!s) return prevu;
     return {exercice_id:s.exercice_id, nom:s.nom, image:s.image, type:s.type,
@@ -733,10 +811,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(e&&e.semaine===DATA.semaine) etat=e; else etat={sets:{},rpe:{},subs:{},unites:{},termine:{},debut:Date.now(),semaine:DATA.semaine};
     etat.subs=etat.subs||{}; etat.unites=etat.unites||{}; etat.termine=etat.termine||{};
     etat.enPlus=etat.enPlus||{};
-    etat.semaine=DATA.semaine;
+    etat.semaine=DATA.semaine; etat.gsubs=etat.gsubs||{};
     fixerLangue(DATA.lang);      // le serveur tranche, pas le telephone
     $('entete').hidden=false; $('fin').hidden=false;
-    $('hSemaine').textContent=tr('Semaine')+' '+DATA.semaine+(DATA.intensity?' · '+DATA.intensity:'');
+    // L'intensite de la semaine et sa technique principale sont ce qui change
+    // d'une semaine a l'autre : elles se voient, elles ne se devinent pas.
+    $('hSemaine').innerHTML='<span class="s-sem">'+tr('Semaine')+' '+esc(DATA.semaine)+'</span>'+
+      (DATA.intensity?'<span class="s-int">'+esc(DATA.intensity)+'</span>':'')+
+      (DATA.technique?'<span class="s-tech">'+esc(DATA.technique)+'</span>':'');
     construireOnglets(); afficherJour(jourActif);
   }
   function sauver(){ ecrire(CLE_ETAT,etat); }
@@ -786,86 +868,105 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // L'eleve n'a pas besoin de savoir POURQUOI la charge a ete calculee ainsi :
   // il a besoin de la technique, du format, de l'objectif, et de ce qu'il a
   // fait la derniere fois. Le reste etait du bruit.
+  // La carte du coach, dans l'ordre ou on la lit en salle :
+  //   la technique et son schema, puis le format en trois chiffres,
+  //   puis la consigne, puis l'objectif avec la bascule KG/LBS.
   function blocCarte(exo,i){
     var p=exo.prescription;
-    // L'unite choisie commande TOUT l'affichage des charges : l'objectif, le
-    // plan des series et les champs. Avant, la bascule ne touchait que les
-    // champs et l'objectif restait dans son unite d'origine.
-    var unCarte=uniteChoisie(i), pdcCarte=estPDC(exo);
-    var bascule = pdcCarte ? '' :
+    var unCarte=uniteChoisie(i), ch=champsDe(exo);
+    // pas de bascule quand il n'y a pas de charge : au poids du corps comme
+    // sur un format fixe, « KG ou LBS » ne veut rien dire
+    var bascule = (estPDC(exo)||!ch.charge) ? '' :
       '<span class="unite-bascule">'+
         '<button type="button" data-unite="kg" data-exo="'+i+'" aria-pressed="'+(unCarte==='kg')+'">KG</button>'+
         '<button type="button" data-unite="lbs" data-exo="'+i+'" aria-pressed="'+(unCarte==='lbs')+'">LBS</button>'+
       '</span>';
     if(!p){
-      return '<div class="carte"><div class="c-charge">'+
-             '<span class="c-val" style="font-size:19px">'+tr('Trouve ta charge')+'</span>'+bascule+'</div>'+
+      return '<div class="carte"><div class="c-objline"><span class="lbl">'+tr('Objectif')+'</span>'+
+             '<span class="c-objv"><span class="c-val texte">'+tr('Trouve ta charge')+'</span></span>'+
+             bascule+'</div>'+
              '<div class="c-detail" style="padding-top:0"><div class="c-ligne">'+
              '<b>'+tr('Dernière')+'</b><span class="v">'+texteDerniere(exo)+'</span></div></div></div>';
     }
     var h='<div class="carte'+(p.cas===1?' test':'')+'">';
 
-    // 1. la technique, avec son schéma. Un clic ouvre son explication.
+    // 1. la technique a gauche, son schema a droite. Un clic ouvre l'explication.
     var expli=p.philosophie||'';
     var depliable=!!(expli||p.schema_label);
-    h+='<button class="c-tete'+(depliable?'':' fixe')+'" type="button"'+
-         (depliable?' data-tech="'+i+'" aria-expanded="false"':' disabled')+'>'+
-         '<span class="c-tech">'+esc(p.technique||tr('Technique'))+'</span>'+
-         (depliable?'<span class="fl">▾</span>':'')+
-         (p.schema_svg?'<span class="mini">'+p.schema_svg+'</span>':'')+
-       '</button>';
-    if(depliable){
-      h+='<div class="c-expli" id="tech-'+i+'" hidden>'+esc(expli)+
-         (p.schema_label?'<div class="sous">'+esc(p.schema_label)+'</div>':'')+'</div>';
+    if(p.technique||p.schema_svg){
+      h+='<button class="c-tete'+(depliable?'':' fixe')+'" type="button"'+
+           (depliable?' data-tech="'+i+'" aria-expanded="false"':' disabled')+'>'+
+           '<span class="c-tech">'+esc(p.technique||tr('Technique'))+'</span>'+
+           (depliable?'<span class="fl">▾</span>':'')+
+           (p.schema_svg?'<span class="mini">'+p.schema_svg+'</span>':'')+
+         '</button>';
+      if(depliable){
+        h+='<div class="c-expli" id="tech-'+i+'" hidden>'+esc(expli)+
+           (p.schema_label?'<div class="sous">'+esc(p.schema_label)+'</div>':'')+'</div>';
+      }
     }
 
-    // 2. le format, en entier et une seule fois
+    // 2. le format : combien de series, combien de reps, combien de repos.
+    //    Le repos est le bouton qui lance le chrono — il n'est plus en haut.
+    var nSet=nbSeries(jourActif,i,exo);
+    var reps=String(exo.reps||'').trim();
+    if(!reps&&p.format){
+      var mr=String(p.format).match(/x\s*(\d+(?:\s*-\s*\d+)?)/i);
+      reps=mr?mr[1].replace(/\s+/g,''):'';
+    }
+    // le repos tel que le coach l'ecrit (« 2min-2min30 ») plutot que la seule
+    // valeur du chrono, qui n'en est que la borne basse
+    var txtRepos='';
     if(p.format){
-      h+='<div class="c-info"><span class="lbl">'+tr('Format')+'</span>'+
-         '<span class="v">'+esc(p.format)+'</span></div>';
+      var mp=String(p.format).match(/([0-9][^\s]*)\s*(?:rest|repos)\s*$/i);
+      if(mp) txtRepos=mp[1];
     }
+    if(!txtRepos) txtRepos=fmtMin(exo.repos);
+    h+='<div class="c-fmtline">'+
+       '<span class="f-it"><b>'+nSet+'</b>set</span>'+
+       ((ch.reps&&reps)?'<span class="f-it"><b>'+esc(reps)+'</b>reps</span>':'')+
+       (exo.repos?'<button class="f-repos" type="button" data-repos="'+i+'">'+
+          tr('Repos')+' <b>'+esc(txtRepos)+'</b><span class="ic">⏱</span></button>':'')+
+       '</div>';
 
-    // 2bis. la consigne de l'exercice. Visible, et non repliee sous
-    // « historique » : quand elle existe, c'est le protocole lui-meme.
-    var consigneCoach=consigneDe(exo);
-    if(consigneCoach){
+    // 3. la consigne du coach, et le chrono quand c'est une tenue
+    var consigneCoach=consigneDe(exo), bIso=boutonIso(exo,i);
+    if(consigneCoach||bIso){
       h+='<div class="c-info"><span class="lbl">'+tr('Consigne')+'</span>'+
-         '<span class="v">'+esc(consigneCoach)+'</span></div>';
+         (consigneCoach?'<span class="v">'+esc(consigneCoach)+'</span>':'')+
+         (bIso?'<div>'+bIso+'</div>':'')+'</div>';
     }
 
-    // 3. l'objectif : la charge en grand, puis le plan des séries en chiffres réels
-    var obj='';
-    var m=p.objectif?p.objectif.match(/^\s*([\d.,]+)\s*(kg|lbs)\s*(\(([^)]*)\))?\s*(.*)$/i):null;
+    // 4. l'objectif : la charge et les reps en rouge, la bascule a droite.
+    //    Plus d'equivalence en gris : la bascule la donne a la demande.
+    var objv='';
+    var m=p.objectif?String(p.objectif).match(/^\s*([\d.,]+)\s*(kg|lbs)\s*(\(([^)]*)\))?\s*(.*)$/i):null;
     if(m){
-      // la charge est reecrite dans l'unite choisie, et l'autre unite reste
-      // affichee en petit a cote : on ne perd jamais l'equivalence
       var uSrc=m[2].toLowerCase(), vSrc=+String(m[1]).replace(',','.');
-      var vAff=conv(vSrc,uSrc,unCarte);
-      var autre=(unCarte==='lbs')?'kg':'lbs';
-      obj+='<div class="c-charge">'+
-             '<span class="c-val">'+esc(nb(vAff))+'<span class="u">'+esc(unCarte)+'</span></span>'+
-             '<span class="c-alt">'+esc(nb(conv(vSrc,uSrc,autre))+autre)+'</span>'+
-             (m[5]?'<span class="c-reps">'+esc(m[5])+'</span>':'')+
-             bascule+
-           '</div>';
+      var suite=String(m[5]||'').replace(/^\s*[x×]\s*/i,'').trim();
+      objv='<span class="c-val">'+esc(nb(conv(vSrc,uSrc,unCarte)))+
+           '<span class="u">'+esc(unCarte)+'</span></span>'+
+           (suite?'<span class="c-reps">× '+esc(suite)+'</span>':'');
     }else if(p.objectif){
-      obj+='<div class="c-charge"><span class="c-val" style="font-size:19px">'+esc(p.objectif)+'</span>'+bascule+'</div>';
+      objv='<span class="c-val texte">'+esc(p.objectif)+'</span>';
+    }
+    if(objv||bascule){
+      h+='<div class="c-objline"><span class="lbl">'+tr(objv?'Objectif':'Charge')+'</span>'+
+         '<span class="c-objv">'+objv+'</span>'+bascule+'</div>';
     }
     var sp=p.series_prescrites||[];
     if(sp.length>1){
       var chips='';
-      sp.forEach(function(r){
-        chips+='<span class="chip'+(r.role!=='travail'?' rampe':'')+'">'+
-               nb(conv(+r.charge,r.unite,unCarte))+'</span>';
+      sp.forEach(function(x){
+        chips+='<span class="chip'+(x.role!=='travail'?' rampe':'')+'">'+
+               nb(conv(+x.charge,x.unite,unCarte))+'</span>';
       });
-      obj+='<div class="c-plan"><span class="lbl">'+tr('Séries')+'</span>'+chips+'</div>';
+      h+='<div class="c-plan"><span class="lbl">'+tr('Séries')+'</span>'+chips+'</div>';
     }
-    if(obj) h+='<div class="c-info c-obj"><span class="lbl">'+tr('Objectif')+'</span>'+obj+'</div>';
 
-    // 4. l'historique, replié
+    // 5. l'historique, replié
     var det='<div class="c-ligne"><b>'+tr('Dernière fois')+'</b><span class="v">'+
             (p.derniere?esc(p.derniere):texteDerniere(exo))+'</span></div>';
-
     h+='<button class="c-plus" type="button" data-detail="'+i+'">'+tr('Historique')+' ▾</button>'+
        '<div class="c-detail" id="detail-'+i+'" hidden>'+det+'</div>';
     return h+'</div>';
@@ -945,6 +1046,78 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(!m) return null;
     var v=parseFloat(m[1].replace(',','.')), u=m[2]||'s';
     return Math.round(v*(u.charAt(0)==='m'?60:1));
+  }
+  function groupeDe(idx,i){
+    var gs=groupes(idx);
+    for(var k=0;k<gs.length;k++) if(gs[k].indexOf(i)>=0) return gs[k];
+    return null;
+  }
+  // Pour remplacer un superset ENTIER : les substituts de tous ses mouvements,
+  // sans doublon et sans les mouvements eux-memes.
+  function unionSubs(idx,g){
+    var ex=DATA.jours[idx].exos, vus={}, out=[];
+    g.forEach(function(i){ vus[ex[i].exercice_id]=1; });
+    g.forEach(function(i){
+      (ex[i].substituts||[]).forEach(function(s){
+        if(vus[s.exercice_id]) return;
+        vus[s.exercice_id]=1; out.push(s);
+      });
+    });
+    out.sort(function(a,b){ return String(a.nom).localeCompare(String(b.nom)); });
+    return out;
+  }
+  function substitutsDe(idx,i){
+    var g=groupeDe(idx,i);
+    if(g && g.length>1 && i===g[0] && (etat.gsubs||{})[idx+'-'+g[0]])
+      return unionSubs(idx,g);
+    return DATA.jours[idx].exos[i].substituts||[];
+  }
+  // Les mouvements qu'un remplacement de groupe fait disparaitre : ni dessines,
+  // ni comptes dans les series du jour.
+  function caches(idx){
+    var out={};
+    groupes(idx).forEach(function(g){
+      if(g.length>1 && (etat.gsubs||{})[idx+'-'+g[0]])
+        g.slice(1).forEach(function(i){ out[i]=true; });
+    });
+    return out;
+  }
+  function copie(o){
+    var n={}, k;
+    for(k in o) if(Object.prototype.hasOwnProperty.call(o,k)) n[k]=o[k];
+    return n;
+  }
+  function remplacerGroupe(g0,k){
+    if(verrouille()) return;
+    var g=groupeDe(jourActif,g0); if(!g) return;
+    var s=unionSubs(jourActif,g)[k]; if(!s) return;
+    var ex=DATA.jours[jourActif].exos;
+    g.forEach(function(i){
+      var c=jourActif+'-'+i, e=exoEffectif(ex[i],jourActif,i);
+      for(var t=0;t<nbSeries(jourActif,i,e);t++) delete etat.sets[cle(jourActif,i,t)];
+      delete etat.rpe[c]; delete etat.unites[c]; delete etat.subs[c];
+      if(etat.enPlus) delete etat.enPlus[c];
+    });
+    var n=copie(s);
+    n._remplace=g.map(function(i){ return ex[i].nom; }).join(' + ');
+    etat.gsubs=etat.gsubs||{};
+    etat.gsubs[jourActif+'-'+g0]=n;
+    sauver(); afficherJour(jourActif); construireOnglets();
+    window.scrollTo(0,0);
+  }
+  // Combien de temps dure la tenue : c'est ecrit dans la consigne du coach
+  // (« 20 secondes d'isometrie... »). Sans duree lisible, pas de bouton.
+  function dureeIso(exo){
+    var m=String(consigneDe(exo)).match(/(\d+(?:[.,]\d+)?)\s*(secondes?|sec|s|minutes?|min)\b/i);
+    if(!m) return 0;
+    var v=parseFloat(m[1].replace(',','.'));
+    return Math.round(/^m/i.test(m[2])?v*60:v);
+  }
+  function boutonIso(exo,i){
+    var d=(estIso(exo)||estIsoPdc(exo))?dureeIso(exo):0;
+    if(!d) return '';
+    return '<button class="go-iso" type="button" data-iso="'+i+'" data-sec="'+d+'">▶ '+
+           tr('Tenue')+' '+d+' s</button>';
   }
   function protocoleRope(exo){
     var src=consigneDe(exo);
@@ -1029,10 +1202,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function blocOutils(prevu,i,exo){
     var h='<div class="outils">';
     if(exo.remplace) h+='<button class="outil retour" type="button" data-retour="'+i+'">↩ '+tr('Revenir à')+' '+esc(exo.remplace)+'</button>';
-    if(prevu.substituts&&prevu.substituts.length){
+    // la liste depend de l'etat : celle du mouvement, ou celle du groupe
+    // entier quand c'est tout le superset qui a ete remplace
+    var subs=substitutsDe(jourActif,i);
+    if(subs.length){
       h+='<button class="outil" type="button" data-subs="'+i+'">'+(exo.remplace?tr('Changer encore'):tr('Faire un autre exercice'))+' ▾</button>'+
          '<div class="subs" id="subs-'+i+'">';
-      prevu.substituts.forEach(function(s,k){
+      subs.forEach(function(s,k){
         var actif=(s.exercice_id===exo.exercice_id);
         h+='<button class="sub'+(actif?' actif':'')+'" type="button" data-choisir="'+i+'" data-k="'+k+'">'+
              (s.image?'<img loading="lazy" src="'+esc(s.image)+'" alt="">':'<img alt="">')+
@@ -1074,7 +1250,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // ---------- la carte d'un SUPERSET : un seul bloc, pas deux colles ----------
   // Un superset n'est pas « l'exercice A puis l'exercice B » : c'est UN
   // exercice a deux mouvements, qu'on fait tour par tour. La carte suit donc
-  // les TOURS, et chaque tour porte les deux lignes de saisie.
+  // les TOURS — et un mouvement qui ne demande rien (un saut, une tenue au
+  // poids du corps) n'a PAS de ligne : sa consigne suffit.
   //
   // L'etat reste range par exercice (`cle(idx, i, s)`), donc l'envoi,
   // l'historique et la progression ne changent pas d'un iota.
@@ -1083,11 +1260,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var membres=g.map(function(i){ return {i:i, prevu:ex[i], exo:exoEffectif(ex[i],idx,i)}; });
     var repos=0;
     g.forEach(function(i){ if(ex[i].superset_repos) repos=+ex[i].superset_repos; });
-    var tours=Math.max.apply(null, membres.map(function(m){
+    if(!repos) repos=membres[0].exo.repos||0;
+    var aSaisir=membres.filter(function(m){ return !sansSaisie(m.exo); });
+    var tours=Math.max.apply(null,(aSaisir.length?aSaisir:membres).map(function(m){
       return nbSeries(idx,m.i,m.exo); }));
-    var lettres='AB CDEF'.replace(' ','');
+    var lettres='ABCDEF';
 
-    // 1. l'en-tete : les deux mouvements, cote a cote
+    // 1. l'en-tete : les mouvements, cote a cote
     var tete='';
     membres.forEach(function(m,n){
       if(n) tete+='<span class="sup-plus">+</span>';
@@ -1100,45 +1279,49 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
         '<span class="sup-nom">'+esc(m.exo.nom)+'</span></div>';
     });
 
-    // 2. ce qu'il faut savoir sur chaque mouvement : consigne et objectif
+    // 2. une fiche par mouvement : consigne, objectif, derniere fois, et le
+    //    chrono de la tenue quand c'est une isometrie
     var fiches='';
     membres.forEach(function(m,n){
-      var p=m.exo.prescription||{}, cons=consigneDe(m.exo);
-      var obj='';
+      var p=m.exo.prescription||{}, cons=consigneDe(m.exo), obj='';
       var mm=p.objectif?String(p.objectif).match(/^\s*([\d.,]+)\s*(kg|lbs)\s*(\(([^)]*)\))?\s*(.*)$/i):null;
       if(mm){
         var un=uniteChoisie(m.i), uSrc=mm[2].toLowerCase();
         var vSrc=+String(mm[1]).replace(',','.');
-        obj=nb(conv(vSrc,uSrc,un))+un+(mm[5]?' '+mm[5]:'');
+        var suite=String(mm[5]||'').replace(/^\s*[x×]\s*/i,'').trim();
+        obj=nb(conv(vSrc,uSrc,un))+un+(suite?' × '+suite:'');
       }else if(p.objectif){ obj=p.objectif; }
       fiches+='<div class="sup-fiche">'+
         '<span class="sup-badge">'+lettres.charAt(n)+'</span>'+
         '<div class="sup-txt"><div class="sup-t">'+esc(m.exo.nom)+'</div>'+
           (cons?'<div class="sup-cons">'+esc(cons)+'</div>':'')+
           (obj?'<div class="sup-obj">'+tr('Objectif')+' : <b>'+esc(obj)+'</b></div>':'')+
-          (sansSaisie(m.exo)?'':'<div class="sup-der">'+tr('Dernière fois')+' : '+
+          (sansSaisie(m.exo)?'':'<div class="sup-obj">'+tr('Dernière fois')+' : '+
             texteDerniere(m.exo)+'</div>')+
+          boutonIso(m.exo,m.i)+
         '</div></div>';
     });
 
-    // 3. les tours
+    // 3. les tours, en compact : un numero a gauche, ses lignes a droite
     var corps='';
     for(var s=0;s<tours;s++){
       var lignes='';
-      membres.forEach(function(m,n){
+      aSaisir.forEach(function(m){
         if(s>=nbSeries(idx,m.i,m.exo)) return;
-        lignes+=ligneSerie(idx,m.i,m.exo,s,lettres.charAt(n));
+        lignes+=ligneSerie(idx,m.i,m.exo,s,lettres.charAt(membres.indexOf(m)));
       });
-      corps+='<div class="sup-tour"><div class="sup-tour-t">'+tr('Tour')+' '+(s+1)+
-             '</div>'+lignes+'</div>';
+      if(!lignes) continue;
+      corps+='<div class="sup-tour"><span class="sup-tour-n">'+(s+1)+'</span>'+
+             '<div class="sup-tour-l">'+lignes+'</div></div>';
     }
+    if(!corps) corps='<p class="sup-rien">'+tr('Rien à saisir sur ce superset.')+'</p>';
 
     // 4. RPE, un par mouvement qui en demande
     var rpe='';
     if(avecRPE()){
-      membres.forEach(function(m,n){
-        if(sansSaisie(m.exo)) return;
-        rpe+='<div class="rpe"><div class="rpe-label">'+tr('RPE')+' — '+
+      aSaisir.forEach(function(m){
+        var n=membres.indexOf(m);
+        rpe+='<div class="rpe"><div class="rpe-label">RPE — '+
              lettres.charAt(n)+' '+esc(m.exo.nom)+'</div><div class="rpe-choix">';
         [10,9,8,7,5].forEach(function(v){
           rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+m.i+'" aria-pressed="'+
@@ -1148,37 +1331,59 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       });
     }
 
-    var outils='';
+    // 5. remplacer le superset ENTIER (une presse a la place des deux), puis
+    //    les outils de chaque mouvement
+    var uni=unionSubs(idx,g), outils='';
+    if(uni.length){
+      outils+='<div class="outils"><button class="outil" type="button" data-gsubs="'+g[0]+'">'+
+              tr('Remplacer tout le superset')+' ▾</button><div class="subs" id="gsubs-'+g[0]+'">';
+      uni.forEach(function(s2,k){
+        outils+='<button class="sub" type="button" data-gchoisir="'+g[0]+'" data-k="'+k+'">'+
+          (s2.image?'<img loading="lazy" src="'+esc(s2.image)+'" alt="">':'<img alt="">')+
+          '<span class="nom">'+esc(s2.nom)+'</span><span class="go">'+tr('choisir')+'</span></button>';
+      });
+      outils+='</div></div>';
+    }
     membres.forEach(function(m,n){
       outils+='<div class="sup-outils-t">'+lettres.charAt(n)+' — '+esc(m.exo.nom)+'</div>'+
               blocOutils(m.prevu,m.i,m.exo);
     });
 
-    var tech=(membres[0].exo.prescription||{}).technique||'';
+    var tech=(membres[0].exo.prescription||{}).technique||
+             (membres[1]?(membres[1].exo.prescription||{}).technique:'')||'';
+    var ids=(aSaisir.length?aSaisir.map(function(m){return m.i;}):g).join(',');
     return '<article class="exo superset" id="exo-'+g[0]+'">'+
       '<div class="sup-tete">'+
         '<span class="sup-tag">⇄ '+tr('Superset')+'</span>'+
         '<button class="tag repos" type="button" data-reposup="'+g[0]+'" data-sec="'+(repos||0)+'">⏱ '+
-          (repos?fmt(repos):fmt(membres[0].exo.repos))+' '+tr('entre les tours')+'</button>'+
+          fmtMin(repos)+' '+tr('entre les tours')+'</button>'+
         (tech?'<span class="sup-tech">'+esc(tech)+'</span>':'')+
       '</div>'+
       '<div class="sup-mvts">'+tete+'</div>'+
       '<p class="sup-regle">'+tr('Un tour = A puis B enchaînés. Repos à la fin du tour.')+'</p>'+
       '<div class="sup-fiches">'+fiches+'</div>'+
       '<div class="series sup-tours">'+corps+'</div>'+
-      '<div class="serie-outils">'+
-        '<button type="button" class="s-out" data-toutfaitsup="'+g.join(',')+'">✓ '+tr('Tout marquer fait')+'</button>'+
+      (aSaisir.length?'<div class="serie-outils">'+
+        '<button type="button" class="s-out" data-toutfaitsup="'+ids+'">✓ '+tr('Tout marquer fait')+'</button>'+
         '<button type="button" class="s-out" data-plussup="'+g.join(',')+'">+ '+tr('Ajouter un tour')+'</button>'+
         (enPlus(idx,g[0])>0?'<button type="button" class="s-out" data-moinssup="'+g.join(',')+'">− '+tr('Retirer un tour')+'</button>':'')+
-      '</div>'+rpe+'<div class="sup-outils">'+outils+'</div></article>';
+      '</div>':'')+
+      rpe+'<div class="sup-outils">'+outils+'</div></article>';
   }
 
   // ---------- rendu d'un jour ----------
   function afficherJour(idx){
     var j=DATA.jours[idx];
-    var nbs=j.exos.reduce(function(a,e,i){return a+(sansSaisie(e)?0:nbSeries(idx,i,e));},0);
+    // un mouvement efface par un remplacement de groupe ne compte plus
+    var cach=caches(idx), nbs=0, nbex=0;
+    j.exos.forEach(function(e,i){
+      if(cach[i]) return;
+      nbex++;
+      var ef=exoEffectif(e,idx,i);
+      if(!sansSaisie(ef)) nbs+=nbSeries(idx,i,ef);
+    });
     $('hJour').textContent='Day '+j.num+' — '+j.titre;
-    $('hSous').textContent=DATA.eleve+' · '+j.exos.length+' '+tr('exercices')+
+    $('hSous').textContent=DATA.eleve+' · '+nbex+' '+tr('exercices')+
                            ' · '+nbs+' '+tr('séries');
 
     var html='';
@@ -1189,16 +1394,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             '<button type="button" id="btnModifier">'+tr('Modifier')+'</button></div>';
     }
 
-    // Les exercices enchaines forment UN groupe, donc UNE carte. Le `mode`
-    // SUPERSET est porte par le deuxieme : « je m'enchaine avec celui du
-    // dessus ». Une suite de trois tient donc dans un seul groupe.
+    // Les exercices enchaines forment UN groupe, donc UNE carte. Remplace en
+    // entier, ce groupe redevient un exercice ordinaire.
     groupes(idx).forEach(function(g){
-      if(g.length>1){ html+=carteSuperset(idx,g); return; }
+      if(g.length>1 && !(etat.gsubs||{})[idx+'-'+g[0]]){ html+=carteSuperset(idx,g); return; }
       var i=g[0], prevu=j.exos[i], exo=exoEffectif(prevu,idx,i);
       if(estRope(exo)){ html+=blocRope(exo,i,prevu); return; }
       if(estIsoPdc(exo)){ html+=blocFixe(exo,i,prevu,tr('Isométrie')); return; }
       if(estPlio(exo)){ html+=blocFixe(exo,i,prevu,tr('Pliométrie')); return; }
-      var un=uniteChoisie(i);
       var pdc=estPDC(exo);
       var series='';
       // la charge n'est plus pre-remplie : elle est suggeree a la saisie
@@ -1225,14 +1428,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             '<img loading="lazy" decoding="async" src="'+esc(exo.image)+'" alt=""><span class="loupe-ic">⤢</span></button>'
         : '<span class="vignette"><span class="vide">—</span></span>';
 
+      // le nom a gauche, le GIF a droite ; le repos a rejoint la ligne de
+      // format, dans la carte, ou il est devenu le bouton du chrono
       html+='<article class="exo" id="exo-'+i+'">'+
         '<div class="exo-tete"><span class="num">'+(i+1)+'</span><div class="exo-titres">'+
-          '<h2 class="exo-nom">'+esc(exo.nom)+'</h2><div class="meta">'+
-            // le format est dans la carte, juste dessous : ne pas le répéter ici
-            '<button class="tag repos" type="button" data-repos="'+i+'">⏱ '+tr('Repos')+' '+fmt(exo.repos)+'</button>'+
-            // la bascule KG/LBS a rejoint l'objectif, dans la carte
-            (pdc ? '<span class="tag pdc-tag">'+tr('poids du corps')+'</span>' : '')+
-        '</div></div>'+vignette+'</div>'+
+          '<h2 class="exo-nom">'+esc(exo.nom)+'</h2>'+
+          (pdc?'<div class="meta"><span class="tag pdc-tag">'+tr('poids du corps')+'</span></div>':'')+
+        '</div>'+vignette+'</div>'+
         (exo.remplace?'<div class="bandeau-sub">'+tr('Remplace')+' <b>'+esc(exo.remplace)+'</b> '+tr('— tes séries seront enregistrées sur')+' '+esc(exo.nom)+'.</div>':'')+
         blocCarte(exo,i)+
         '<div class="series">'+series+'</div>'+rpe+blocOutils(prevu,i,exo)+'</article>';
@@ -1258,7 +1460,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var exo=exoCourant(i);
     var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
     var cons=sp&&sp[s]?sp[s]:null;
-    var valeurs=[], cible=null;
+    var valeurs=[], cible=null, v;
 
     if(type==='kg'){
       var un=uniteChoisie(i), pas=(un==='lbs')?5:2.5;
@@ -1270,24 +1472,26 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       }
       if(!base) return;
       cible=base;
-      valeurs=[base-2*pas,base-pas,base,base+pas,base+2*pas].filter(function(v){return v>0;});
+      valeurs=[base-2*pas,base-pas,base,base+pas,base+2*pas].filter(function(x){return x>0;});
     }else{
-      // L'OBJECTIF fait foi, pas la fourchette du type. Aux tractions
-      // l'objectif disait « 10+ reps » et on suggerait 20 a 25 : exo.reps
-      // vient de regle_serie pour le TYPE (PDC), pas de la prescription.
-      var ro=repsObjectif(exo), min, max;
-      if(ro){ min=+ro; max=min+4; }
-      else{
-        var r=(exo.reps||'').match(/(\d+)\s*-\s*(\d+)/);
-        min=r?+r[1]:8; max=r?+r[2]:min+2;
+      // Les suggestions se rangent AUTOUR de l'objectif : objectif 10 donne
+      // 7 8 9 10 11 12, et non 9 a 14 — on fait aussi bien moins que plus.
+      // L'objectif fait foi, pas la fourchette du type (20-25 aux tractions).
+      var ro=repsObjectif(exo);
+      if(ro){
+        cible=+ro;
+        for(v=Math.max(1,cible-3);valeurs.length<6;v++) valeurs.push(v);
+      }else{
+        var rg=String(exo.reps||'').match(/(\d+)\s*-\s*(\d+)/);
+        var mn=rg?+rg[1]:8, mx=rg?+rg[2]:11;
+        cible=mn;
+        for(v=Math.max(1,mn-1);v<=mx+2&&valeurs.length<6;v++) valeurs.push(v);
       }
-      cible=min;
-      for(var v=Math.max(1,min-1);v<=max+2&&valeurs.length<6;v++) valeurs.push(v);
     }
 
     var html='';
-    valeurs.forEach(function(v){
-      html+='<button type="button" data-pose="'+v+'" class="'+(v===cible?'cible':'')+'">'+nb(v)+'</button>';
+    valeurs.forEach(function(x){
+      html+='<button type="button" data-pose="'+x+'" class="'+(x===cible?'cible':'')+'">'+nb(x)+'</button>';
     });
     html+='<button type="button" data-toutes="1" class="toutes">'+tr('= toutes les séries')+'</button>';
     var div=document.createElement('div');
@@ -1313,6 +1517,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   $('liste').addEventListener('pointerdown',function(ev){
     if(ev.target.closest('.aide')) ev.preventDefault();
   });
+  // La barre de suggestions ne se ferme plus toute seule : elle se ferme quand
+  // on touche AILLEURS. En capture, pour passer avant le reste.
+  document.addEventListener('pointerdown',function(ev){
+    if(!document.querySelector('.aide')) return;
+    if(ev.target.closest('.aide')) return;
+    if(ev.target.closest('input[data-champ]')) return;
+    fermerAide();
+  },true);
 
   $('liste').addEventListener('click',function(ev){
     var a=ev.target.closest('.aide button');
@@ -1322,10 +1534,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       if(a.dataset.toutes){
         var src=champ(i,s,type).value;
         for(var k=0;k<nbSeries(jourActif,i,exo);k++){ var c=champ(i,k,type); if(c) c.value=src; }
+        a.classList.add('choisi');
       }else{
         champ(i,s,type).value=a.dataset.pose;
+        // La barre RESTE ouverte : on pose une valeur, on la corrige, puis on
+        // l'applique a toutes les series. Elle ne se ferme qu'en touchant
+        // ailleurs (voir le pointerdown sur le document).
+        [].forEach.call(box.querySelectorAll('[data-pose]'),function(x){
+          x.classList.toggle('choisi', x===a); });
       }
-      fermerAide();
       return;
     }
     var tc=ev.target.closest('[data-tech]');
@@ -1401,6 +1618,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var rc=ev.target.closest('[data-rope]');
     if(rc){ var ex=exoCourant(+rc.dataset.rope);
             lancerIntervalles(phasesRope(ex), ex.nom); return; }
+    var iso=ev.target.closest('[data-iso]');
+    if(iso){ var ei=exoCourant(+iso.dataset.iso);
+             lancerRepos(+iso.dataset.sec, ei.nom, tr('Tenue')); return; }
+    var gsb=ev.target.closest('[data-gsubs]');
+    if(gsb){ var bg=$('gsubs-'+gsb.dataset.gsubs), og=bg.classList.toggle('ouvert');
+             gsb.textContent=tr('Remplacer tout le superset')+' '+(og?'▴':'▾'); return; }
+    var gch=ev.target.closest('[data-gchoisir]');
+    if(gch){ remplacerGroupe(+gch.dataset.gchoisir,+gch.dataset.k); return; }
     var g=ev.target.closest('[data-gif]');
     if(g){ ouvrirLoupe(+g.dataset.gif); return; }
     var sb=ev.target.closest('[data-subs]');
@@ -1507,12 +1732,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   }
 
   function majProgression(){
-    var j=DATA.jours[jourActif];
-    var total=j.exos.reduce(function(a,e,i){return a+(sansSaisie(e)?0:nbSeries(jourActif,i,e));},0), faits=0;
-    j.exos.forEach(function(exo,i){
-      var n=0, ns=nbSeries(jourActif,i,exo);
-      for(var s=0;s<ns;s++){ if(etat.sets[cle(jourActif,i,s)]){n++;faits++;} }
-      var el=$('exo-'+i); if(el) el.classList.toggle('fait',n===ns);
+    var j=DATA.jours[jourActif], cach=caches(jourActif), total=0, faits=0;
+    j.exos.forEach(function(e,i){
+      if(cach[i]) return;
+      var ef=exoEffectif(e,jourActif,i);
+      var ns=sansSaisie(ef)?0:nbSeries(jourActif,i,ef), n=0;
+      for(var s=0;s<ns;s++){ if(etat.sets[cle(jourActif,i,s)]){ n++; faits++; } }
+      total+=ns;
+      var el=$('exo-'+i); if(el) el.classList.toggle('fait',ns>0&&n===ns);
     });
     $('hBarre').style.width=(total?faits/total*100:0)+'%';
     var t=$('btnTerminer');
@@ -1524,10 +1751,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function basculerVers(i,k){
     if(verrouille()) return;
     var prevu=DATA.jours[jourActif].exos[i], c=jourActif+'-'+i;
-    for(var s=0;s<nbSeries(jourActif,i,prevu);s++) delete etat.sets[cle(jourActif,i,s)];
+    var e0=exoEffectif(prevu,jourActif,i);
+    for(var s=0;s<nbSeries(jourActif,i,e0);s++) delete etat.sets[cle(jourActif,i,s)];
     delete etat.rpe[c]; delete etat.unites[c];
     if(etat.enPlus) delete etat.enPlus[c];
-    if(k===null) delete etat.subs[c]; else etat.subs[c]=prevu.substituts[k];
+    var liste=substitutsDe(jourActif,i);
+    var gs=(etat.gsubs||{})[c];
+    if(gs){
+      // on est sur un superset remplace en entier : changer, c'est changer le
+      // remplacant ; revenir, c'est retrouver les deux mouvements
+      if(k===null){ delete etat.gsubs[c]; }
+      else{ var n=copie(liste[k]); n._remplace=gs._remplace; etat.gsubs[c]=n; }
+    }else if(k===null){ delete etat.subs[c]; }
+    else{ etat.subs[c]=liste[k]; }
     sauver(); afficherJour(jourActif); construireOnglets();
     var el=$('exo-'+i); if(el) el.scrollIntoView({block:'start'});
   }

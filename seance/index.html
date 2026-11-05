@@ -101,8 +101,12 @@ body.chrono-actif .page{padding-bottom:104px;}
   color:#fff;background:var(--rouge);border-radius:6px;padding:5px 11px;}
 .sup-tech{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
   color:var(--rouge-vif);}
-.sup-mvts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.sup-mvt{display:flex;align-items:center;gap:9px;min-width:0;flex:1 1 180px;}
+/* a 375 px, deux mouvements cote a cote ne tiennent pas : le second passait
+   a la ligne et le « + » restait seul au bout du premier. On empile, et le
+   « + » se met au milieu — c'est d'ailleurs plus lisible. */
+.sup-mvts{display:flex;flex-direction:column;align-items:stretch;gap:5px;}
+.sup-mvt{display:flex;align-items:center;gap:9px;min-width:0;}
+.sup-plus{align-self:center;line-height:1;}
 .sup-gif{border:none;padding:0;background:#fff;border-radius:11px;position:relative;
   width:66px;height:66px;flex:none;cursor:pointer;overflow:hidden;}
 .sup-gif img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -207,16 +211,16 @@ body.chrono-actif .page{padding-bottom:104px;}
 /* ---------- le format : combien de series, de reps, de repos ----------
    Trois chiffres sur une ligne. Le repos est un BOUTON : c'est lui qui lance
    le chrono, l'etiquette de l'en-tete a disparu. */
-.c-fmtline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;
+.c-fmtline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;
   border-bottom:1px solid var(--ligne);}
 .f-it{font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
   color:var(--tres-faible);}
 .f-it b{font-size:16px;font-weight:800;color:var(--texte);letter-spacing:0;
   font-variant-numeric:tabular-nums;margin-right:4px;}
-.f-repos{margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+.f-repos{margin-left:auto;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
   border:1px solid var(--ligne);border-radius:8px;background:var(--surface);
   color:var(--tres-faible);font-family:inherit;font-size:10px;font-weight:700;
-  letter-spacing:1.1px;text-transform:uppercase;padding:7px 11px;cursor:pointer;min-height:40px;}
+  letter-spacing:.9px;text-transform:uppercase;padding:7px 10px;cursor:pointer;min-height:40px;}
 .f-repos b{font-size:13.5px;font-weight:800;color:var(--texte);letter-spacing:0;
   font-variant-numeric:tabular-nums;}
 .f-repos .ic{font-size:15px;color:var(--rouge-vif);}
@@ -914,18 +918,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var mr=String(p.format).match(/x\s*(\d+(?:\s*-\s*\d+)?)/i);
       reps=mr?mr[1].replace(/\s+/g,''):'';
     }
-    // le repos tel que le coach l'ecrit (« 2min-2min30 ») plutot que la seule
-    // valeur du chrono, qui n'en est que la borne basse
-    var txtRepos='';
+    // Le coach ecrit une fourchette (« 2min-2min30 ») : on affiche la borne
+    // HAUTE, c'est le repos annonce, et le chrono compte CETTE valeur — un
+    // bouton qui dit 2min30 et en compte 2 serait un piege.
+    var txtRepos='', secRepos=exo.repos||0;
     if(p.format){
       var mp=String(p.format).match(/([0-9][^\s]*)\s*(?:rest|repos)\s*$/i);
-      if(mp) txtRepos=mp[1];
+      if(mp){
+        var bouts=mp[1].split('-');
+        txtRepos=bouts[bouts.length-1];
+        var sx=secondes(txtRepos);
+        if(sx) secRepos=sx; else txtRepos='';
+      }
     }
-    if(!txtRepos) txtRepos=fmtMin(exo.repos);
+    if(!txtRepos) txtRepos=fmtMin(secRepos);
     h+='<div class="c-fmtline">'+
        '<span class="f-it"><b>'+nSet+'</b>set</span>'+
        ((ch.reps&&reps)?'<span class="f-it"><b>'+esc(reps)+'</b>reps</span>':'')+
-       (exo.repos?'<button class="f-repos" type="button" data-repos="'+i+'">'+
+       (secRepos?'<button class="f-repos" type="button" data-repos="'+i+'" data-sec="'+secRepos+'">'+
           tr('Repos')+' <b>'+esc(txtRepos)+'</b><span class="ic">⏱</span></button>':'')+
        '</div>';
 
@@ -1614,7 +1624,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var u=ev.target.closest('[data-unite]');
     if(u){ changerUnite(+u.dataset.exo, u.dataset.unite); return; }
     var rp=ev.target.closest('[data-repos]');
-    if(rp){ var e=exoCourant(+rp.dataset.repos); lancerRepos(e.repos, e.nom, tr('Repos')); return; }
+    if(rp){ var e=exoCourant(+rp.dataset.repos);
+            lancerRepos(+rp.dataset.sec||e.repos, e.nom, tr('Repos')); return; }
     var rc=ev.target.closest('[data-rope]');
     if(rc){ var ex=exoCourant(+rc.dataset.rope);
             lancerIntervalles(phasesRope(ex), ex.nom); return; }

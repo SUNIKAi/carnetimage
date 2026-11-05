@@ -631,6 +631,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var d=exo.derniere;
     return !!(d && String(d.unite||'').toUpperCase()==='PDC');
   }
+  // Les reps de l'objectif, SANS passer par prescrit() : celui-ci exige une
+  // unite (kg|lbs) et rend null au poids du corps — c'est ce qui faisait
+  // retomber les tractions sur la fourchette du type (20-25) malgre un
+  // objectif a 3 reps.
+  function repsObjectif(exo){
+    var o=(exo.prescription&&exo.prescription.objectif)||'';
+    var m=String(o).match(/(\d+)\s*\+?\s*reps/i);
+    return m?+m[1]:null;
+  }
   function uniteDe(exo){
     var pr=prescrit(exo); if(pr) return pr.unite;
     var d=derniereDe(exo);
@@ -1117,7 +1126,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       // L'OBJECTIF fait foi, pas la fourchette du type. Aux tractions
       // l'objectif disait « 10+ reps » et on suggerait 20 a 25 : exo.reps
       // vient de regle_serie pour le TYPE (PDC), pas de la prescription.
-      var ro=(prescrit(exo)||{}).reps, min, max;
+      var ro=repsObjectif(exo), min, max;
       if(ro){ min=+ro; max=min+4; }
       else{
         var r=(exo.reps||'').match(/(\d+)\s*-\s*(\d+)/);

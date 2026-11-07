@@ -517,6 +517,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // TOUT ce qui compte des series passe par nbSeries() : la saisie, l'envoi,
   // la progression et l'en-tete du jour.
   function enPlus(j,i){ return (etat.enPlus||{})[j+'-'+i]||0; }
+  // Ce qui est TAPE mais pas encore valide. Sans ca, le moindre redessin de la
+  // page (ajouter une serie, changer d'unite, revenir sur le jour) repartait de
+  // `etat.sets` et effacait le tableau en cours de remplissage.
+  function brouillon(j,i,s,type){ return (etat.brouillons||{})[cle(j,i,s)+'-'+type]||''; }
+  function noterBrouillon(inp){
+    if(!inp) return;
+    var k=cle(jourActif,+inp.dataset.exo,+inp.dataset.serie)+'-'+inp.dataset.champ;
+    etat.brouillons=etat.brouillons||{};
+    if(inp.value==='') delete etat.brouillons[k]; else etat.brouillons[k]=inp.value;
+    sauver();
+  }
+  function oublierBrouillons(i,n){
+    if(!etat.brouillons) return;
+    for(var s=0;s<n;s++){
+      delete etat.brouillons[cle(jourActif,i,s)+'-kg'];
+      delete etat.brouillons[cle(jourActif,i,s)+'-reps'];
+    }
+  }
   function nbSeries(j,i,exo){ return (exo.series||0)+enPlus(j,i); }
   function nb(x){ return (+x).toString(); }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -549,6 +567,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     "abdo:SINGLE SET":"Pick a hard or weighted exercise.\nDo as many reps as you can, to failure.\nWith no rest, go straight into as many floor leg raises as you can.\nWith no rest, finish with as many crunches as you can.\nDone.",
     // --- fin abdos
     'Tenue':'Hold',
+    'Série suivante':'Next set',
     'Charge':'Weight',
     'Remplacer tout le superset':'Replace the whole superset',
     'Rien à saisir sur ce superset.':'Nothing to log on this superset.',
@@ -816,6 +835,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     etat.subs=etat.subs||{}; etat.unites=etat.unites||{}; etat.termine=etat.termine||{};
     etat.enPlus=etat.enPlus||{};
     etat.semaine=DATA.semaine; etat.gsubs=etat.gsubs||{};
+    etat.brouillons=etat.brouillons||{};
     fixerLangue(DATA.lang);      // le serveur tranche, pas le telephone
     $('entete').hidden=false; $('fin').hidden=false;
     // L'intensite de la semaine et sa technique principale sont ce qui change
@@ -1105,6 +1125,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     g.forEach(function(i){
       var c=jourActif+'-'+i, e=exoEffectif(ex[i],jourActif,i);
       for(var t=0;t<nbSeries(jourActif,i,e);t++) delete etat.sets[cle(jourActif,i,t)];
+      oublierBrouillons(i,nbSeries(jourActif,i,e));
       delete etat.rpe[c]; delete etat.unites[c]; delete etat.subs[c];
       if(etat.enPlus) delete etat.enPlus[c];
     });
@@ -1247,10 +1268,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       '<span class="serie-num">'+esc(etiquette)+
         (rol?'<span class="serie-role">'+rol+'</span>':'')+'</span>'+
       (ch.charge?'<label class="champ"><input data-champ="kg" data-exo="'+i+'" data-serie="'+s+'" inputmode="decimal" '+
-         'placeholder="'+tr('charge')+'" aria-label="'+tr('Charge série')+' '+(s+1)+'" value="'+(v?v.kg:'')+'">'+
+         'placeholder="'+tr('charge')+'" aria-label="'+tr('Charge série')+' '+(s+1)+'" value="'+
+         (v?esc(v.kg):esc(brouillon(idx,i,s,'kg')))+'">'+
          '<span class="unite">'+un+'</span></label>':'')+
       (ch.reps?'<label class="champ"><input data-champ="reps" data-exo="'+i+'" data-serie="'+s+'" inputmode="numeric" '+
-         'placeholder="reps" aria-label="'+tr('Répétitions série')+' '+(s+1)+'" value="'+(v?v.reps:'')+'">'+
+         'placeholder="reps" aria-label="'+tr('Répétitions série')+' '+(s+1)+'" value="'+
+         (v?esc(v.reps):esc(brouillon(idx,i,s,'reps')))+'">'+
          '<span class="unite">reps</span></label>':'')+
       (!ch.charge&&!ch.reps?'<span class="rien-txt">'+tr('rien à saisir')+'</span>':'')+
       '<button class="valider" type="button" data-valide aria-label="'+tr('Valider la série')+' '+(s+1)+'">✓</button>'+
@@ -1503,7 +1526,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     valeurs.forEach(function(x){
       html+='<button type="button" data-pose="'+x+'" class="'+(x===cible?'cible':'')+'">'+nb(x)+'</button>';
     });
-    html+='<button type="button" data-toutes="1" class="toutes">'+tr('= toutes les séries')+'</button>';
+    // « Serie suivante » plutot que « toutes les series » : on recopie sur la
+    // ligne d'en dessous et on y descend, donc on peut corriger au passage.
+    if(s+1<nbSeries(jourActif,i,exo))
+      html+='<button type="button" data-suivante="1" class="toutes">'+tr('Série suivante')+' ↓</button>';
     var div=document.createElement('div');
     div.className='aide'; div.dataset.exo=i; div.dataset.serie=s; div.dataset.type=type;
     div.innerHTML=html;
@@ -1523,6 +1549,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(ev.target.closest('.aide')) return;
     fermerAide();
   });
+  // chaque frappe est retenue : c'est ce qui permet de redessiner la page
+  // (ajouter une serie, changer d'unite) sans effacer le tableau en cours
+  $('liste').addEventListener('input',function(ev){
+    var inp=ev.target.closest('input[data-champ]');
+    if(inp) noterBrouillon(inp);
+  });
   // garde le champ actif pendant qu'on touche un bouton d'aide
   $('liste').addEventListener('pointerdown',function(ev){
     if(ev.target.closest('.aide')) ev.preventDefault();
@@ -1541,14 +1573,29 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(a){
       var box=a.closest('.aide'), i=+box.dataset.exo, s=+box.dataset.serie, type=box.dataset.type;
       var exo=exoCourant(i);
-      if(a.dataset.toutes){
-        var src=champ(i,s,type).value;
-        for(var k=0;k<nbSeries(jourActif,i,exo);k++){ var c=champ(i,k,type); if(c) c.value=src; }
-        a.classList.add('choisi');
-      }else{
-        champ(i,s,type).value=a.dataset.pose;
+      if(a.dataset.suivante){
+        // On recopie les DEUX champs : une serie, c'est une charge ET des reps.
+        // Puis on descend d'un cran et on rouvre les suggestions — quatre clics
+        // remplissent quatre series, chacune modifiable au passage.
+        var ns=s+1;
+        if(ns<nbSeries(jourActif,i,exo)){
+          ['kg','reps'].forEach(function(ty){
+            var src=champ(i,s,ty), dst=champ(i,ns,ty);
+            if(src&&dst&&src.value!==''){ dst.value=src.value; noterBrouillon(dst); }
+          });
+          var suiv=champ(i,ns,type)||champ(i,ns,'kg')||champ(i,ns,'reps');
+          if(suiv){
+            ouvrirAide(suiv);
+            suiv.closest('.serie').scrollIntoView({block:'center',behavior:'smooth'});
+          }
+        }
+        return;
+      }
+      if(a.dataset.pose){
+        var cible_=champ(i,s,type);
+        if(cible_){ cible_.value=a.dataset.pose; noterBrouillon(cible_); }
         // La barre RESTE ouverte : on pose une valeur, on la corrige, puis on
-        // l'applique a toutes les series. Elle ne se ferme qu'en touchant
+        // descend a la serie suivante. Elle ne se ferme qu'en touchant
         // ailleurs (voir le pointerdown sur le document).
         [].forEach.call(box.querySelectorAll('[data-pose]'),function(x){
           x.classList.toggle('choisi', x===a); });
@@ -1664,12 +1711,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     if(avant===vers) return;
     etat.unites[c]=vers;
     var exo=exoCourant(i);
-    // convertir ce qui est déjà saisi, validé ou non
+    var vers_=function(x){ return vers==='lbs'?versLbs(+x):versKg(+x); };
+    // convertir ce qui est déjà saisi, validé ou non. Le pas tape vit dans
+    // les brouillons : c'est LUI qu'il faut convertir, le champ du navigateur
+    // sera redessine juste apres.
     for(var s=0;s<nbSeries(jourActif,i,exo);s++){
-      var inp=champ(i,s,'kg');
-      if(inp&&inp.value){ inp.value=nb(vers==='lbs'?versLbs(+inp.value):versKg(+inp.value)); }
-      var k=cle(jourActif,i,s);
-      if(etat.sets[k]) etat.sets[k].kg = vers==='lbs'?versLbs(etat.sets[k].kg):versKg(etat.sets[k].kg);
+      noterBrouillon(champ(i,s,'kg'));
+      var k=cle(jourActif,i,s), bk=k+'-kg';
+      if(etat.brouillons&&etat.brouillons[bk])
+        etat.brouillons[bk]=nb(vers_(etat.brouillons[bk]));
+      if(etat.sets[k]) etat.sets[k].kg = vers_(etat.sets[k].kg);
     }
     sauver(); afficherJour(jourActif); envoyer(i);
   }
@@ -1707,7 +1758,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var n=enPlus(jourActif,i)+delta;
     if(n<0) n=0;
     // en retirant, la saisie de la serie qui disparait part avec elle
-    if(delta<0) delete etat.sets[cle(jourActif,i,(exo.series||0)+n)];
+    if(delta<0){
+      var kDisp=cle(jourActif,i,(exo.series||0)+n);
+      delete etat.sets[kDisp];
+      if(etat.brouillons){ delete etat.brouillons[kDisp+'-kg'];
+                           delete etat.brouillons[kDisp+'-reps']; }
+    }
     etat.enPlus=etat.enPlus||{}; etat.enPlus[c]=n;
     sauver(); afficherJour(jourActif); envoyer(i);
   }
@@ -1764,6 +1820,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     var prevu=DATA.jours[jourActif].exos[i], c=jourActif+'-'+i;
     var e0=exoEffectif(prevu,jourActif,i);
     for(var s=0;s<nbSeries(jourActif,i,e0);s++) delete etat.sets[cle(jourActif,i,s)];
+    oublierBrouillons(i,nbSeries(jourActif,i,e0));
     delete etat.rpe[c]; delete etat.unites[c];
     if(etat.enPlus) delete etat.enPlus[c];
     var liste=substitutsDe(jourActif,i);

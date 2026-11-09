@@ -2037,7 +2037,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       comp.connect(sortie); sortie.connect(audio.destination);
       var t0=audio.currentTime;
       for(var k=0;k<5;k++){
-        var t=t0+k*0.30, f=(k%2)?2300:1760;
+        // 784 / 1176 Hz : moins criard que 1760 / 2300, et l'onde carree
+        // porte tout autant — ses harmoniques tombent dans la bande ou le
+        // haut-parleur du telephone donne tout
+        var t=t0+k*0.30, f=(k%2)?1176:784;
         [[f,0.9],[f*1.5,0.45]].forEach(function(v){
           var o=audio.createOscillator(), g=audio.createGain();
           o.type='square'; o.frequency.value=v[0];

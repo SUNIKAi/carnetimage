@@ -2022,23 +2022,31 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   // CARREE (riche en harmoniques), deux tons alternes comme une vraie alarme,
   // six bips au lieu de trois, et un compresseur qui laisse monter le volume
   // sans saturer.
+  // Meme recette que le chrono, pour la meme raison : le compresseur seul ne
+  // faisait que BAISSER le volume (il lui manquait un rattrapage de gain
+  // derriere), les bips etaient trop courts pour etre percus forts, et 990 Hz
+  // tombe dans la zone sourde d'un haut-parleur de telephone.
   function sonner(){
     try{
       if(!audio) return;
       var comp=audio.createDynamicsCompressor();
-      comp.threshold.value=-16; comp.ratio.value=12; comp.attack.value=0.002;
-      comp.connect(audio.destination);
+      comp.threshold.value=-6; comp.knee.value=12; comp.ratio.value=6;
+      comp.attack.value=0.001; comp.release.value=0.12;
+      var sortie=audio.createGain();
+      sortie.gain.value=4;
+      comp.connect(sortie); sortie.connect(audio.destination);
       var t0=audio.currentTime;
-      for(var k=0;k<6;k++){
-        var t=t0+k*0.33, f=(k%2)?1320:990;
-        [['square',0.55,1],['sine',0.25,2]].forEach(function(v){
+      for(var k=0;k<5;k++){
+        var t=t0+k*0.30, f=(k%2)?2300:1760;
+        [[f,0.9],[f*1.5,0.45]].forEach(function(v){
           var o=audio.createOscillator(), g=audio.createGain();
-          o.type=v[0]; o.frequency.value=f*v[2];
+          o.type='square'; o.frequency.value=v[0];
           o.connect(g); g.connect(comp);
           g.gain.setValueAtTime(0.0001,t);
-          g.gain.exponentialRampToValueAtTime(v[1],t+0.012);
-          g.gain.exponentialRampToValueAtTime(0.0001,t+0.27);
-          o.start(t); o.stop(t+0.3);
+          g.gain.exponentialRampToValueAtTime(v[1],t+0.008);
+          g.gain.setValueAtTime(v[1],t+0.20);
+          g.gain.exponentialRampToValueAtTime(0.0001,t+0.26);
+          o.start(t); o.stop(t+0.28);
         });
       }
     }catch(e){}

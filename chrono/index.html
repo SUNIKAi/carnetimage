@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chrono</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#121110">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chrono">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+<style>
+:root{
+  --fond:#111010; --surface:#1B1918; --haut:#262321; --ligne:#36312E;
+  --rouge:#D4210A; --rouge-vif:#FF4A1F; --texte:#F4F0EC;
+  --faible:#8E857E; --tres-faible:#5E5751;
+  /* une couleur par phase : en salle, on lit la couleur avant le mot */
+  --c-prepare:#C8820A; --c-travail:#D4210A; --c-repos:#262B33;
+  --c-recup:#39505E;   --c-fini:#2F7D4F;
+  --police:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{background:var(--fond);color:var(--texte);font:400 15px/1.45 var(--police);
+  -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;
+  overscroll-behavior:none;}
+button,input{font-family:inherit;}
+.num{font-variant-numeric:tabular-nums;}
+[hidden]{display:none!important;}
+
+/* ---------- ossature ---------- */
+.vue{min-height:100%;display:none;flex-direction:column;}
+.vue.ouverte{display:flex;}
+.page{flex:1;max-width:520px;width:100%;margin:0 auto;
+  padding:0 max(16px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px));}
+
+.barre{position:sticky;top:0;z-index:5;background:var(--fond);
+  display:flex;align-items:center;gap:10px;
+  padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-left,0px)) 12px;
+  border-bottom:1px solid var(--ligne);max-width:520px;margin:0 auto;}
+.barre h1{flex:1;min-width:0;margin:0;font-size:15px;font-weight:800;letter-spacing:2.4px;
+  text-transform:uppercase;text-align:center;}
+.b-txt{flex:none;background:none;border:none;color:var(--faible);cursor:pointer;
+  font-size:12.5px;font-weight:700;letter-spacing:.6px;padding:8px 2px;min-width:64px;}
+.b-txt.fort{color:var(--rouge-vif);text-align:right;}
+.b-txt.gauche{text-align:left;}
+
+/* ---------- accueil ---------- */
+.intro{padding:18px 0 6px;}
+.intro .t{font-size:24px;font-weight:800;letter-spacing:-.4px;margin:0;}
+.intro .s{font-size:13px;color:var(--faible);margin-top:3px;}
+.liste{display:flex;flex-direction:column;gap:10px;padding:14px 0 10px;}
+.carte{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--surface);border:1px solid var(--ligne);border-radius:13px;
+  padding:14px;cursor:pointer;color:inherit;}
+.carte:active{background:var(--haut);}
+.carte .cc{flex:1;min-width:0;}
+.carte .cn{font-size:16.5px;font-weight:700;line-height:1.2;}
+.carte .cd{font-size:12.5px;color:var(--faible);margin-top:3px;}
+.carte .ct{flex:none;font-size:19px;font-weight:800;color:var(--rouge-vif);letter-spacing:-.5px;}
+.carte .cm{flex:none;width:40px;height:40px;border-radius:10px;border:1px solid var(--ligne);
+  background:var(--haut);color:var(--faible);font-size:15px;cursor:pointer;}
+.vide{padding:40px 0;text-align:center;color:var(--faible);}
+.vide b{display:block;color:var(--texte);font-size:17px;font-weight:700;margin-bottom:6px;}
+.gros{width:100%;min-height:56px;border:none;border-radius:13px;background:var(--rouge);
+  color:#fff;font-size:14px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
+  cursor:pointer;margin-top:6px;}
+.gros.creux{background:transparent;color:var(--faible);box-shadow:inset 0 0 0 1px var(--ligne);}
+.gros.danger{background:transparent;color:var(--rouge-vif);box-shadow:inset 0 0 0 1px var(--rouge);}
+
+/* ---------- réglages ---------- */
+.champ-nom{width:100%;min-height:54px;background:var(--surface);color:var(--texte);
+  border:1px solid var(--ligne);border-radius:12px;padding:0 14px;
+  font-size:17px;font-weight:700;margin:18px 0 4px;}
+.champ-nom:focus{outline:none;border-color:var(--rouge);}
+.sstitre{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--tres-faible);padding:20px 2px 8px;}
+.reglage{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--ligne);}
+.reglage .pt{width:11px;height:11px;border-radius:50%;flex:none;}
+.reglage .rt{flex:1;min-width:0;}
+.reglage .rn{font-size:14.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;}
+.reglage .rd{font-size:11.5px;color:var(--faible);margin-top:1px;line-height:1.3;}
+.pas{display:flex;align-items:center;gap:0;flex:none;}
+.pas button{width:38px;height:44px;border:1px solid var(--ligne);background:var(--haut);
+  color:var(--texte);font-size:19px;font-weight:700;cursor:pointer;}
+.pas button:first-child{border-radius:10px 0 0 10px;}
+.pas button:last-child{border-radius:0 10px 10px 0;}
+.pas input{width:74px;height:44px;border:1px solid var(--ligne);border-left:none;border-right:none;
+  background:var(--fond);color:var(--texte);text-align:center;font-size:18px;font-weight:800;
+  font-variant-numeric:tabular-nums;padding:0;}
+.pas input:focus{outline:none;border-color:var(--rouge);}
+.total-ligne{display:flex;justify-content:space-between;align-items:baseline;
+  padding:18px 2px 0;border-top:1px solid var(--ligne);margin-top:4px;}
+.total-ligne span{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--tres-faible);}
+.total-ligne b{font-size:26px;font-weight:800;color:var(--rouge-vif);letter-spacing:-.8px;}
+
+/* ---------- séance ---------- */
+#vueSeance{background:var(--fond);}
+.s-haut{display:flex;align-items:center;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;}
+.s-haut .sn{flex:1;min-width:0;text-align:center;}
+.s-haut .sn .nn{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
+  color:var(--rouge-vif);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.s-haut .sn .tt{font-size:20px;font-weight:800;letter-spacing:-.4px;}
+.s-rond{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--ligne);
+  background:var(--surface);color:var(--faible);font-size:17px;cursor:pointer;}
+.panneau{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--c-travail);color:#fff;transition:background-color .25s;padding:20px 16px;}
+.panneau .ph{font-size:30px;font-weight:900;letter-spacing:2px;text-transform:uppercase;}
+.panneau .gros-temps{font-size:clamp(76px,26vw,132px);font-weight:800;line-height:.95;
+  letter-spacing:-5px;margin:8px 0 4px;font-variant-numeric:tabular-nums;}
+.panneau .sous{font-size:13px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;opacity:.75;}
+.panneau .sous b{display:block;font-size:26px;font-weight:800;letter-spacing:-.8px;margin-top:2px;}
+.panneau.fini{background:var(--c-fini);}
+.panneau.pause{filter:saturate(.45) brightness(.8);}
+.s-bas{display:flex;align-items:center;gap:14px;
+  padding:16px max(16px,env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px));}
+.s-tours{flex:1;min-width:0;}
+.s-tours b{display:block;font-size:34px;font-weight:800;line-height:1;color:var(--rouge-vif);
+  font-variant-numeric:tabular-nums;}
+.s-tours span{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--faible);}
+.go{flex:none;width:96px;height:96px;border-radius:50%;border:3px solid var(--rouge);
+  background:rgba(212,33,10,.14);color:var(--rouge-vif);font-size:34px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;}
+.go:active{background:rgba(212,33,10,.3);}
+.s-libelle{flex:1;min-width:0;text-align:right;font-size:10px;font-weight:800;
+  letter-spacing:1.4px;text-transform:uppercase;color:var(--faible);}
+
+/* ---------- divers ---------- */
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));
+  transform:translateX(-50%);background:var(--haut);color:var(--texte);
+  border:1px solid var(--ligne);border-radius:10px;padding:11px 16px;font-size:13.5px;
+  z-index:40;max-width:88vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.5);}
+.msg{padding:70px 16px;text-align:center;color:var(--faible);}
+.msg h2{font-size:19px;font-weight:700;color:var(--texte);margin:0 0 8px;}
+.msg p{margin:0 auto;max-width:300px;font-size:13.5px;line-height:1.6;}
+button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<!-- ===================== ACCUEIL ===================== -->
+<section class="vue ouverte" id="vueListe">
+  <div class="barre"><span class="b-txt gauche"></span><h1>Chrono</h1><span class="b-txt"></span></div>
+  <div class="page">
+    <div class="intro">
+      <p class="t" id="bonjour">Tes chronos</p>
+      <p class="s" id="sousTitre">Le dernier utilisé en premier.</p>
+    </div>
+    <div class="liste" id="liste"></div>
+    <button class="gros" id="btnNouveau">+ Nouveau chrono</button>
+  </div>
+</section>
+
+<!-- ===================== RÉGLAGES ===================== -->
+<section class="vue" id="vueReglages">
+  <div class="barre">
+    <button class="b-txt gauche" id="btnAnnuler">Annuler</button>
+    <h1 id="titreReglages">Nouveau</h1>
+    <button class="b-txt fort" id="btnSauver">Enregistrer</button>
+  </div>
+  <div class="page">
+    <input class="champ-nom" id="chNom" placeholder="Nom du chrono" maxlength="40">
+    <div class="sstitre">Intervalles</div>
+
+    <div class="reglage">
+      <span class="pt" style="background:var(--c-prepare)"></span>
+      <div class="rt"><div class="rn">Préparation</div><div class="rd">Décompte avant le départ</div></div>
+      <div class="pas"><button data-pas="prepare,-15">−</button>
+        <input class="num" id="chPrepare" inputmode="numeric" data-duree>
+        <button data-pas="prepare,15">+</button></div>
+    </div>
+
+    <div class="reglage">
+      <span class="pt" style="background:var(--c-travail)"></span>
+      <div class="rt"><div class="rn">Travail</div><div class="rd">La phase d'effort</div></div>
+      <div class="pas"><button data-pas="travail,-15">−</button>
+        <input class="num" id="chTravail" inputmode="numeric" data-duree>
+        <button data-pas="travail,15">+</button></div>
+    </div>
+
+    <div class="reglage">
+      <span class="pt" style="background:var(--c-repos)"></span>
+      <div class="rt"><div class="rn">Repos</div><div class="rd">La récupération, entre deux tours</div></div>
+      <div class="pas"><button data-pas="repos,-15">−</button>
+        <input class="num" id="chRepos" inputmode="numeric" data-duree>
+        <button data-pas="repos,15">+</button></div>
+    </div>
+
+    <div class="reglage">
+      <span class="pt" style="background:var(--rouge-vif)"></span>
+      <div class="rt"><div class="rn">Tours</div><div class="rd">Un tour = travail + repos</div></div>
+      <div class="pas"><button data-pas="tours,-1">−</button>
+        <input class="num" id="chTours" inputmode="numeric">
+        <button data-pas="tours,1">+</button></div>
+    </div>
+
+    <div class="reglage">
+      <span class="pt" style="background:var(--c-recup)"></span>
+      <div class="rt"><div class="rn">Retour au calme</div><div class="rd">Une fois, tout à la fin</div></div>
+      <div class="pas"><button data-pas="recup,-15">−</button>
+        <input class="num" id="chRecup" inputmode="numeric" data-duree>
+        <button data-pas="recup,15">+</button></div>
+    </div>
+
+    <div class="total-ligne"><span>Durée totale</span><b class="num" id="chTotal">—</b></div>
+    <div style="height:18px"></div>
+    <button class="gros danger" id="btnSupprimer" hidden>Supprimer ce chrono</button>
+  </div>
+</section>
+
+<!-- ===================== SÉANCE ===================== -->
+<section class="vue" id="vueSeance">
+  <div class="s-haut">
+    <button class="s-rond" id="btnQuitter" aria-label="Revenir à la liste">✕</button>
+    <div class="sn"><div class="nn" id="seNom"></div><div class="tt num" id="seTotal">0:00</div></div>
+    <button class="s-rond" id="btnReset" aria-label="Remettre à zéro">↺</button>
+  </div>
+  <div class="panneau" id="panneau">
+    <div class="ph" id="sePhase">Prêt</div>
+    <div class="gros-temps" id="seTemps">0:00</div>
+    <div class="sous" id="seSuite"></div>
+  </div>
+  <div class="s-bas">
+    <div class="s-tours"><b class="num" id="seTours">0</b><span>tours restants</span></div>
+    <button class="go" id="btnGo" aria-label="Démarrer">▶</button>
+    <div class="s-libelle" id="seLibelle">Démarrer</div>
+  </div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+
+  var API = 'https://aghftupaybcffvtzibds.supabase.co/rest/v1/rpc/';
+  var CLE = 'sb_publishable_vqFJ7bgqNbAtXfFFkAeSTg_diGfjPjz';
+
+  function $(id){ return document.getElementById(id); }
+  function lire(c){ try{ var v=localStorage.getItem(c); return v?JSON.parse(v):null; }catch(e){ return null; } }
+  function ecrire(c,v){ try{ localStorage.setItem(c,JSON.stringify(v)); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // Le jeton arrive dans le fragment, comme pour la seance : il ne part donc
+  // jamais au serveur web. S'il n'y est pas, on reprend celui que l'appli
+  // seance a deja range — meme domaine, donc meme localStorage.
+  var jeton = (location.hash||'').replace(/[^A-Za-z0-9_-]/g,'');
+  try{
+    if(jeton) localStorage.setItem('seance-jeton',jeton);
+    else jeton = localStorage.getItem('seance-jeton') || '';
+  }catch(e){}
+
+  function rpc(f,args){
+    return fetch(API+f,{method:'POST',
+      headers:{'apikey':CLE,'Authorization':'Bearer '+CLE,'Content-Type':'application/json'},
+      body:JSON.stringify(args)})
+      .then(function(r){
+        if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+' '+t); });
+        return r.text().then(function(t){ return t.trim()?JSON.parse(t):null; });
+      });
+  }
+
+  var minuteur=null;
+  function toast(txt){
+    var d=document.createElement('div'); d.className='toast'; d.textContent=txt;
+    document.body.appendChild(d);
+    clearTimeout(minuteur); minuteur=setTimeout(function(){ d.remove(); },2600);
+  }
+
+  // ---------- temps ----------
+  function mmss(s){
+    s=Math.max(0,Math.round(s));
+    var m=Math.floor(s/60), r=s%60;
+    return m+':'+('0'+r).slice(-2);
+  }
+  // « 90 » = 90 s, « 1:30 » = 90 s, « 1.30 » aussi : on accepte ce qui vient
+  function versSec(txt){
+    var t=String(txt||'').trim().replace(',','.');
+    if(!t) return 0;
+    var m=t.match(/^(\d+)\s*[:.]\s*(\d{1,2})$/);
+    if(m) return (+m[1])*60 + Math.min(59,+m[2]);
+    var n=parseInt(t.replace(/[^\d]/g,''),10);
+    return isNaN(n)?0:n;
+  }
+  function totalDe(c){
+    return (c.prepare||0) + (c.tours||1)*((c.travail||0)+(c.repos||0)) + (c.recup||0);
+  }
+  function resume(c){
+    var p=[];
+    if(c.prepare) p.push(mmss(c.prepare)+' prépa');
+    p.push(mmss(c.travail)+(c.repos?' / '+mmss(c.repos):'')+' × '+(c.tours||1));
+    if(c.recup) p.push(mmss(c.recup)+' calme');
+    return p.join('  ·  ');
+  }
+
+  // ---------- le son ----------
+  // « ambient » : le bip SE MELE a la musique au lieu de la couper. C'est le
+  // reglage que Vincent a choisi. Contrepartie : il se tait si le telephone
+  // est en silencieux — ce qui n'arrive pas quand on ecoute de la musique.
+  var audio=null;
+  function reveiller(){
+    try{
+      if(navigator.audioSession) navigator.audioSession.type='ambient';
+    }catch(e){}
+    try{
+      if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)();
+      if(audio.state==='suspended') audio.resume();
+    }catch(e){}
+  }
+  // Une onde carree porte bien mieux qu'une sinusoide sur un haut-parleur de
+  // telephone, qui coupe les graves et ne rend que les harmoniques.
+  function biper(n,aigu){
+    try{
+      if(!audio) return;
+      var comp=audio.createDynamicsCompressor();
+      comp.threshold.value=-16; comp.ratio.value=12; comp.attack.value=0.002;
+      comp.connect(audio.destination);
+      var t0=audio.currentTime;
+      for(var k=0;k<n;k++){
+        var t=t0+k*0.23, f=aigu?1480:990;
+        [['square',0.5,1],['sine',0.22,2]].forEach(function(v){
+          var o=audio.createOscillator(), g=audio.createGain();
+          o.type=v[0]; o.frequency.value=f*v[2];
+          o.connect(g); g.connect(comp);
+          g.gain.setValueAtTime(0.0001,t);
+          g.gain.exponentialRampToValueAtTime(v[1],t+0.012);
+          g.gain.exponentialRampToValueAtTime(0.0001,t+0.19);
+          o.start(t); o.stop(t+0.22);
+        });
+      }
+    }catch(e){}
+    try{ if(navigator.vibrate) navigator.vibrate(aigu?[300,120,300]:220); }catch(e){}
+  }
+
+  // ---------- écran allumé ----------
+  var verrou=null;
+  function garderEcran(){
+    try{ if(navigator.wakeLock && !verrou)
+      navigator.wakeLock.request('screen').then(function(v){ verrou=v;
+        v.addEventListener('release',function(){ verrou=null; }); }).catch(function(){});
+    }catch(e){}
+  }
+  function relacherEcran(){ if(verrou){ try{ verrou.release(); }catch(e){} verrou=null; } }
+
+  // ---------- les vues ----------
+  function montrer(id){
+    ['vueListe','vueReglages','vueSeance'].forEach(function(v){
+      $(v).classList.toggle('ouverte', v===id);
+    });
+    window.scrollTo(0,0);
+  }
+
+  // ===================== ACCUEIL =====================
+  var CHRONOS=[];
+  var CLE_CACHE='chronos-'+jeton;
+
+  function dessinerListe(){
+    var l=$('liste');
+    if(!CHRONOS.length){
+      l.innerHTML='<div class="vide"><b>Aucun chrono</b>'+
+        'Crée ton premier : préparation, travail, repos, tours, retour au calme.</div>';
+      return;
+    }
+    l.innerHTML=CHRONOS.map(function(c,k){
+      return '<div class="carte" data-ouvrir="'+k+'">'+
+        '<div class="cc"><div class="cn">'+esc(c.nom)+'</div>'+
+        '<div class="cd">'+esc(resume(c))+'</div></div>'+
+        '<div class="ct num">'+mmss(totalDe(c))+'</div>'+
+        '<button class="cm" data-modifier="'+k+'" aria-label="Modifier">✎</button></div>';
+    }).join('');
+  }
+
+  function charger(){
+    var cache=lire(CLE_CACHE);
+    if(cache){ CHRONOS=cache; dessinerListe(); }
+    return rpc('chronos_eleve',{p_jeton:jeton}).then(function(r){
+      CHRONOS=r||[]; ecrire(CLE_CACHE,CHRONOS); dessinerListe();
+    }).catch(function(){
+      if(!cache) $('liste').innerHTML='<div class="vide"><b>Hors ligne</b>'+
+        'Tes chronos reviendront dès que tu auras du réseau.</div>';
+    });
+  }
+
+  $('liste').addEventListener('click',function(ev){
+    var m=ev.target.closest('[data-modifier]');
+    if(m){ ev.stopPropagation(); ouvrirReglages(CHRONOS[+m.dataset.modifier]); return; }
+    var o=ev.target.closest('[data-ouvrir]');
+    if(o) ouvrirSeance(CHRONOS[+o.dataset.ouvrir]);
+  });
+  $('btnNouveau').addEventListener('click',function(){ ouvrirReglages(null); });
+
+  // ===================== RÉGLAGES =====================
+  var enEdition=null;
+  var CHAMPS={prepare:'chPrepare', travail:'chTravail', repos:'chRepos',
+              tours:'chTours', recup:'chRecup'};
+
+  function lireFormulaire(){
+    return {nom:$('chNom').value.trim(),
+            prepare:versSec($('chPrepare').value),
+            travail:versSec($('chTravail').value),
+            repos:versSec($('chRepos').value),
+            tours:Math.max(1,parseInt($('chTours').value,10)||1),
+            recup:versSec($('chRecup').value)};
+  }
+  function poserFormulaire(c){
+    $('chNom').value=c.nom||'';
+    $('chPrepare').value=mmss(c.prepare||0);
+    $('chTravail').value=mmss(c.travail||0);
+    $('chRepos').value=mmss(c.repos||0);
+    $('chTours').value=c.tours||1;
+    $('chRecup').value=mmss(c.recup||0);
+    majTotal();
+  }
+  function majTotal(){ $('chTotal').textContent=mmss(totalDe(lireFormulaire())); }
+
+  function ouvrirReglages(c){
+    enEdition=c||null;
+    $('titreReglages').textContent=c?'Modifier':'Nouveau';
+    $('btnSupprimer').hidden=!c;
+    poserFormulaire(c||{nom:'',prepare:10,travail:60,repos:60,tours:5,recup:0});
+    montrer('vueReglages');
+    if(!c) setTimeout(function(){ $('chNom').focus(); },120);
+  }
+
+  $('vueReglages').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-pas]');
+    if(!b) return;
+    var p=b.dataset.pas.split(','), cle=p[0], d=+p[1];
+    var inp=$(CHAMPS[cle]);
+    if(cle==='tours'){
+      inp.value=Math.max(1,(parseInt(inp.value,10)||1)+d);
+    }else{
+      inp.value=mmss(Math.max(0, versSec(inp.value)+d));
+    }
+    majTotal();
+  });
+  // on normalise a la sortie du champ : « 90 » devient « 1:30 »
+  Object.keys(CHAMPS).forEach(function(cle){
+    var inp=$(CHAMPS[cle]);
+    inp.addEventListener('input',majTotal);
+    inp.addEventListener('blur',function(){
+      if(cle==='tours') inp.value=Math.max(1,parseInt(inp.value,10)||1);
+      else inp.value=mmss(versSec(inp.value));
+      majTotal();
+    });
+  });
+
+  $('btnAnnuler').addEventListener('click',function(){ montrer('vueListe'); });
+
+  $('btnSauver').addEventListener('click',function(){
+    var c=lireFormulaire();
+    if(!c.nom){ toast('Donne-lui un nom'); $('chNom').focus(); return; }
+    if(totalDe(c)<=0){ toast('Un chrono entièrement à zéro ne compterait rien'); return; }
+    var args={p_jeton:jeton, p_nom:c.nom, p_prepare:c.prepare, p_travail:c.travail,
+              p_repos:c.repos, p_tours:c.tours, p_recup:c.recup};
+    if(enEdition) args.p_id=enEdition.id;
+    $('btnSauver').disabled=true;
+    rpc('enregistrer_chrono',args)
+      .then(function(){ return charger(); })
+      .then(function(){ $('btnSauver').disabled=false; montrer('vueListe'); toast('Enregistré'); })
+      .catch(function(){ $('btnSauver').disabled=false; toast('Enregistrement impossible'); });
+  });
+
+  $('btnSupprimer').addEventListener('click',function(){
+    if(!enEdition) return;
+    if(!window.confirm('Supprimer « '+enEdition.nom+' » ?')) return;
+    rpc('supprimer_chrono',{p_jeton:jeton,p_id:enEdition.id})
+      .then(function(){ return charger(); })
+      .then(function(){ montrer('vueListe'); toast('Supprimé'); })
+      .catch(function(){ toast('Suppression impossible'); });
+  });
+
+  // ===================== SÉANCE =====================
+  // La suite des phases est calculee une fois pour toutes au demarrage : plus
+  // simple a suivre qu'un automate, et le total ne peut pas deriver.
+  var PH={prepare:{nom:'Préparation',couleur:'var(--c-prepare)'},
+          travail:{nom:'Travail',   couleur:'var(--c-travail)'},
+          repos:  {nom:'Repos',     couleur:'var(--c-repos)'},
+          recup:  {nom:'Retour au calme',couleur:'var(--c-recup)'}};
+
+  function suiteDe(c){
+    var s=[];
+    if(c.prepare>0) s.push({t:'prepare',sec:c.prepare,tour:0});
+    for(var r=1;r<=(c.tours||1);r++){
+      if(c.travail>0) s.push({t:'travail',sec:c.travail,tour:r});
+      if(c.repos>0)   s.push({t:'repos',  sec:c.repos,  tour:r});
+    }
+    if(c.recup>0) s.push({t:'recup',sec:c.recup,tour:c.tours||1});
+    return s;
+  }
+
+  var courant=null, suite=[], iPhase=0, finAt=0, restePause=0,
+      enMarche=false, raf=null, tempsTotal=0;
+
+  function ouvrirSeance(c){
+    courant=c; suite=suiteDe(c); iPhase=0; enMarche=false;
+    tempsTotal=totalDe(c);
+    restePause=suite.length?suite[0].sec*1000:0;
+    $('seNom').textContent=c.nom;
+    montrer('vueSeance');
+    peindre();
+    rpc('utiliser_chrono',{p_jeton:jeton,p_id:c.id})
+      .then(function(){ return charger(); }).catch(function(){});
+  }
+
+  function resteDansPhase(){
+    return enMarche ? Math.max(0,finAt-Date.now()) : restePause;
+  }
+  function resteEnTout(){
+    var ms=resteDansPhase();
+    for(var k=iPhase+1;k<suite.length;k++) ms+=suite[k].sec*1000;
+    return ms;
+  }
+  function toursRestants(){
+    var vus={};
+    for(var k=iPhase;k<suite.length;k++) if(suite[k].tour) vus[suite[k].tour]=1;
+    return Object.keys(vus).length;
+  }
+
+  function peindre(){
+    var p=$('panneau');
+    if(iPhase>=suite.length){
+      p.style.background='';
+      p.classList.add('fini'); p.classList.remove('pause');
+      $('sePhase').textContent='Terminé';
+      $('seTemps').textContent='0:00';
+      $('seSuite').innerHTML='';
+      $('seTotal').textContent=mmss(0);
+      $('seTours').textContent='0';
+      $('btnGo').textContent='▶'; $('seLibelle').textContent='Recommencer';
+      return;
+    }
+    var ph=suite[iPhase], info=PH[ph.t];
+    p.classList.remove('fini');
+    p.classList.toggle('pause',!enMarche);
+    p.style.background=info.couleur;
+    $('sePhase').textContent=info.nom;
+    $('seTemps').textContent=mmss(resteDansPhase()/1000);
+    $('seSuite').innerHTML=ph.tour
+      ? 'Tour '+ph.tour+' sur '+(courant.tours||1)+'<b>'+mmss(ph.sec)+'</b>'
+      : '<b>'+mmss(ph.sec)+'</b>';
+    $('seTotal').textContent=mmss(resteEnTout()/1000);
+    $('seTours').textContent=toursRestants();
+    $('btnGo').textContent=enMarche?'❚❚':'▶';
+    $('seLibelle').textContent=enMarche?'Pause':'Démarrer';
+  }
+
+  function boucle(){
+    if(!enMarche) return;
+    var ms=resteDansPhase();
+    if(ms<=0){
+      iPhase++;
+      if(iPhase>=suite.length){
+        enMarche=false; relacherEcran(); biper(3,true); peindre(); return;
+      }
+      // on ENCHAINE : un signal sonore, et l'activite continue
+      biper(iPhase<suite.length?2:1,false);
+      finAt=Date.now()+suite[iPhase].sec*1000;
+      peindre();
+      raf=requestAnimationFrame(boucle);
+      return;
+    }
+    $('seTemps').textContent=mmss(ms/1000);
+    $('seTotal').textContent=mmss(resteEnTout()/1000);
+    raf=requestAnimationFrame(boucle);
+  }
+
+  function demarrer(){
+    if(iPhase>=suite.length){ iPhase=0; restePause=suite.length?suite[0].sec*1000:0; }
+    if(!suite.length){ toast('Ce chrono ne contient aucune phase'); return; }
+    reveiller(); garderEcran();
+    enMarche=true;
+    finAt=Date.now()+restePause;
+    peindre();
+    biper(1,false);
+    raf=requestAnimationFrame(boucle);
+  }
+  function mettreEnPause(){
+    restePause=resteDansPhase();
+    enMarche=false;
+    if(raf) cancelAnimationFrame(raf);
+    relacherEcran();
+    peindre();
+  }
+
+  $('btnGo').addEventListener('click',function(){ enMarche?mettreEnPause():demarrer(); });
+  $('btnReset').addEventListener('click',function(){
+    enMarche=false; if(raf) cancelAnimationFrame(raf);
+    relacherEcran();
+    iPhase=0; restePause=suite.length?suite[0].sec*1000:0;
+    peindre();
+  });
+  $('btnQuitter').addEventListener('click',function(){
+    enMarche=false; if(raf) cancelAnimationFrame(raf);
+    relacherEcran(); montrer('vueListe');
+  });
+
+  // l'onglet revient au premier plan : on rattrape le temps passe en arriere
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState!=='visible' || !enMarche) return;
+    garderEcran();
+    while(iPhase<suite.length && resteDansPhase()<=0){
+      iPhase++;
+      if(iPhase<suite.length) finAt=Date.now()+suite[iPhase].sec*1000;
+    }
+    if(iPhase>=suite.length){ enMarche=false; relacherEcran(); }
+    peindre();
+    if(enMarche) raf=requestAnimationFrame(boucle);
+  });
+
+  // ===================== DÉMARRAGE =====================
+  if(!jeton){
+    document.body.innerHTML='<div class="msg"><h2>Lien incomplet</h2>'+
+      '<p>Ouvre le lien personnel que ton coach t’a envoyé : il se termine par '+
+      'un code après le #.</p></div>';
+    return;
+  }
+  charger();
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    });
+  }
+})();
+</script>
+</body>
+</html>

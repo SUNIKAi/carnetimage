@@ -70,7 +70,7 @@ button,input{font-family:inherit;}
 .vol{display:flex;align-items:center;gap:8px;padding:18px 2px 0;}
 .vol span{flex:1;min-width:0;font-size:10px;font-weight:800;letter-spacing:1.6px;
   text-transform:uppercase;color:var(--tres-faible);}
-.vol button{flex:none;min-height:40px;padding:0 14px;border-radius:10px;
+.vol button{flex:none;min-height:40px;padding:0 12px;border-radius:10px;
   border:1px solid var(--ligne);background:var(--haut);color:var(--texte);
   font-size:12.5px;font-weight:700;cursor:pointer;}
 .vol button:active{background:var(--ligne);}
@@ -165,7 +165,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     <div class="liste" id="liste"></div>
     <button class="gros" id="btnNouveau">+ Nouveau chrono</button>
     <div class="vol">
-      <span>Volume du bip</span>
+      <span>Le bip</span>
+      <button type="button" id="btnTon">Moyen</button>
       <button type="button" id="btnVolume">Normal</button>
       <button type="button" id="btnEssaiSon">Écouter</button>
     </div>
@@ -324,6 +325,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   var VOLUMES=[1.6,3,4.5,6], NOMS=['Doux','Normal','Fort','Maximum'];
   var iVol=(function(){ var v=lire('chrono-volume'); return (v===null||v<0||v>3)?1:v; })();
   var VOLUME=VOLUMES[iVol];
+  // La tonalite. L'onde reste CARREE dans les trois cas : c'est elle qui
+  // porte, meme grave, parce que ses harmoniques tombent dans la bande ou le
+  // haut-parleur du telephone donne tout.
+  var TONS=[[523,784],[784,1176],[1760,2640]], NOMS_TON=['Grave','Moyen','Aigu'];
+  var iTon=(function(){ var v=lire('chrono-ton'); return (v===null||v<0||v>2)?1:v; })();
   function reveiller(){
     try{
       if(navigator.audioSession) navigator.audioSession.type='ambient';
@@ -349,10 +355,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       var sortie=audio.createGain();
       sortie.gain.value=VOLUME;          // le rattrapage, c'est lui qui porte
       comp.connect(sortie); sortie.connect(audio.destination);
-      var t0=audio.currentTime, base=aigu?2300:1760;
+      // la fin de seance monte d'un cran dans la meme famille : on reconnait
+      // le son, on entend qu'il est different
+      var paire=TONS[Math.min(2, iTon + (aigu?1:0))];
+      var t0=audio.currentTime;
       for(var k=0;k<n;k++){
         var t=t0+k*0.30;
-        [[base,0.9],[base*1.5,0.45]].forEach(function(v){
+        [[paire[0],0.9],[paire[1],0.45]].forEach(function(v){
           var o=audio.createOscillator(), g=audio.createGain();
           o.type='square'; o.frequency.value=v[0];
           o.connect(g); g.connect(comp);
@@ -424,13 +433,20 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   });
   $('btnNouveau').addEventListener('click',function(){ ouvrirReglages(null); });
 
-  function majVolume(){ $('btnVolume').textContent=NOMS[iVol]; }
+  function majSon(){
+    $('btnVolume').textContent=NOMS[iVol];
+    $('btnTon').textContent=NOMS_TON[iTon];
+  }
   $('btnVolume').addEventListener('click',function(){
     iVol=(iVol+1)%VOLUMES.length; VOLUME=VOLUMES[iVol];
-    ecrire('chrono-volume',iVol); majVolume(); reveiller(); biper(1,false);
+    ecrire('chrono-volume',iVol); majSon(); reveiller(); biper(1,false);
+  });
+  $('btnTon').addEventListener('click',function(){
+    iTon=(iTon+1)%TONS.length;
+    ecrire('chrono-ton',iTon); majSon(); reveiller(); biper(1,false);
   });
   $('btnEssaiSon').addEventListener('click',function(){ reveiller(); biper(2,false); });
-  majVolume();
+  majSon();
 
   // ===================== RÉGLAGES =====================
   var enEdition=null;

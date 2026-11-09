@@ -424,7 +424,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   function ouvrirReglages(c){
     enEdition=c||null;
     $('titreReglages').textContent=c?'Modifier':'Nouveau';
-    $('btnSupprimer').hidden=!c;
+    $('btnSupprimer').hidden=!c; desarmerSuppr();
     poserFormulaire(c||{nom:'',prepare:10,travail:60,repos:60,tours:5,recup:0});
     montrer('vueReglages');
     if(!c) setTimeout(function(){ $('chNom').focus(); },120);
@@ -469,9 +469,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       .catch(function(){ $('btnSauver').disabled=false; toast('Enregistrement impossible'); });
   });
 
+  // Suppression en DEUX temps, dans la page. Un `window.confirm` natif bloque
+  // tout le navigateur tant qu'on n'y repond pas, et il n'a pas sa place dans
+  // une application installee sur l'ecran d'accueil.
+  var armeSuppr=false, minuteurSuppr=null;
+  function desarmerSuppr(){
+    armeSuppr=false; clearTimeout(minuteurSuppr);
+    $('btnSupprimer').textContent='Supprimer ce chrono';
+    $('btnSupprimer').classList.add('danger');
+  }
   $('btnSupprimer').addEventListener('click',function(){
     if(!enEdition) return;
-    if(!window.confirm('Supprimer « '+enEdition.nom+' » ?')) return;
+    if(!armeSuppr){
+      armeSuppr=true;
+      this.textContent='Confirmer la suppression';
+      minuteurSuppr=setTimeout(desarmerSuppr,5000);
+      return;
+    }
+    desarmerSuppr();
     rpc('supprimer_chrono',{p_jeton:jeton,p_id:enEdition.id})
       .then(function(){ return charger(); })
       .then(function(){ montrer('vueListe'); toast('Supprimé'); })

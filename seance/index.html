@@ -49,7 +49,7 @@ body{
   -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;
 }
 .page{max-width:460px;margin:0 auto;padding-bottom:24px;}
-body.chrono-actif .page{padding-bottom:104px;}
+body.chrono-actif .page{padding-bottom:152px;}
 
 /* ---------- entête ---------- */
 .entete{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--fond);
@@ -187,6 +187,25 @@ body.chrono-actif .page{padding-bottom:104px;}
 .c-tete .fl{font-size:11px;color:var(--tres-faible);flex:none;margin-right:auto;}
 .carte.test .c-tete .fl{color:var(--ambre);}
 .c-tete .mini{flex:none;width:72px;opacity:.95;}
+/* le schema de la technique, sur sa propre ligne et a sa vraie taille */
+.c-schema{padding:10px 14px 12px;border-bottom:1px dashed var(--ligne);}
+.c-schema svg{width:100%;max-width:250px;height:auto;display:block;}
+.sch-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--faible);margin-top:6px;}
+/* une case par serie : son numero, sa charge, son role */
+.plan-liste{display:flex;gap:6px;margin-top:6px;}
+.plan-set{flex:1;min-width:0;text-align:center;border:1px solid var(--ligne);
+  border-radius:4px;padding:6px 3px 5px;background:var(--surface);}
+.plan-set.fort{border-color:var(--accent);background:var(--accent);}
+.ps-n{display:block;font-size:8.5px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;color:var(--tres-faible);}
+.plan-set.fort .ps-n{color:rgba(255,255,255,.75);}
+.ps-v{display:block;font-family:var(--chiffres);font-size:20px;font-weight:600;
+  line-height:1.15;color:var(--texte);}
+.plan-set.fort .ps-v{color:#fff;}
+.ps-r{display:block;font-size:8px;font-weight:600;letter-spacing:.4px;
+  text-transform:uppercase;color:var(--tres-faible);margin-top:1px;}
+.plan-set.fort .ps-r{color:rgba(255,255,255,.85);}
 .c-tete .mini svg{width:100%;height:auto;display:block;}
 .c-tete .mini .lbl{display:none;}
 .c-expli{padding:10px 14px;border-bottom:1px dashed var(--ligne);
@@ -211,9 +230,9 @@ body.chrono-actif .page{padding-bottom:104px;}
 .c-alt{font-size:13px;font-weight:600;color:var(--tres-faible);}
 .c-reps{font-family:var(--chiffres);font-size:21px;font-weight:600;color:var(--accent);margin-left:auto;}
 .carte.test .c-val,.carte.test .c-tech{color:var(--ambre);}
-.c-plan{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 14px 13px;}
-.c-plan .lbl{font-size:9.5px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;
-  color:var(--tres-faible);margin-right:2px;}
+.c-plan{display:block;padding:10px 14px 14px;}
+.c-plan .lbl{display:block;font-size:9.5px;font-weight:600;letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--tres-faible);}
 .chip{min-width:40px;text-align:center;padding:4px 8px;border-radius:4px;
   font-family:var(--chiffres);font-size:15px;font-weight:600;
   background:var(--accent);color:#fff;}
@@ -392,20 +411,31 @@ body.chrono-actif .page{padding-bottom:104px;}
   pointer-events:none;}
 .chrono-zone[hidden]{display:none!important;}
 .chrono{max-width:460px;margin:0 auto;border-radius:6px;background:var(--surface);
-  border:1px solid var(--ligne-forte);overflow:hidden;pointer-events:auto;
-  box-shadow:0 6px 22px rgba(27,25,21,.22);}
-.ch-barre{height:3px;background:var(--ligne);}
+  border:2px solid var(--ligne-forte);overflow:hidden;pointer-events:auto;
+  box-shadow:0 8px 28px rgba(27,25,21,.3);}
+.ch-barre{height:6px;background:var(--ligne);}
 .ch-barre span{display:block;height:100%;background:var(--accent);width:100%;}
-.chrono.fini .ch-barre span{background:var(--accent-vif);}
-.ch-corps{display:flex;align-items:center;gap:10px;padding:9px 11px;}
-.ch-temps{font-family:var(--chiffres);font-size:25px;font-weight:600;line-height:1;flex:none;min-width:66px;}
-.chrono.fini .ch-temps{color:var(--accent-vif);animation:battement .55s infinite alternate;}
-@keyframes battement{to{opacity:.4;}}
-.ch-nom{flex:1;min-width:0;font-size:11px;color:var(--faible);line-height:1.3;
+.chrono.fini .ch-barre span{background:#fff;}
+.ch-corps{display:flex;align-items:center;gap:12px;padding:12px 14px;}
+.ch-txt{flex:1;min-width:0;}
+.ch-temps{display:block;font-family:var(--chiffres);font-size:48px;font-weight:600;
+  line-height:1;letter-spacing:-1.5px;margin-top:1px;}
+.ch-nom{display:block;font-size:10.5px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--faible);line-height:1.3;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.ch-corps button{min-height:36px;padding:0 11px;border-radius:4px;border:1px solid var(--ligne);
-  background:var(--haut);color:var(--faible);font-family:inherit;font-size:11px;font-weight:600;
-  letter-spacing:.8px;text-transform:uppercase;cursor:pointer;flex:none;}
+.ch-btns{display:flex;flex-direction:column;gap:6px;flex:none;}
+.ch-corps button{min-height:42px;min-width:64px;padding:0 12px;border-radius:4px;
+  border:1px solid var(--ligne);background:var(--haut);color:var(--faible);font-family:inherit;
+  font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;}
+/* a zero, TOUT le bandeau passe en rouge et bat : on le voit de l'autre bout
+   de la salle, meme telephone pose par terre */
+.chrono.fini{background:var(--accent);border-color:var(--accent);
+  animation:battement .5s infinite alternate;}
+.chrono.fini .ch-nom{color:rgba(255,255,255,.85);}
+.chrono.fini .ch-temps{color:#fff;}
+.chrono.fini .ch-corps button{background:rgba(255,255,255,.2);
+  border-color:rgba(255,255,255,.55);color:#fff;}
+@keyframes battement{to{filter:brightness(1.4);}}
 
 /* ---------- historique / bilan ---------- */
 .hist,.bilan{position:fixed;inset:0;z-index:22;background:var(--fond);overflow-y:auto;
@@ -465,10 +495,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   <div class="chrono" id="chrono">
     <div class="ch-barre"><span id="chBarre"></span></div>
     <div class="ch-corps">
-      <span class="ch-temps" id="chTemps">0:00</span>
-      <span class="ch-nom" id="chNom"></span>
-      <button id="chPlus" type="button">+15s</button>
-      <button id="chStop" type="button">✕</button>
+      <div class="ch-txt">
+        <span class="ch-nom" id="chNom"></span>
+        <span class="ch-temps" id="chTemps">0:00</span>
+      </div>
+      <div class="ch-btns">
+        <button id="chPlus" type="button">+15s</button>
+        <button id="chStop" type="button">✕</button>
+      </div>
     </div>
   </div>
 </div>
@@ -589,6 +623,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     "abdo:SINGLE SET":"Pick a hard or weighted exercise.\nDo as many reps as you can, to failure.\nWith no rest, go straight into as many floor leg raises as you can.\nWith no rest, finish with as many crunches as you can.\nDone.",
     // --- fin abdos
     'Tenue':'Hold',
+    'effectif':'work set',
+    'top set':'top set',
+    'back-off':'back-off',
     'Série suivante':'Next set',
     'Charge':'Weight',
     'Remplacer tout le superset':'Replace the whole superset',
@@ -936,19 +973,25 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     }
     var h='<div class="carte'+(p.cas===1?' test':'')+'">';
 
-    // 1. la technique a gauche, son schema a droite. Un clic ouvre l'explication.
+    // 1. la technique, puis SON SCHEMA SUR SA PROPRE LIGNE. A 72 px de large,
+    //    coince a droite du titre, ses legendes faisaient 4 px : personne ne
+    //    pouvait les lire. Il prend maintenant la largeur de la carte, et son
+    //    intitule (« 2 TOP SET + BACK OFF SET ») sort du repli.
     var expli=p.philosophie||'';
-    var depliable=!!(expli||p.schema_label);
+    var depliable=!!expli;
     if(p.technique||p.schema_svg){
       h+='<button class="c-tete'+(depliable?'':' fixe')+'" type="button"'+
            (depliable?' data-tech="'+i+'" aria-expanded="false"':' disabled')+'>'+
            '<span class="c-tech">'+esc(p.technique||tr('Technique'))+'</span>'+
            (depliable?'<span class="fl">▾</span>':'')+
-           (p.schema_svg?'<span class="mini">'+p.schema_svg+'</span>':'')+
          '</button>';
       if(depliable){
-        h+='<div class="c-expli" id="tech-'+i+'" hidden>'+esc(expli)+
-           (p.schema_label?'<div class="sous">'+esc(p.schema_label)+'</div>':'')+'</div>';
+        h+='<div class="c-expli" id="tech-'+i+'" hidden>'+esc(expli)+'</div>';
+      }
+      if(p.schema_svg){
+        h+='<div class="c-schema">'+p.schema_svg+
+           (p.schema_label?'<div class="sch-lbl">'+esc(p.schema_label)+'</div>':'')+
+           '</div>';
       }
     }
 
@@ -1006,14 +1049,22 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       h+='<div class="c-objline"><span class="lbl">'+tr(objv?'Objectif':'Charge')+'</span>'+
          '<span class="c-objv">'+objv+'</span>'+bascule+'</div>';
     }
+    // Le plan des series : une case par serie, avec SON numero et SON role.
+    // « 90 90 100 » ne disait pas a quelle serie allait quel chiffre, ni
+    // laquelle etait le set qui compte.
     var sp=p.series_prescrites||[];
     if(sp.length>1){
-      var chips='';
-      sp.forEach(function(x){
-        chips+='<span class="chip'+(x.role!=='travail'?' rampe':'')+'">'+
-               nb(conv(+x.charge,x.unite,unCarte))+'</span>';
+      var cases='';
+      sp.forEach(function(x,k){
+        var rl=x.libelle||'';
+        cases+='<div class="plan-set'+(x.role==='travail'?' fort':'')+'">'+
+                 '<span class="ps-n">S'+(k+1)+'</span>'+
+                 '<span class="ps-v">'+nb(conv(+x.charge,x.unite,unCarte))+'</span>'+
+                 (rl?'<span class="ps-r">'+esc(tr(rl))+'</span>':'')+
+               '</div>';
       });
-      h+='<div class="c-plan"><span class="lbl">'+tr('Séries')+'</span>'+chips+'</div>';
+      h+='<div class="c-plan"><span class="lbl">'+tr('Séries')+'</span>'+
+         '<div class="plan-liste">'+cases+'</div></div>';
     }
 
     // 5. l'historique, replié
@@ -1282,8 +1333,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     var ch=champsDe(exo), un=uniteChoisie(i);
     var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
     var cons=sp&&sp[s]?sp[s]:null;
-    var ROLE={rampe:tr('montée'),backoff:'back-off',travail:''};
-    var rol=cons?(ROLE[cons.role]||''):'';
+    // le libelle est ecrit par prescrire.py (« montée », « effectif »,
+    // « top set », « back-off ») ; la table ne sert que pour les anciennes
+    // prescriptions, ecrites avant qu'il existe
+    var ROLE={rampe:'montée',backoff:'back-off',travail:''};
+    var rol=cons?tr(cons.libelle||ROLE[cons.role]||''):'';
     var classe='serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+
                (!ch.charge?' pdc':'')+(!ch.charge&&!ch.reps?' rien':'');
     return '<div class="'+classe+'" data-exo="'+i+'" data-serie="'+s+'">'+
@@ -1914,7 +1968,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     $('chTemps').textContent=fmt(Math.ceil(ms/1000));
     $('chBarre').style.width=(total>0?(ms/(total*1000))*100:0)+'%';
     if(ms<=0){ if(!fini){ fini=true; $('chrono').classList.add('fini'); sonner();
-      try{ if(navigator.vibrate) navigator.vibrate([220,110,220,110,400]); }catch(e){} }
+      try{ if(navigator.vibrate) navigator.vibrate([400,140,400,140,400,140,700]); }catch(e){} }
       if(file.length) phaseSuivante();
       return; }
     raf=requestAnimationFrame(boucle);
@@ -1935,17 +1989,30 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     try{ if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)();
          if(audio.state==='suspended') audio.resume(); }catch(e){}
   }
+  // Une sinusoide a 880 Hz passe mal sur un haut-parleur de telephone, qui
+  // coupe les graves et ne rend bien que les harmoniques : d'ou une onde
+  // CARREE (riche en harmoniques), deux tons alternes comme une vraie alarme,
+  // six bips au lieu de trois, et un compresseur qui laisse monter le volume
+  // sans saturer.
   function sonner(){
     try{
       if(!audio) return;
-      [0,0.42,0.84].forEach(function(t){
-        var o=audio.createOscillator(), g=audio.createGain();
-        o.connect(g); g.connect(audio.destination); o.frequency.value=880; o.type='sine';
-        g.gain.setValueAtTime(0.0001,audio.currentTime+t);
-        g.gain.exponentialRampToValueAtTime(0.32,audio.currentTime+t+0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001,audio.currentTime+t+0.32);
-        o.start(audio.currentTime+t); o.stop(audio.currentTime+t+0.36);
-      });
+      var comp=audio.createDynamicsCompressor();
+      comp.threshold.value=-16; comp.ratio.value=12; comp.attack.value=0.002;
+      comp.connect(audio.destination);
+      var t0=audio.currentTime;
+      for(var k=0;k<6;k++){
+        var t=t0+k*0.33, f=(k%2)?1320:990;
+        [['square',0.55,1],['sine',0.25,2]].forEach(function(v){
+          var o=audio.createOscillator(), g=audio.createGain();
+          o.type=v[0]; o.frequency.value=f*v[2];
+          o.connect(g); g.connect(comp);
+          g.gain.setValueAtTime(0.0001,t);
+          g.gain.exponentialRampToValueAtTime(v[1],t+0.012);
+          g.gain.exponentialRampToValueAtTime(0.0001,t+0.27);
+          o.start(t); o.stop(t+0.3);
+        });
+      }
     }catch(e){}
   }
   function garderEcran(){

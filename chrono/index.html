@@ -493,7 +493,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       if(c.travail>0) s.push({t:'travail',sec:c.travail,tour:r});
       if(c.repos>0)   s.push({t:'repos',  sec:c.repos,  tour:r});
     }
-    if(c.recup>0) s.push({t:'recup',sec:c.recup,tour:c.tours||1});
+    // le retour au calme ne porte PAS de numero de tour : sinon il comptait
+    // encore pour un tour restant alors que les tours sont finis
+    if(c.recup>0) s.push({t:'recup',sec:c.recup,tour:0});
     return s;
   }
 

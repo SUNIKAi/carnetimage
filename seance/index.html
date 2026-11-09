@@ -186,26 +186,15 @@ body.chrono-actif .page{padding-bottom:152px;}
 .c-tete .c-tech{flex:0 1 auto;}
 .c-tete .fl{font-size:11px;color:var(--tres-faible);flex:none;margin-right:auto;}
 .carte.test .c-tete .fl{color:var(--ambre);}
-.c-tete .mini{flex:none;width:72px;opacity:.95;}
-/* le schema de la technique, sur sa propre ligne et a sa vraie taille */
-.c-schema{padding:10px 14px 12px;border-bottom:1px dashed var(--ligne);}
-.c-schema svg{width:100%;max-width:250px;height:auto;display:block;}
-.sch-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--faible);margin-top:6px;}
-/* une case par serie : son numero, sa charge, son role */
-.plan-liste{display:flex;gap:6px;margin-top:6px;}
-.plan-set{flex:1;min-width:0;text-align:center;border:1px solid var(--ligne);
-  border-radius:4px;padding:6px 3px 5px;background:var(--surface);}
-.plan-set.fort{border-color:var(--accent);background:var(--accent);}
-.ps-n{display:block;font-size:8.5px;font-weight:700;letter-spacing:1px;
+.c-tete .mini{flex:none;width:118px;opacity:.95;}
+/* les charges de reperage, sous l'objectif : une ligne, en petit */
+.c-indic{display:flex;align-items:baseline;gap:10px;padding:2px 14px 12px;}
+.c-indic .lbl{flex:1;min-width:0;font-size:9px;font-weight:600;letter-spacing:1.2px;
   text-transform:uppercase;color:var(--tres-faible);}
-.plan-set.fort .ps-n{color:rgba(255,255,255,.75);}
-.ps-v{display:block;font-family:var(--chiffres);font-size:20px;font-weight:600;
-  line-height:1.15;color:var(--texte);}
-.plan-set.fort .ps-v{color:#fff;}
-.ps-r{display:block;font-size:8px;font-weight:600;letter-spacing:.4px;
-  text-transform:uppercase;color:var(--tres-faible);margin-top:1px;}
-.plan-set.fort .ps-r{color:rgba(255,255,255,.85);}
+.c-indic .iv{flex:none;font-family:var(--chiffres);font-size:16px;font-weight:600;
+  color:var(--faible);}
+.c-indic .iv small{font-family:var(--police);font-size:9.5px;font-weight:600;
+  margin-left:3px;text-transform:uppercase;color:var(--tres-faible);}
 .c-tete .mini svg{width:100%;height:auto;display:block;}
 .c-tete .mini .lbl{display:none;}
 .c-expli{padding:10px 14px;border-bottom:1px dashed var(--ligne);
@@ -269,14 +258,18 @@ body.chrono-actif .page{padding-bottom:152px;}
 .f-repos:active{background:var(--ligne);}
 
 /* ---------- l'objectif ---------- */
-.c-objline{display:flex;align-items:center;gap:10px;padding:13px 14px 4px;}
-.c-objline .lbl{font-size:9.5px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;
-  color:var(--tres-faible);flex:none;}
-.c-objv{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
-.c-objv .c-val{font-size:38px;}
-.c-objv .c-val.texte{font-size:21px;line-height:1.2;}
-.c-objv .c-reps{font-size:21px;margin-left:0;}
+.c-objline{display:block;padding:12px 14px 4px;}
+.c-objline .lbl{display:block;font-size:9.5px;font-weight:600;letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--tres-faible);}
+/* la charge, les reps et la bascule sur UNE ligne : pas de retour a la ligne */
+.c-objrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:1px;}
+.c-objv{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;flex-wrap:nowrap;}
+.c-objv .c-val{font-size:32px;white-space:nowrap;}
+.c-objv .c-val .u{font-size:15px;}
+.c-objv .c-val.texte{font-size:19px;line-height:1.2;white-space:normal;}
+.c-objv .c-reps{font-size:17px;margin-left:0;white-space:nowrap;}
 .c-objline .unite-bascule{flex:none;align-self:center;margin-left:0;}
+.c-objline .unite-bascule button{padding:0 13px;min-height:36px;font-size:12.5px;}
 
 /* ---------- le chrono d'une tenue isometrique ---------- */
 .go-iso{appearance:none;display:inline-flex;align-items:center;gap:8px;margin-top:9px;
@@ -315,9 +308,10 @@ body.chrono-actif .page{padding-bottom:152px;}
 .series{padding:12px 14px 4px;display:flex;flex-direction:column;gap:7px;}
 .serie{display:flex;align-items:center;gap:8px;}
 .serie-num{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--tres-faible);
-  width:26px;flex:none;text-transform:uppercase;}
-.serie-role{font-size:8px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;
-  color:var(--tres-faible);display:block;margin-top:1px;}
+  width:42px;flex:none;text-transform:uppercase;}
+/* « TOP SET » ne tenait pas dans 26 px et sortait coupe (« EFFECT ») */
+.serie-role{font-size:7.5px;font-weight:700;letter-spacing:0;text-transform:uppercase;
+  color:var(--accent);display:block;margin-top:2px;white-space:nowrap;}
 .serie.rampe .serie-role{color:var(--ambre);}
 .champ{position:relative;flex:1;min-width:0;}
 .champ input{width:100%;min-height:46px;background:var(--fond);color:var(--texte);
@@ -623,6 +617,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     "abdo:SINGLE SET":"Pick a hard or weighted exercise.\nDo as many reps as you can, to failure.\nWith no rest, go straight into as many floor leg raises as you can.\nWith no rest, finish with as many crunches as you can.\nDone.",
     // --- fin abdos
     'Tenue':'Hold',
+    'Séries indicatives de montée':'Ramp-up guide',
+    'Série back off set':'Back-off set',
+    'TOP SET':'TOP SET',
     'effectif':'work set',
     'top set':'top set',
     'back-off':'back-off',
@@ -833,6 +830,42 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     var m=String(o).match(/(\d+)\s*\+?\s*reps/i);
     return m?+m[1]:null;
   }
+  // ---------- les charges de REPERAGE, sous l'objectif ----------
+  // Elles ne dependent PAS du nombre de series : c'est une indication de
+  // montee, pas un plan. Elles suivent la bascule KG/LBS, et sont calees sur
+  // l'increment de l'unite — « 42,3 » n'est pas une charge qu'on pose sur
+  // une barre.
+  function estPyramid(exo){
+    return String((exo.prescription||{}).technique||'').toUpperCase().indexOf('PYRAMID')>=0;
+  }
+  function estTopset(exo){
+    return /TOPSET|BACKOFF|BACK-OFF|BACK OFF/
+      .test(String((exo.prescription||{}).technique||'').toUpperCase());
+  }
+  function indicatif(exo,i){
+    var p=exo.prescription||{};
+    var m=p.objectif?String(p.objectif).match(/^\s*([\d.,]+)\s*(kg|lbs)/i):null;
+    if(!m) return null;
+    var un=uniteChoisie(i);
+    var base=conv(+String(m[1]).replace(',','.'), m[2].toLowerCase(), un);
+    var pas=(un==='lbs')?5:2.5;
+    function cale(v){ return Math.round(v/pas)*pas; }
+    if(estPyramid(exo))
+      return {libelle:tr('Séries indicatives de montée'),
+              valeurs:[cale(base*0.80), cale(base*0.90)], unite:un};
+    if(estTopset(exo))
+      return {libelle:tr('Série back off set'),
+              valeurs:[cale(base*0.80)], unite:un};
+    return null;
+  }
+  // Ce qui s'ecrit sous le numero de serie. Rien, sauf les sets qui comptent :
+  // les deux DERNIERS d'un pyramid, les deux PREMIERS d'un topset.
+  function roleSerie(exo,idx,i,s){
+    var n=nbSeries(idx,i,exo);
+    if(estPyramid(exo)) return (s>=n-2)?'MAX':'';
+    if(estTopset(exo))  return (s<2)?tr('TOP SET'):'';
+    return '';
+  }
   function uniteDe(exo){
     var pr=prescrit(exo); if(pr) return pr.unite;
     var d=derniereDe(exo);
@@ -973,28 +1006,25 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     }
     var h='<div class="carte'+(p.cas===1?' test':'')+'">';
 
-    // 1. la technique, puis SON SCHEMA SUR SA PROPRE LIGNE. A 72 px de large,
-    //    coince a droite du titre, ses legendes faisaient 4 px : personne ne
-    //    pouvait les lire. Il prend maintenant la largeur de la carte, et son
-    //    intitule (« 2 TOP SET + BACK OFF SET ») sort du repli.
+    // 1. le nom de la technique a gauche, SON SCHEMA A DROITE. Entre les
+    //    72 px d'origine (legendes illisibles) et le plein cadre (qui mangeait
+    //    la moitie de l'ecran) : 118 px, assez pour lire ECH / PRE / MAX.
+    //    L'intitule du schema repart dans le repli, avec l'explication.
     var expli=p.philosophie||'';
-    var depliable=!!expli;
+    // le <br> vient de carnet.py, qui le met pour la mise en page des cartes
+    // Notion ; ici il se lirait en toutes lettres
+    var sl=String(p.schema_label||'').replace(/<br\s*\/?>/gi,' ').trim();
+    var depliable=!!(expli||sl);
     if(p.technique||p.schema_svg){
       h+='<button class="c-tete'+(depliable?'':' fixe')+'" type="button"'+
            (depliable?' data-tech="'+i+'" aria-expanded="false"':' disabled')+'>'+
            '<span class="c-tech">'+esc(p.technique||tr('Technique'))+'</span>'+
            (depliable?'<span class="fl">▾</span>':'')+
+           (p.schema_svg?'<span class="mini">'+p.schema_svg+'</span>':'')+
          '</button>';
       if(depliable){
-        h+='<div class="c-expli" id="tech-'+i+'" hidden>'+esc(expli)+'</div>';
-      }
-      if(p.schema_svg){
-        // l'intitule vient de carnet.py, qui y met un <br> pour la mise en
-        // page des cartes Notion : ici il se lit tel quel, donc on le remplace
-        var sl=String(p.schema_label||'').replace(/<br\s*\/?>/gi,' ').trim();
-        h+='<div class="c-schema">'+p.schema_svg+
-           (sl?'<div class="sch-lbl">'+esc(sl)+'</div>':'')+
-           '</div>';
+        h+='<div class="c-expli" id="tech-'+i+'" hidden>'+esc(expli)+
+           (sl?'<div class="sous">'+esc(sl)+'</div>':'')+'</div>';
       }
     }
 
@@ -1050,24 +1080,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     }
     if(objv||bascule){
       h+='<div class="c-objline"><span class="lbl">'+tr(objv?'Objectif':'Charge')+'</span>'+
-         '<span class="c-objv">'+objv+'</span>'+bascule+'</div>';
+         '<div class="c-objrow"><span class="c-objv">'+objv+'</span>'+bascule+'</div>'+
+         '</div>';
     }
-    // Le plan des series : une case par serie, avec SON numero et SON role.
-    // « 90 90 100 » ne disait pas a quelle serie allait quel chiffre, ni
-    // laquelle etait le set qui compte.
-    var sp=p.series_prescrites||[];
-    if(sp.length>1){
-      var cases='';
-      sp.forEach(function(x,k){
-        var rl=x.libelle||'';
-        cases+='<div class="plan-set'+(x.role==='travail'?' fort':'')+'">'+
-                 '<span class="ps-n">S'+(k+1)+'</span>'+
-                 '<span class="ps-v">'+nb(conv(+x.charge,x.unite,unCarte))+'</span>'+
-                 (rl?'<span class="ps-r">'+esc(tr(rl))+'</span>':'')+
-               '</div>';
-      });
-      h+='<div class="c-plan"><span class="lbl">'+tr('Séries')+'</span>'+
-         '<div class="plan-liste">'+cases+'</div></div>';
+    // Les charges de reperage, en petit : deux paliers de montee pour un
+    // pyramid, le back off pour un topset. Rien pour les autres techniques.
+    var ind=indicatif(exo,i);
+    if(ind){
+      h+='<div class="c-indic"><span class="lbl">'+esc(ind.libelle)+'</span>'+
+         '<span class="iv">'+ind.valeurs.map(nb).join(' · ')+
+         '<small>'+esc(ind.unite)+'</small></span></div>';
     }
 
     // 5. l'historique, replié
@@ -1336,11 +1358,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     var ch=champsDe(exo), un=uniteChoisie(i);
     var sp=(exo.prescription&&exo.prescription.series_prescrites)||null;
     var cons=sp&&sp[s]?sp[s]:null;
-    // le libelle est ecrit par prescrire.py (« montée », « effectif »,
-    // « top set », « back-off ») ; la table ne sert que pour les anciennes
-    // prescriptions, ecrites avant qu'il existe
-    var ROLE={rampe:'montée',backoff:'back-off',travail:''};
-    var rol=cons?tr(cons.libelle||ROLE[cons.role]||''):'';
+    // « montée » / « effectif » sous chaque ligne alourdissaient le tableau
+    // sans rien apprendre. Ne restent que les sets qui comptent.
+    var rol=roleSerie(exo,idx,i,s);
     var classe='serie'+(v?' ok':'')+(cons&&cons.role==='rampe'?' rampe':'')+
                (!ch.charge?' pdc':'')+(!ch.charge&&!ch.reps?' rien':'');
     return '<div class="'+classe+'" data-exo="'+i+'" data-serie="'+s+'">'+

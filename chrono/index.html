@@ -74,6 +74,17 @@ button,input{font-family:inherit;}
   border:1px solid var(--ligne);background:var(--haut);color:var(--texte);
   font-size:12.5px;font-weight:700;cursor:pointer;}
 .vol button:active{background:var(--ligne);}
+.vol input[type=range]{flex:1;min-width:0;max-width:210px;appearance:none;
+  height:34px;background:transparent;cursor:pointer;}
+.vol input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;
+  background:var(--ligne);}
+.vol input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--ligne);}
+.vol input[type=range]::-webkit-slider-thumb{appearance:none;width:26px;height:26px;
+  border-radius:50%;background:var(--rouge);border:2px solid var(--fond);margin-top:-10px;}
+.vol input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--rouge);border:2px solid var(--fond);}
+.vol b{flex:none;min-width:46px;text-align:right;font-size:13.5px;font-weight:800;
+  color:var(--texte);}
 .vide{padding:40px 0;text-align:center;color:var(--faible);}
 .vide b{display:block;color:var(--texte);font-size:17px;font-weight:700;margin-bottom:6px;}
 .gros{width:100%;min-height:56px;border:none;border-radius:13px;background:var(--rouge);
@@ -167,8 +178,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     <div class="vol">
       <span>Le bip</span>
       <button type="button" id="btnSon">Cloche</button>
-      <button type="button" id="btnVolume">Normal</button>
       <button type="button" id="btnEssaiSon">Écouter</button>
+    </div>
+    <div class="vol">
+      <span>Volume</span>
+      <input type="range" id="rgVolume" min="0" max="100" step="5"
+             aria-label="Volume du bip">
+      <b class="num" id="lbVolume">65 %</b>
     </div>
   </div>
 </section>
@@ -322,9 +338,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   // Le rattrapage de gain, reglable depuis l'accueil. 3 est deja fort ; on
   // monte jusqu'a 6 pour une salle bruyante, au prix d'un son qui sature un
   // peu — ce qui, pour une alarme, le rend plutot plus percant.
-  var VOLUMES=[1.6,3,4.5,6], NOMS=['Doux','Normal','Fort','Maximum'];
-  var iVol=(function(){ var v=lire('chrono-volume'); return (v===null||v<0||v>3)?1:v; })();
-  var VOLUME=VOLUMES[iVol];
+  // Le volume en pour-cent, converti en gain de rattrapage. Courbe
+  // EXPONENTIELLE, parce que l'oreille l'est : sur une echelle lineaire les
+  // premiers pour-cent s'entendraient enormement et les derniers plus du tout.
+  function gainDe(pc){ return 0.4*Math.pow(15, pc/100); }
+  var pcVol=(function(){ var v=lire('chrono-volume-pc');
+                         return (v===null||v<0||v>100)?65:v; })();
+  var VOLUME=gainDe(pcVol);
   // La sonnerie. Trois timbres, du plus doux au plus franc.
   var NOMS_SON=['Cloche','Ring','Carillon','Bip'];
   var iSon=(function(){ var v=lire('chrono-son'); return (v===null||v<0||v>3)?0:v; })();
@@ -498,13 +518,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   $('btnNouveau').addEventListener('click',function(){ ouvrirReglages(null); });
 
   function majSon(){
-    $('btnVolume').textContent=NOMS[iVol];
     $('btnSon').textContent=NOMS_SON[iSon];
+    $('rgVolume').value=pcVol;
+    $('lbVolume').textContent=pcVol+' %';
   }
-  $('btnVolume').addEventListener('click',function(){
-    iVol=(iVol+1)%VOLUMES.length; VOLUME=VOLUMES[iVol];
-    ecrire('chrono-volume',iVol); majSon(); reveiller(); biper(1,false);
+  // en glissant on voit le chiffre bouger ; au relachement, on ENTEND le
+  // reglage — c'est la seule facon de choisir un volume
+  $('rgVolume').addEventListener('input',function(){
+    pcVol=+this.value; VOLUME=gainDe(pcVol);
+    $('lbVolume').textContent=pcVol+' %';
+    ecrire('chrono-volume-pc',pcVol);
   });
+  $('rgVolume').addEventListener('change',function(){ reveiller(); biper(1,false); });
   $('btnSon').addEventListener('click',function(){
     iSon=(iSon+1)%NOMS_SON.length;
     ecrire('chrono-son',iSon); majSon(); reveiller(); biper(1,false);

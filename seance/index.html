@@ -14,7 +14,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&family=Kanit:wght@700;800&display=swap">
 <style>
 /* ===========================================================================
    PAPIER — un carnet, pas un ecran.            Choisi par Vincent le 2026-11-07
@@ -989,8 +989,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
         h+='<div class="c-expli" id="tech-'+i+'" hidden>'+esc(expli)+'</div>';
       }
       if(p.schema_svg){
+        // l'intitule vient de carnet.py, qui y met un <br> pour la mise en
+        // page des cartes Notion : ici il se lit tel quel, donc on le remplace
+        var sl=String(p.schema_label||'').replace(/<br\s*\/?>/gi,' ').trim();
         h+='<div class="c-schema">'+p.schema_svg+
-           (p.schema_label?'<div class="sch-lbl">'+esc(p.schema_label)+'</div>':'')+
+           (sl?'<div class="sch-lbl">'+esc(sl)+'</div>':'')+
            '</div>';
       }
     }

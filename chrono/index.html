@@ -326,8 +326,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   var iVol=(function(){ var v=lire('chrono-volume'); return (v===null||v<0||v>3)?1:v; })();
   var VOLUME=VOLUMES[iVol];
   // La sonnerie. Trois timbres, du plus doux au plus franc.
-  var NOMS_SON=['Cloche','Carillon','Bip'];
-  var iSon=(function(){ var v=lire('chrono-son'); return (v===null||v<0||v>2)?0:v; })();
+  var NOMS_SON=['Cloche','Ring','Carillon','Bip'];
+  var iSon=(function(){ var v=lire('chrono-son'); return (v===null||v<0||v>3)?0:v; })();
   function reveiller(){
     try{
       if(navigator.audioSession) navigator.audioSession.type='ambient';
@@ -373,11 +373,40 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
       o.start(t); o.stop(t+duree*p[2]+0.05);
     });
   }
+  // LA CLOCHE DE RING. Deux choses la distinguent de la cloche douce : le
+  // choc du marteau — un souffle tres court, passe-bande, sans lequel on
+  // entend une note et pas une frappe — et le BATTEMENT, deux partiels a
+  // peine desaccordes dont la somme fait osciller l'amplitude. C'est ce
+  // frisson qu'on reconnait dans tout metal frappe.
+  function coupRing(entree,t,f,vol){
+    var duree=3.0;
+    var n=audio.createBufferSource();
+    var ech=Math.floor(audio.sampleRate*0.08);
+    var buf=audio.createBuffer(1,ech,audio.sampleRate), d=buf.getChannelData(0);
+    for(var i=0;i<ech;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/ech,3);
+    n.buffer=buf;
+    var bp=audio.createBiquadFilter();
+    bp.type='bandpass'; bp.frequency.value=2600; bp.Q.value=1.2;
+    var gn=audio.createGain(); gn.gain.value=vol*0.55;
+    n.connect(bp); bp.connect(gn); gn.connect(entree);
+    n.start(t);
+    var P=[[1,1,1],[1.003,0.9,1],[2.0,0.7,0.8],[2.65,0.6,0.7],
+           [3.6,0.45,0.5],[4.8,0.3,0.36],[6.2,0.2,0.26],[8.1,0.12,0.18]];
+    P.forEach(function(p){
+      var o=audio.createOscillator(), g=audio.createGain();
+      o.type='sine'; o.frequency.value=f*p[0];
+      o.connect(g); g.connect(entree);
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(vol*p[1],t+0.002);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+duree*p[2]);
+      o.start(t); o.stop(t+duree*p[2]+0.05);
+    });
+  }
   function biper(n,aigu){
     try{
       if(!audio) return;
       var e=chaine(), t0=audio.currentTime, k;
-      if(iSon===2){
+      if(iSon===3){
         // BIP : onde carree tenue, la plus franche des trois
         var paire=aigu?[1760,2640]:[784,1176];
         for(k=0;k<n;k++){
@@ -393,13 +422,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
             o.start(t); o.stop(t+0.28);
           });
         }
-      }else if(iSon===1){
+      }else if(iSon===2){
         // CARILLON : deux notes qui descendent, attaque plus douce
         for(k=0;k<n;k++){
           var tc=t0+k*0.85;
           coup(e, tc,      aigu?1319:988, 0.6, 1.1, 0.020);
           coup(e, tc+0.30, aigu?988:784,  0.6, 1.5, 0.020);
         }
+      }else if(iSon===1){
+        // RING : des coups serres, comme au bord d'un ring
+        for(k=0;k<n;k++) coupRing(e, t0+k*0.36, aigu?740:620, 0.7);
       }else{
         // CLOCHE : un coup franc, qui resonne
         for(k=0;k<n;k++) coup(e, t0+k*0.62, aigu?1174:880, 0.75, 1.6, 0.004);

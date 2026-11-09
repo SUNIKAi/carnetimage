@@ -166,7 +166,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
     <button class="gros" id="btnNouveau">+ Nouveau chrono</button>
     <div class="vol">
       <span>Le bip</span>
-      <button type="button" id="btnTon">Moyen</button>
+      <button type="button" id="btnSon">Cloche</button>
       <button type="button" id="btnVolume">Normal</button>
       <button type="button" id="btnEssaiSon">Écouter</button>
     </div>
@@ -325,11 +325,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   var VOLUMES=[1.6,3,4.5,6], NOMS=['Doux','Normal','Fort','Maximum'];
   var iVol=(function(){ var v=lire('chrono-volume'); return (v===null||v<0||v>3)?1:v; })();
   var VOLUME=VOLUMES[iVol];
-  // La tonalite. L'onde reste CARREE dans les trois cas : c'est elle qui
-  // porte, meme grave, parce que ses harmoniques tombent dans la bande ou le
-  // haut-parleur du telephone donne tout.
-  var TONS=[[523,784],[784,1176],[1760,2640]], NOMS_TON=['Grave','Moyen','Aigu'];
-  var iTon=(function(){ var v=lire('chrono-ton'); return (v===null||v<0||v>2)?1:v; })();
+  // La sonnerie. Trois timbres, du plus doux au plus franc.
+  var NOMS_SON=['Cloche','Carillon','Bip'];
+  var iSon=(function(){ var v=lire('chrono-son'); return (v===null||v<0||v>2)?0:v; })();
   function reveiller(){
     try{
       if(navigator.audioSession) navigator.audioSession.type='ambient';
@@ -346,34 +344,68 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
   //     bien plus faible qu'il n'est ;
   //   - 1760 / 2640 Hz : un haut-parleur de telephone ne rend presque rien
   //     sous 1 kHz, et l'oreille est au plus sensible vers 2-4 kHz.
+  // Limiteur + RATTRAPAGE DE GAIN. Le compresseur seul ne fait que baisser le
+  // volume ; c'est l'etage d'apres qui porte.
+  function chaine(){
+    var comp=audio.createDynamicsCompressor();
+    comp.threshold.value=-6; comp.knee.value=12; comp.ratio.value=6;
+    comp.attack.value=0.001; comp.release.value=0.12;
+    var sortie=audio.createGain();
+    sortie.gain.value=VOLUME;
+    comp.connect(sortie); sortie.connect(audio.destination);
+    return comp;
+  }
+  // UN COUP DE CLOCHE. Les partiels sont INHARMONIQUES — 1 · 2 · 2,4 · 3 ·
+  // 4,5 · 5,33 — et c'est exactement ce qui fait entendre « cloche » plutot
+  // que « note » : une serie harmonique ferait un orgue. Chaque partiel a sa
+  // propre duree d'extinction, les aigus meurent les premiers et le bourdon
+  // reste, comme sur du metal.
+  function coup(entree,t,f,vol,duree,attaque){
+    var P=[[1,1,1],[2,0.55,0.72],[2.4,0.48,0.58],[3,0.3,0.42],
+           [4.5,0.2,0.26],[5.33,0.12,0.18]];
+    P.forEach(function(p){
+      var o=audio.createOscillator(), g=audio.createGain();
+      o.type='sine'; o.frequency.value=f*p[0];
+      o.connect(g); g.connect(entree);
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(vol*p[1],t+attaque);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+duree*p[2]);
+      o.start(t); o.stop(t+duree*p[2]+0.05);
+    });
+  }
   function biper(n,aigu){
     try{
       if(!audio) return;
-      var comp=audio.createDynamicsCompressor();
-      comp.threshold.value=-6; comp.knee.value=12; comp.ratio.value=6;
-      comp.attack.value=0.001; comp.release.value=0.12;
-      var sortie=audio.createGain();
-      sortie.gain.value=VOLUME;          // le rattrapage, c'est lui qui porte
-      comp.connect(sortie); sortie.connect(audio.destination);
-      // la fin de seance monte d'un cran dans la meme famille : on reconnait
-      // le son, on entend qu'il est different
-      var paire=TONS[Math.min(2, iTon + (aigu?1:0))];
-      var t0=audio.currentTime;
-      for(var k=0;k<n;k++){
-        var t=t0+k*0.30;
-        [[paire[0],0.9],[paire[1],0.45]].forEach(function(v){
-          var o=audio.createOscillator(), g=audio.createGain();
-          o.type='square'; o.frequency.value=v[0];
-          o.connect(g); g.connect(comp);
-          g.gain.setValueAtTime(0.0001,t);
-          g.gain.exponentialRampToValueAtTime(v[1],t+0.008);
-          g.gain.setValueAtTime(v[1],t+0.20);
-          g.gain.exponentialRampToValueAtTime(0.0001,t+0.26);
-          o.start(t); o.stop(t+0.28);
-        });
+      var e=chaine(), t0=audio.currentTime, k;
+      if(iSon===2){
+        // BIP : onde carree tenue, la plus franche des trois
+        var paire=aigu?[1760,2640]:[784,1176];
+        for(k=0;k<n;k++){
+          var t=t0+k*0.30;
+          [[paire[0],0.9],[paire[1],0.45]].forEach(function(v){
+            var o=audio.createOscillator(), g=audio.createGain();
+            o.type='square'; o.frequency.value=v[0];
+            o.connect(g); g.connect(e);
+            g.gain.setValueAtTime(0.0001,t);
+            g.gain.exponentialRampToValueAtTime(v[1],t+0.008);
+            g.gain.setValueAtTime(v[1],t+0.20);
+            g.gain.exponentialRampToValueAtTime(0.0001,t+0.26);
+            o.start(t); o.stop(t+0.28);
+          });
+        }
+      }else if(iSon===1){
+        // CARILLON : deux notes qui descendent, attaque plus douce
+        for(k=0;k<n;k++){
+          var tc=t0+k*0.85;
+          coup(e, tc,      aigu?1319:988, 0.6, 1.1, 0.020);
+          coup(e, tc+0.30, aigu?988:784,  0.6, 1.5, 0.020);
+        }
+      }else{
+        // CLOCHE : un coup franc, qui resonne
+        for(k=0;k<n;k++) coup(e, t0+k*0.62, aigu?1174:880, 0.75, 1.6, 0.004);
       }
-    }catch(e){}
-    try{ if(navigator.vibrate) navigator.vibrate(aigu?[400,140,400,140,400]:300); }catch(e){}
+    }catch(e2){}
+    try{ if(navigator.vibrate) navigator.vibrate(aigu?[400,140,400,140,400]:300); }catch(e3){}
   }
 
   // ---------- écran allumé ----------
@@ -435,15 +467,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--rouge-vif);outl
 
   function majSon(){
     $('btnVolume').textContent=NOMS[iVol];
-    $('btnTon').textContent=NOMS_TON[iTon];
+    $('btnSon').textContent=NOMS_SON[iSon];
   }
   $('btnVolume').addEventListener('click',function(){
     iVol=(iVol+1)%VOLUMES.length; VOLUME=VOLUMES[iVol];
     ecrire('chrono-volume',iVol); majSon(); reveiller(); biper(1,false);
   });
-  $('btnTon').addEventListener('click',function(){
-    iTon=(iTon+1)%TONS.length;
-    ecrire('chrono-ton',iTon); majSon(); reveiller(); biper(1,false);
+  $('btnSon').addEventListener('click',function(){
+    iSon=(iSon+1)%NOMS_SON.length;
+    ecrire('chrono-son',iSon); majSon(); reveiller(); biper(1,false);
   });
   $('btnEssaiSon').addEventListener('click',function(){ reveiller(); biper(2,false); });
   majSon();

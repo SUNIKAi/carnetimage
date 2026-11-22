@@ -211,7 +211,10 @@ body.chrono-actif .page{padding-bottom:152px;}
 .c-info:last-of-type{padding-bottom:12px;}
 .c-info .lbl{display:block;font-size:9.5px;font-weight:600;letter-spacing:1.4px;
   text-transform:uppercase;color:var(--tres-faible);margin-bottom:3px;}
-.c-info .v{font-size:13.5px;color:var(--texte);}
+/* pre-line : une consigne de coach peut tenir en plusieurs lignes.
+   Sans ca elles se collent bout a bout en un pave illisible. */
+.c-info .v{font-size:13.5px;color:var(--texte);white-space:pre-line;
+  line-height:1.5;}
 .c-obj .c-charge{padding:2px 0 0;}
 .c-obj .c-plan{padding:8px 0 0;}
 /* le nom passe a la ligne plutot que d'etre coupe : « PYRAMID + TECHNIQU... »

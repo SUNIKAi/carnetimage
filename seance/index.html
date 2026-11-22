@@ -160,6 +160,8 @@ body.chrono-actif .page{padding-bottom:152px;}
 .sup-tour-t{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
   color:var(--tres-faible);padding:0 2px 6px;}
 .serie.rien .rien-txt{flex:1;font-size:12.5px;color:var(--tres-faible);}
+.serie.rien .rien-txt.dicte{font-family:var(--chiffres);font-size:16.5px;
+  color:var(--texte);font-weight:600;letter-spacing:.01em;}
 .sup-outils-t{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
   color:var(--tres-faible);padding:10px 2px 0;}
 .serie-outils{display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 2px;}
@@ -1036,7 +1038,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     // 2. le format : combien de series, combien de reps, combien de repos.
     //    Le repos est le bouton qui lance le chrono — il n'est plus en haut.
     var nSet=nbSeries(jourActif,i,exo);
-    var reps=String(exo.reps||'').trim();
+    // PREPA : la fourchette de la semaine (6-8 en HEAVY...) n'a rien a
+    // faire sur cette carte. Le coach a ecrit son chiffre dans l'objectif.
+    var prep=estPrepa(exo)?(prescrit(exo)||{}):null;
+    var reps=prep?String(prep.reps||'').trim():String(exo.reps||'').trim();
     if(!reps&&p.format){
       var mr=String(p.format).match(/x\s*(\d+(?:\s*-\s*\d+)?)/i);
       reps=mr?mr[1].replace(/\s+/g,''):'';
@@ -1044,7 +1049,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     // Le coach ecrit une fourchette (« 2min-2min30 ») : on affiche la borne
     // HAUTE, c'est le repos annonce, et le chrono compte CETTE valeur — un
     // bouton qui dit 2min30 et en compte 2 serait un piege.
-    var txtRepos='', secRepos=exo.repos||0;
+    // Le repos vient lui aussi de regle_serie : on le tait en PREPA, ou
+    // le coach n'a dicte que le travail.
+    var txtRepos='', secRepos=prep?0:(exo.repos||0);
     if(p.format){
       var mp=String(p.format).match(/([0-9][^\s]*)\s*(?:rest|repos)\s*$/i);
       if(mp){
@@ -1057,7 +1064,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     if(!txtRepos) txtRepos=fmtMin(secRepos);
     h+='<div class="c-fmtline">'+
        '<span class="f-it"><b>'+nSet+'</b>set</span>'+
-       ((ch.reps&&reps)?'<span class="f-it"><b>'+esc(reps)+'</b>reps</span>':'')+
+       (((ch.reps||prep)&&reps)?'<span class="f-it"><b>'+esc(reps)+'</b>reps</span>':'')+
        (secRepos?'<button class="f-repos" type="button" data-repos="'+i+'" data-sec="'+secRepos+'">'+
           tr('Repos')+' <b>'+esc(txtRepos)+'</b><span class="ic">⏱</span></button>':'')+
        '</div>';
@@ -1141,14 +1148,37 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     return String(m).toUpperCase()==='ISOPDC'
         || String(exo.type||'').toUpperCase()==='ISOPDC';
   }
+  // ---------- PREPA : le coach dicte, l'eleve coche ----------
+  // Pour un eleve en preparation, les chiffres ne viennent pas de la
+  // semaine (regle_serie / intensity) mais du COACH, ecrits dans
+  // l'objectif de la prescription. La carte ne montre donc ni technique
+  // ni fourchette : juste le travail a faire. Il n'y a rien a taper —
+  // chaque serie se valide d'une coche — et ce qui est ENREGISTRE est la
+  // valeur dictee, pas un zero.
+  function estPrepa(exo){
+    return String((exo.prescription&&exo.prescription.mode)||'')
+           .toUpperCase()==='PREPA';
+  }
+  // Ce que le coach a dicte, en clair a la place des champs.
+  function texteDicte(exo,i){
+    if(!estPrepa(exo)) return '';
+    var p=prescrit(exo); if(!p) return '';
+    var un=uniteChoisie(i);
+    var t=nb(conv(p.charge,p.unite,un))+' '+un;
+    return p.reps?(t+' × '+p.reps):t;
+  }
   // Quels champs cet exercice demande. Un seul endroit a lire, partout.
   function champsDe(exo){
+    if(estPrepa(exo)) return {charge:false,reps:false};
     if(estRope(exo)||estPlio(exo)||estIsoPdc(exo)) return {charge:false,reps:false};
     if(estIso(exo))  return {charge:true,  reps:false};   // un temps, pas des reps
     if(estPDC(exo))  return {charge:false, reps:true};
     return {charge:true, reps:true};
   }
   function sansSaisie(exo){
+    // PREPA n'a rien a TAPER, mais il a bien des series a cocher : il
+    // compte dans le volume du jour, contrairement a un format fixe.
+    if(estPrepa(exo)) return false;
     var c=champsDe(exo);
     return !c.charge && !c.reps;
   }
@@ -1379,7 +1409,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
          'placeholder="reps" aria-label="'+tr('Répétitions série')+' '+(s+1)+'" value="'+
          (v?esc(v.reps):esc(brouillon(idx,i,s,'reps')))+'">'+
          '<span class="unite">reps</span></label>':'')+
-      (!ch.charge&&!ch.reps?'<span class="rien-txt">'+tr('rien à saisir')+'</span>':'')+
+      (!ch.charge&&!ch.reps?(function(){
+         var d=texteDicte(exo,i);
+         return '<span class="rien-txt'+(d?' dicte':'')+'">'+
+                esc(d||tr('rien à saisir'))+'</span>';
+       })():'')+
       '<button class="valider" type="button" data-valide aria-label="'+tr('Valider la série')+' '+(s+1)+'">✓</button>'+
     '</div>';
   }
@@ -1552,9 +1586,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       '</div>';
 
       var rpe='';
-      if(avecRPE()){
+      if(avecRPE()||estPrepa(exo)){
+        // En PREPA le coach veut une note SUR 10, pas l'echelle courte
+        // 10/9/8/7/5 heritee de Notion.
+        var echelle=estPrepa(exo)?[1,2,3,4,5,6,7,8,9,10]:[10,9,8,7,5];
         rpe='<div class="rpe"><div class="rpe-label">'+tr("RPE de l'exercice")+'</div><div class="rpe-choix">';
-        [10,9,8,7,5].forEach(function(v){
+        echelle.forEach(function(v){
           rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+i+'" aria-pressed="'+(etat.rpe[idx+'-'+i]===v)+'">'+v+'</button>';
         });
         rpe+='</div></div>';
@@ -1840,9 +1877,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       // une isometrie il n'y a pas de reps, sur un format fixe il n'y a rien.
       // On n'exige que ce qui est demande.
       var ch=champsDe(exo);
+      // En PREPA rien n'est tape : on enregistre ce que le coach a
+      // dicte, sinon l'historique se remplirait de 0 kg x 0.
+      var pp=estPrepa(exo)?(prescrit(exo)||{}):null;
       var chKg=champ(i,s,'kg'), chRp=champ(i,s,'reps');
-      var kg=chKg?(parseFloat(chKg.value)||0):0;
-      var reps=chRp?(parseInt(chRp.value,10)||0):0;
+      var kg=pp?(+pp.charge||0):(chKg?(parseFloat(chKg.value)||0):0);
+      var reps=pp?(parseInt(pp.reps,10)||0):(chRp?(parseInt(chRp.value,10)||0):0);
       if(ch.reps && !reps){ chRp.focus(); return; }
       if(ch.charge && !ch.reps && !kg){ chKg.focus(); return; }
       etat.sets[k]={kg:kg,reps:reps};
@@ -1887,9 +1927,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       var ch=champ(i,s,'kg'), cr=champ(i,s,'reps');
       var dem=champsDe(exo);
       var prevue=0;
-      if(dem.charge) prevue = sp[s] ? conv(+sp[s].charge,sp[s].unite,un)
-                                    : (pr.charge?conv(pr.charge,pr.unite,un):0);
-      var kg = ch ? (parseFloat(ch.value)||prevue) : 0;
+      if(dem.charge||estPrepa(exo))
+        prevue = sp[s] ? conv(+sp[s].charge,sp[s].unite,un)
+                       : (pr.charge?conv(pr.charge,pr.unite,un):0);
+      var kg = ch ? (parseFloat(ch.value)||prevue) : prevue;
       var reps = parseInt(cr?cr.value:'',10) || repsPrevu;
       // une isometrie n'a pas de reps, un format fixe n'a rien : on les
       // marque faits quand meme, sinon « tout marquer » en saute la moitie

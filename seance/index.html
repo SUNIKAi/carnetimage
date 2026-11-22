@@ -279,6 +279,9 @@ body.chrono-actif .page{padding-bottom:152px;}
   font-size:19px;font-weight:700;color:var(--accent);cursor:pointer;}
 .rpe.prepa .rpe-case:active{background:var(--haut);}
 .rpe.prepa .rpe-pop{display:flex;gap:6px;flex-wrap:wrap;}
+/* sans ca, display:flex ecrase l'attribut hidden et le selecteur
+   reste deplie en permanence */
+.rpe.prepa .rpe-pop[hidden]{display:none;}
 .rpe.prepa .rpe-pop button{flex:1;min-width:44px;height:40px;
   border:1px solid var(--ligne);border-radius:4px;background:var(--surface);
   font-family:var(--chiffres);font-size:17px;color:var(--texte);}

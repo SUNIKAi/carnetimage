@@ -409,6 +409,11 @@ body.chrono-actif .page{padding-bottom:152px;}
 .vignette{width:58px;height:58px;flex:none;border-radius:4px;overflow:hidden;border:1px solid var(--ligne);
   background:#fff;padding:0;cursor:pointer;position:relative;display:block;transition:transform .12s;}
 .vignette:active{transform:scale(.94);}
+/* Une image nettement plus large que haute (deux mouvements cote a cote,
+   une planche de positions) devenait illisible dans un carre de 58 px :
+   56 de large pour 32 de haut. On elargit la vignette pour ces images la,
+   la classe est posee a la lecture des dimensions reelles. */
+.vignette.large{width:116px;}
 /* contain et non cover : une image plus haute que large (une position
    figee, une planche) se faisait couper la tete et les pieds. Sur les
    GIF carres de la bibliotheque, les deux reviennent au meme. */
@@ -975,10 +980,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     $('entete').hidden=false; $('fin').hidden=false;
     // L'intensite de la semaine et sa technique principale sont ce qui change
     // d'une semaine a l'autre : elles se voient, elles ne se devinent pas.
+    // En preparation, le coach dicte : l'intensite de la semaine et sa
+    // technique ne s'appliquent pas a cet eleve, les afficher le
+    // tromperait.
+    var enPrepa=((DATA&&DATA.planification)||'').toUpperCase()==='PREPA';
     $('hSemaine').innerHTML='<span class="s-sem">'+tr('Semaine')+' '+esc(DATA.semaine)+'</span>'+
-      (DATA.intensity?'<span class="s-int">'+esc(DATA.intensity)+'</span>':'')+
-      (DATA.technique?'<span class="s-tech">'+esc(DATA.technique)+'</span>':'');
+      ((DATA.intensity&&!enPrepa)?'<span class="s-int">'+esc(DATA.intensity)+'</span>':'')+
+      ((DATA.technique&&!enPrepa)?'<span class="s-tech">'+esc(DATA.technique)+'</span>':'');
     construireOnglets(); afficherJour(jourActif);
+  }
+  // Les vignettes ne connaissent pas les proportions de leur image avant
+  // de l'avoir chargee : on mesure apres coup, et on relance au `load`
+  // pour celles qui arrivent plus tard.
+  function ajusterVignettes(){
+    [].forEach.call(document.querySelectorAll('.vignette img'),
+      function(im){
+        function poser(){
+          if(im.naturalWidth > im.naturalHeight*1.4)
+            im.parentNode.classList.add('large');
+        }
+        if(im.complete && im.naturalWidth) poser();
+        else im.addEventListener('load', poser, {once:true});
+      });
   }
   function sauver(){ ecrire(CLE_ETAT,etat); }
   function verrouille(){ return !!etat.termine[jourActif]; }
@@ -1694,6 +1717,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     html+=blocAbdo(j.num);
 
     $('liste').innerHTML=html;
+    ajusterVignettes();
     $('liste').classList.toggle('jour-verrouille',!!etat.termine[idx]);
     var bm=$('btnModifier');
     if(bm) bm.addEventListener('click',function(){ delete etat.termine[idx]; sauver(); afficherJour(idx); construireOnglets(); });

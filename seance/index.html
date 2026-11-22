@@ -263,6 +263,31 @@ body.chrono-actif .page{padding-bottom:152px;}
 .f-repos b{font-family:var(--chiffres);font-size:15px;font-weight:600;color:var(--texte);letter-spacing:0;}
 .f-repos .ic{font-size:15px;color:var(--accent);}
 .f-repos:active{background:var(--ligne);}
+/* ---------- PREPA : le coach dicte ---------- */
+.c-fmtline.prepa{gap:12px;}
+.c-fmtline.prepa .f-sr{font-family:var(--chiffres);font-size:20px;
+  font-weight:700;color:var(--texte);letter-spacing:0;}
+.c-fmtline.prepa .f-ch{font-family:var(--chiffres);font-size:20px;
+  font-weight:700;color:var(--accent);letter-spacing:0;}
+.c-fmtline.prepa .f-ch small{font-size:12px;margin-left:2px;font-weight:600;}
+.rpe.prepa{padding:10px 14px 12px;display:flex;flex-direction:column;gap:9px;}
+.rpe.prepa .rpe-ligne{display:flex;align-items:center;gap:10px;}
+.rpe.prepa .rpe-tag{font-size:10px;font-weight:700;letter-spacing:1.3px;
+  text-transform:uppercase;color:var(--tres-faible);}
+.rpe.prepa .rpe-case{min-width:58px;height:38px;border:1px solid var(--ligne-forte);
+  border-radius:4px;background:var(--surface);font-family:var(--chiffres);
+  font-size:19px;font-weight:700;color:var(--accent);cursor:pointer;}
+.rpe.prepa .rpe-case:active{background:var(--haut);}
+.rpe.prepa .rpe-pop{display:flex;gap:6px;flex-wrap:wrap;}
+.rpe.prepa .rpe-pop button{flex:1;min-width:44px;height:40px;
+  border:1px solid var(--ligne);border-radius:4px;background:var(--surface);
+  font-family:var(--chiffres);font-size:17px;color:var(--texte);}
+.rpe.prepa .rpe-pop button[aria-pressed="true"]{background:var(--accent);
+  color:#fff;border-color:var(--accent);}
+.rpe.prepa .rpe-aide{display:flex;flex-direction:column;gap:2px;
+  font-size:11.5px;color:var(--tres-faible);line-height:1.35;}
+.rpe.prepa .rpe-aide b{font-family:var(--chiffres);font-size:13px;
+  color:var(--faible);margin-right:4px;}
 
 /* ---------- l'objectif ---------- */
 .c-objline{display:block;padding:12px 14px 4px;}
@@ -384,7 +409,10 @@ body.chrono-actif .page{padding-bottom:152px;}
 .vignette{width:58px;height:58px;flex:none;border-radius:4px;overflow:hidden;border:1px solid var(--ligne);
   background:#fff;padding:0;cursor:pointer;position:relative;display:block;transition:transform .12s;}
 .vignette:active{transform:scale(.94);}
-.vignette img{width:100%;height:100%;object-fit:cover;display:block;background:#fff;}
+/* contain et non cover : une image plus haute que large (une position
+   figee, une planche) se faisait couper la tete et les pieds. Sur les
+   GIF carres de la bibliotheque, les deux reviennent au meme. */
+.vignette img{width:100%;height:100%;object-fit:contain;display:block;background:#fff;}
 .vignette .vide{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   color:var(--tres-faible);font-size:19px;font-weight:800;}
 .vignette .loupe-ic{position:absolute;right:3px;bottom:3px;width:15px;height:15px;border-radius:3px;
@@ -705,6 +733,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     'Répétitions série':'Reps, set',
     'Valider la série':'Confirm set',
     "RPE de l'exercice":'Exercise RPE',
+    'échec':'failure',
+    '1 rep de réserve estimée':'1 rep left in reserve',
+    '2 reps de réserve estimées':'2 reps left in reserve',
     'Voir la démonstration de':'Watch the demo for',
     'Repos':'Rest',
     'poids du corps':'bodyweight',
@@ -764,6 +795,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   }
 
   function avecRPE(){ return ((DATA&&DATA.planification)||'').toUpperCase().indexOf('CYCLE')>=0; }
+  // Un eleve EN PREPARATION : `eleves.planification = 'PREPA'`. Le coach
+  // dicte tout, et il ne veut pas qu'on propose des remplacements.
+  function elevePrepa(){
+    return ((DATA&&DATA.planification)||'').toUpperCase()==='PREPA';
+  }
 
   // ---------- conversion d'unité ----------
   // Arrondis pratiques en salle : 2,5 kg et 5 lbs.
@@ -1062,6 +1098,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       }
     }
     if(!txtRepos) txtRepos=fmtMin(secRepos);
+    if(prep){
+      // Tout sur une ligne : series x reps en noir, la charge en rouge,
+      // la bascule KG/LBS a cote, le repos au bout. La ligne « objectif »
+      // disparait, elle ne ferait que repeter la charge.
+      var uP=uniteChoisie(i);
+      var vP=prep.charge?nb(conv(prep.charge,prep.unite,uP)):'';
+      h+='<div class="c-fmtline prepa">'+
+         '<span class="f-sr">'+nSet+' × '+esc(reps||'')+'</span>'+
+         (vP?'<span class="f-ch">'+esc(vP)+'<small>'+esc(uP)+'</small></span>':'')+
+         '<span class="unite-bascule">'+
+           '<button type="button" data-unite="kg" data-exo="'+i+'" aria-pressed="'+(uP==='kg')+'">KG</button>'+
+           '<button type="button" data-unite="lbs" data-exo="'+i+'" aria-pressed="'+(uP==='lbs')+'">LBS</button>'+
+         '</span>'+
+         (secRepos?'<button class="f-repos" type="button" data-repos="'+i+'" data-sec="'+secRepos+'">'+
+            tr('Repos')+' <b>'+esc(txtRepos)+'</b><span class="ic">\u23f1</span></button>':'')+
+         '</div>';
+      return h+blocFinCarte(exo,i,p);
+    }
     h+='<div class="c-fmtline">'+
        '<span class="f-it"><b>'+nSet+'</b>set</span>'+
        (((ch.reps||prep)&&reps)?'<span class="f-it"><b>'+esc(reps)+'</b>reps</span>':'')+
@@ -1105,11 +1159,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     }
 
     // 5. l'historique, replié
+    return h+blocFinCarte(exo,i,p);
+  }
+  // La fin de toute carte : l'historique replie. Mise a part pour que la
+  // branche PREPA, qui sort plus tot, la partage au lieu de la recopier.
+  function blocFinCarte(exo,i,p){
     var det='<div class="c-ligne"><b>'+tr('Dernière fois')+'</b><span class="v">'+
             (p.derniere?esc(p.derniere):texteDerniere(exo))+'</span></div>';
-    h+='<button class="c-plus" type="button" data-detail="'+i+'">'+tr('Historique')+' ▾</button>'+
-       '<div class="c-detail" id="detail-'+i+'" hidden>'+det+'</div>';
-    return h+'</div>';
+    return '<button class="c-plus" type="button" data-detail="'+i+'">'+tr('Historique')+' ▾</button>'+
+       '<div class="c-detail" id="detail-'+i+'" hidden>'+det+'</div></div>';
   }
 
   // ---------- ROPE : conditionnement, rien a saisir ----------
@@ -1368,7 +1426,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     if(exo.remplace) h+='<button class="outil retour" type="button" data-retour="'+i+'">↩ '+tr('Revenir à')+' '+esc(exo.remplace)+'</button>';
     // la liste depend de l'etat : celle du mouvement, ou celle du groupe
     // entier quand c'est tout le superset qui a ete remplace
-    var subs=substitutsDe(jourActif,i);
+    // En preparation, le coach choisit les exercices : on ne propose
+    // aucun remplacement.
+    var subs=elevePrepa()?[]:substitutsDe(jourActif,i);
     if(subs.length){
       h+='<button class="outil" type="button" data-subs="'+i+'">'+(exo.remplace?tr('Changer encore'):tr('Faire un autre exercice'))+' ▾</button>'+
          '<div class="subs" id="subs-'+i+'">';
@@ -1586,12 +1646,29 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       '</div>';
 
       var rpe='';
-      if(avecRPE()||estPrepa(exo)){
-        // En PREPA le coach veut une note SUR 10, pas l'echelle courte
-        // 10/9/8/7/5 heritee de Notion.
-        var echelle=estPrepa(exo)?[1,2,3,4,5,6,7,8,9,10]:[10,9,8,7,5];
+      if(estPrepa(exo)){
+        // Demande de Vincent : un bouton RPE, une case vide a cote, un
+        // selecteur de 5 a 10 au clic, et la legende dessous. L'echelle
+        // courte 10/9/8/7/5 heritee de Notion ne lui parle pas.
+        var vr=etat.rpe[idx+'-'+i];
+        rpe='<div class="rpe prepa">'+
+            '<div class="rpe-ligne"><span class="rpe-tag">RPE</span>'+
+            '<button class="rpe-case" type="button" data-rpeouvre="'+i+'" '+
+              'aria-expanded="false" aria-label="'+tr("RPE de l'exercice")+'">'+
+              (vr?vr:'')+'</button></div>'+
+            '<div class="rpe-pop" id="rpepop-'+i+'" hidden>';
+        [5,6,7,8,9,10].forEach(function(v){
+          rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+i+'" '+
+               'aria-pressed="'+(vr===v)+'">'+v+'</button>';
+        });
+        rpe+='</div><div class="rpe-aide">'+
+             '<span><b>10</b>'+tr('échec')+'</span>'+
+             '<span><b>9</b>'+tr('1 rep de réserve estimée')+'</span>'+
+             '<span><b>8</b>'+tr('2 reps de réserve estimées')+'</span>'+
+             '</div></div>';
+      } else if(avecRPE()){
         rpe='<div class="rpe"><div class="rpe-label">'+tr("RPE de l'exercice")+'</div><div class="rpe-choix">';
-        echelle.forEach(function(v){
+        [10,9,8,7,5].forEach(function(v){
           rpe+='<button type="button" data-rpe="'+v+'" data-exo="'+i+'" aria-pressed="'+(etat.rpe[idx+'-'+i]===v)+'">'+v+'</button>';
         });
         rpe+='</div></div>';
@@ -1838,11 +1915,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     if(hb){ ouvrirHistorique(+hb.dataset.hist); return; }
     var b=ev.target.closest('[data-valide]');
     if(b){ validerSerie(b.closest('.serie')); return; }
+    var ro=ev.target.closest('[data-rpeouvre]');
+    if(ro){
+      var pop=document.getElementById('rpepop-'+ro.dataset.rpeouvre);
+      if(pop){ pop.hidden=!pop.hidden;
+               ro.setAttribute('aria-expanded',String(!pop.hidden)); }
+      return;
+    }
     var r=ev.target.closest('[data-rpe]');
     if(r){
       var k2=jourActif+'-'+r.dataset.exo, v2=+r.dataset.rpe;
       etat.rpe[k2]=(etat.rpe[k2]===v2?null:v2); sauver();
       [].forEach.call(r.parentNode.children,function(x){ x.setAttribute('aria-pressed',String(+x.dataset.rpe===etat.rpe[k2])); });
+      // la case du mode PREPA porte la note, et le selecteur se referme
+      var caseR=document.querySelector('[data-rpeouvre="'+r.dataset.exo+'"]');
+      if(caseR) caseR.textContent=etat.rpe[k2]||'';
+      var popR=document.getElementById('rpepop-'+r.dataset.exo);
+      if(popR){ popR.hidden=true;
+                if(caseR) caseR.setAttribute('aria-expanded','false'); }
       envoyer(+r.dataset.exo);
     }
   });
@@ -1881,7 +1971,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       // dicte, sinon l'historique se remplirait de 0 kg x 0.
       var pp=estPrepa(exo)?(prescrit(exo)||{}):null;
       var chKg=champ(i,s,'kg'), chRp=champ(i,s,'reps');
-      var kg=pp?(+pp.charge||0):(chKg?(parseFloat(chKg.value)||0):0);
+      // la charge dictee est stockee dans l'unite AFFICHEE, puisque
+      // `envoyer` transmet uniteChoisie(i) : sans conversion, basculer
+      // en LBS enregistrerait 27.5 avec UNITE=LBS.
+      var kg=pp?conv(+pp.charge||0,pp.unite,uniteChoisie(i))
+               :(chKg?(parseFloat(chKg.value)||0):0);
       var reps=pp?(parseInt(pp.reps,10)||0):(chRp?(parseInt(chRp.value,10)||0):0);
       if(ch.reps && !reps){ chRp.focus(); return; }
       if(ch.charge && !ch.reps && !kg){ chKg.focus(); return; }
